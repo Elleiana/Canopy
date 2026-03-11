@@ -779,8 +779,9 @@ async function startCrawl() {
   const concurrency = parseInt(document.getElementById('concurrency').value) || 3;
 
   crawlResults = [];
-  crawlState = { running: true, queue: [startUrl], visited: new Set(), results: [], base: origin };
-  crawlState.visited.add(startUrl);
+  // visited tracks URLs already queued or processed — add startUrl so it isn't queued twice
+  // but do NOT skip it when dequeued; the worker checks visited before adding to queue, not before fetching
+  crawlState = { running: true, queue: [startUrl], visited: new Set([startUrl]), results: [], base: origin };
 
   // UI reset
   document.getElementById('btn-crawl-start').disabled = true;
@@ -796,12 +797,18 @@ async function startCrawl() {
   setStatusText('crawling…');
   setQueueInfo('');
 
+  // Waypoint-style worker: dequeue → fetch → enqueue new links
+  // visited is used only to prevent duplicate queuing, not to skip fetching
   async function worker() {
-    while (crawlState.running && crawlState.queue.length > 0) {
+    while (crawlState.running) {
       const url = crawlState.queue.shift();
-      if (!url || crawlState.visited.has(url)) continue;
-      if (shouldExclude(url, f)) { crawlState.visited.add(url); continue; }
-      crawlState.visited.add(url);
+      if (!url) {
+        // Queue is empty right now — but another worker may push new URLs
+        // after its current fetch completes. Wait briefly before giving up.
+        await new Promise(r => setTimeout(r, 80));
+        if (crawlState.queue.length === 0) break;
+        continue;
+      }
 
       const item = { url, ok: null, status: null, statusText: '…', depth: getDepth(url, origin), section: getSection(url) };
       crawlState.results.push(item);
@@ -824,8 +831,9 @@ async function startCrawl() {
             const u = new URL(lnk);
             if (u.origin !== origin) continue;
             const clean = (u.origin + u.pathname).replace(/\/+$/, '') || u.origin + '/';
-            if (crawlState.visited.has(clean) || crawlState.queue.includes(clean)) continue;
+            if (crawlState.visited.has(clean)) continue;
             if (shouldExclude(clean, f)) continue;
+            crawlState.visited.add(clean);
             crawlState.queue.push(clean);
           } catch {}
         }
@@ -833,6 +841,9 @@ async function startCrawl() {
     }
   }
 
+  // Run N workers in parallel — each loops until the queue is empty.
+  // Since workers push new URLs mid-crawl, the pool keeps running until
+  // all workers find an empty queue on the same tick.
   const workers = Array.from({ length: concurrency }, () => worker());
   await Promise.all(workers);
 
