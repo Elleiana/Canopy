@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canopy</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0e0e0e;
+  --surface:   #161616;
+  --surface2:  #1c1c1c;
+  --surface3:  #222222;
+  --border:    #2a2a2a;
+  --border2:   #333333;
+  --text:      #d4d4d4;
+  --text-dim:  #777777;
+  --text-faint:#444444;
+  --accent:    #e0e0e0;
+  --active:    #ffffff;
+  --link:      #a8a8a8;
+  --good:      #5a9e6f;
+  --warn:      #b89a4e;
+  --bad:       #9e5a5a;
+}
+
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Courier New', Courier, monospace; font-size: 13px; line-height: 1.5; overflow: hidden; }
+
+a { color: var(--link); text-decoration: none; }
+a:hover { color: var(--active); text-decoration: underline; }
+
+button { font-family: inherit; font-size: 12px; cursor: pointer; border: 1px solid var(--border2); background: var(--surface2); color: var(--text); padding: 4px 10px; border-radius: 2px; transition: background 0.1s, border-color 0.1s, color 0.1s; white-space: nowrap; }
+button:hover { background: var(--surface3); border-color: #4a4a4a; color: var(--active); }
+button.primary { background: var(--surface3); border-color: #555; color: var(--active); }
+button.primary:hover { background: #2a2a2a; border-color: #666; }
+button:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+
+input[type="text"], input[type="url"], input[type="number"], select, textarea {
+  font-family: inherit; font-size: 12px; background: var(--surface); border: 1px solid var(--border2); color: var(--text); padding: 5px 8px; border-radius: 2px; outline: none; transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus { border-color: #555; color: var(--active); }
+input::placeholder, textarea::placeholder { color: var(--text-faint); }
+
+label { color: var(--text-dim); font-size: 11px; letter-spacing: 0.04em; }
+
+/* ── Layout ── */
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+/* ── Header ── */
+header { display: flex; align-items: center; padding: 0 16px; height: 42px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); gap: 0; }
+
+.logo-wrap { display: flex; align-items: baseline; gap: 8px; margin-right: 24px; cursor: pointer; }
+.logo-wrap:hover .logo-name { color: var(--active); }
+.logo-name { font-size: 15px; font-weight: bold; letter-spacing: 0.04em; color: var(--accent); transition: color 0.1s; }
+.logo-tagline { font-size: 11px; color: var(--text-faint); letter-spacing: 0.05em; }
+
+nav { display: flex; gap: 0; flex: 1; }
+
+.nav-tab { padding: 0 16px; height: 42px; display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-dim); cursor: pointer; border-right: 1px solid transparent; border-left: 1px solid transparent; border-bottom: 2px solid transparent; border-top: none; border-radius: 0; transition: color 0.1s; user-select: none; letter-spacing: 0.02em; background: none; }
+.nav-tab:hover { color: var(--text); background: none; border-color: transparent; border-bottom-color: transparent; }
+.nav-tab.active { color: var(--active); border-left-color: var(--border); border-right-color: var(--border); border-bottom-color: var(--bg); background: var(--bg); }
+.tab-emoji { font-size: 14px; }
+
+.header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+/* ── Tab panels ── */
+.tab-content { display: none; flex: 1; overflow: hidden; }
+.tab-content.active { display: flex; }
+
+/* ══ Crawler tab ══ */
+#tab-crawl { flex-direction: column; }
+
+.crawl-top { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-end; gap: 12px; flex-shrink: 0; flex-wrap: wrap; background: var(--bg); }
+.field-group { display: flex; flex-direction: column; gap: 4px; }
+.crawl-top input[type="url"] { width: 360px; }
+
+.workbench-bar { padding: 0 20px; flex-shrink: 0; border-bottom: 1px solid var(--border); background: var(--bg); }
+.workbench-toggle { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-dim); cursor: pointer; user-select: none; border: none; background: none; padding: 7px 0; border-radius: 0; }
+.workbench-toggle:hover { color: var(--text); background: none; border-color: transparent; }
+.workbench-toggle .arrow { display: inline-block; transition: transform 0.15s; font-size: 9px; }
+.workbench-toggle.open .arrow { transform: rotate(90deg); }
+
+.workbench-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; padding: 14px; margin: 0 0 10px; display: none; gap: 24px; flex-wrap: wrap; }
+.workbench-panel.open { display: flex; }
+.wb-group { display: flex; flex-direction: column; gap: 6px; }
+.wb-title { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 2px; }
+.filter-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text-dim); cursor: pointer; }
+.filter-item input[type="checkbox"] { cursor: pointer; accent-color: #888; }
+.filter-item:hover { color: var(--text); }
+
+.crawl-status-bar { padding: 6px 20px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; gap: 20px; font-size: 11px; color: var(--text-dim); flex-shrink: 0; }
+.crawl-status-bar strong { color: var(--text); }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint); display: inline-block; margin-right: 5px; vertical-align: middle; }
+.status-dot.running { background: var(--good); animation: pulse 1.2s infinite; }
+.status-dot.done    { background: var(--good); }
+.status-dot.error   { background: var(--bad); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+.crawl-body { display: flex; flex: 1; overflow: hidden; }
+
+.crawl-results { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.results-toolbar { padding: 7px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-size: 11px; flex-shrink: 0; background: var(--surface); }
+.pill-group { display: flex; gap: 0; }
+.pill { padding: 3px 10px; border: 1px solid var(--border2); font-size: 11px; color: var(--text-dim); cursor: pointer; background: none; border-radius: 0; transition: all 0.1s; }
+.pill:first-child { border-radius: 2px 0 0 2px; }
+.pill:last-child  { border-radius: 0 2px 2px 0; }
+.pill + .pill { border-left: none; }
+.pill:hover  { color: var(--text); background: var(--surface2); }
+.pill.active { background: var(--surface3); color: var(--active); border-color: #555; }
+
+.results-list { flex: 1; overflow-y: auto; font-size: 11px; }
+.results-list::-webkit-scrollbar { width: 6px; }
+.results-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+.result-item { display: flex; align-items: center; gap: 10px; padding: 5px 14px; border-bottom: 1px solid var(--border); transition: background 0.05s; }
+.result-item:hover { background: var(--surface); }
+.url-text { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status-badge { font-size: 10px; padding: 1px 6px; border-radius: 2px; flex-shrink: 0; }
+.badge-ok    { background: rgba(90,158,111,0.15); color: var(--good); border: 1px solid rgba(90,158,111,0.3); }
+.badge-err   { background: rgba(158,90,90,0.15);  color: var(--bad);  border: 1px solid rgba(158,90,90,0.3); }
+.badge-block { background: rgba(184,154,78,0.12); color: var(--warn); border: 1px solid rgba(184,154,78,0.25); }
+
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 10px; color: var(--text-faint); font-size: 12px; text-align: center; }
+.empty-icon { font-size: 30px; opacity: 0.4; }
+.empty-state strong { color: var(--text-dim); }
+
+/* ══ Diagram tab ══ */
+#tab-diagram { position: relative; }
+
+#diagram-canvas-wrap { flex: 1; overflow: hidden; position: relative; cursor: grab; background: var(--bg); background-image: radial-gradient(circle, #1e1e1e 1px, transparent 1px); background-size: 24px 24px; }
+#diagram-canvas-wrap:active { cursor: grabbing; }
+
+svg#diagram { width: 100%; height: 100%; overflow: visible; }
+
+.diagram-toolbar { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 1px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 3px; padding: 3px; z-index: 10; }
+.diagram-toolbar button { border: none; background: none; padding: 4px 10px; font-size: 13px; color: var(--text-dim); border-radius: 2px; }
+.diagram-toolbar button:hover { background: var(--surface3); color: var(--active); border-color: transparent; }
+.dt-divider { width: 1px; background: var(--border2); height: 18px; margin: 0 2px; }
+
+.diagram-info-panel { position: absolute; top: 14px; right: 14px; width: 210px; background: var(--surface); border: 1px solid var(--border2); border-radius: 2px; z-index: 10; font-size: 11px; }
+.dip-header { padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.dip-header .dip-label { color: var(--text-dim); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.dip-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 5px; }
+.info-row { display: flex; justify-content: space-between; }
+.info-row .il { color: var(--text-dim); }
+.info-row .iv { color: var(--text); }
+.info-row .iv.good { color: var(--good); }
+
+.diagram-legend { position: absolute; top: 14px; left: 14px; background: var(--surface); border: 1px solid var(--border2); border-radius: 2px; padding: 8px 12px; font-size: 10px; z-index: 10; display: flex; flex-direction: column; gap: 5px; color: var(--text-dim); }
+.legend-item { display: flex; align-items: center; gap: 7px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* SVG */
+.node-root-circle    { fill: #2a2a2a; stroke: #666; stroke-width: 2; }
+.node-section-circle { fill: #1e1e1e; stroke: #444; stroke-width: 1.5; }
+.node-page-circle    { fill: #181818; stroke: #2e2e2e; stroke-width: 1; }
+.node text { font-family: 'Courier New', monospace; fill: var(--text); font-size: 10px; text-anchor: middle; pointer-events: none; user-select: none; }
+.node text.nlr { font-size: 11px; fill: var(--active); font-weight: bold; }
+.node text.nls { font-size: 10px; fill: var(--text); }
+.node text.nlp { font-size: 9px; fill: var(--text-dim); }
+.node text.nlsub { font-size: 8px; fill: var(--text-faint); }
+.edge { stroke: #2e2e2e; stroke-width: 1; fill: none; }
+.edge.l1 { stroke-width: 1.5; stroke: #383838; }
+.node circle { cursor: pointer; transition: filter 0.1s; }
+.node:hover circle { filter: brightness(1.6); }
+.node.selected circle { stroke: #999 !important; stroke-width: 2.5 !important; }
+
+/* ══ Export tab ══ */
+#tab-export { flex-direction: column; }
+.export-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; max-width: 600px; overflow-y: auto; }
+.export-section-title { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; }
+.export-option-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.export-card { border: 1px solid var(--border2); border-radius: 2px; padding: 10px 14px; cursor: pointer; transition: border-color 0.1s, background 0.1s; background: var(--surface); min-width: 130px; }
+.export-card:hover { border-color: #444; background: var(--surface2); }
+.export-card.selected { border-color: #666; background: var(--surface2); }
+.export-card .card-label { color: var(--text); font-size: 12px; margin-bottom: 3px; }
+.export-card .card-desc  { color: var(--text-faint); font-size: 10px; line-height: 1.4; }
+
+/* ══ Modals ══ */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.15s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 3px; width: 460px; max-width: 94vw; max-height: 80vh; display: flex; flex-direction: column; transform: translateY(8px); transition: transform 0.15s; }
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.modal-title { color: var(--active); font-size: 13px; }
+.modal-close { background: none; border: none; color: var(--text-dim); font-size: 16px; padding: 0 4px; line-height: 1; }
+.modal-close:hover { color: var(--active); background: none; border-color: transparent; }
+.modal-body { padding: 16px 18px; overflow-y: auto; font-size: 12px; line-height: 1.7; color: var(--text); }
+.modal-body p { margin-bottom: 10px; }
+.modal-body p:last-child { margin-bottom: 0; }
+.modal-body strong { color: var(--active); }
+.modal-section-title { color: var(--text-dim); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; margin-top: 14px; }
+
+/* ══ Home screen ══ */
+#home-screen { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; transition: opacity 0.2s; }
+#home-screen.gone { opacity: 0; pointer-events: none; }
+.home-logo-name    { font-size: 28px; font-weight: bold; letter-spacing: 0.06em; color: var(--accent); text-align: center; }
+.home-logo-tagline { font-size: 12px; color: var(--text-faint); letter-spacing: 0.1em; margin-top: 6px; text-align: center; }
+.home-desc { font-size: 12px; color: var(--text-dim); text-align: center; max-width: 380px; line-height: 1.7; }
+
+/* ══ Footer ══ */
+footer { border-top: 1px solid var(--border); padding: 6px 16px; display: flex; align-items: center; gap: 12px; font-size: 11px; color: var(--text-faint); flex-shrink: 0; background: var(--surface); }
+footer a { color: var(--text-faint); }
+footer a:hover { color: var(--text); }
+.fsep { color: var(--text-faint); }
+
+/* ══ Scrollbars ══ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- Home screen -->
+<div id="home-screen">
+  <div>
+    <div class="home-logo-name">🌿 Canopy</div>
+    <div class="home-logo-tagline">// sitemap toolkit</div>
+  </div>
+  <p class="home-desc">Crawl a live site, map its page structure, and export a visual sitemap — for internal planning or sharing with clients.</p>
+  <button class="primary" style="padding:8px 24px;font-size:13px;border-color:#555" onclick="startSession()">+ new sitemap</button>
+</div>
+
+<!-- App -->
+<div id="app">
+
+  <header>
+    <div class="logo-wrap" onclick="goHome()">
+      <span class="logo-name">🌿 Canopy</span>
+      <span class="logo-tagline">// sitemap toolkit</span>
+    </div>
+    <nav>
+      <button class="nav-tab active" data-tab="crawl"   onclick="switchTab('crawl')">  <span class="tab-emoji">🕷️</span> Crawler</button>
+      <button class="nav-tab"        data-tab="diagram" onclick="switchTab('diagram')"><span class="tab-emoji">🌳</span> Diagram</button>
+      <button class="nav-tab"        data-tab="export"  onclick="switchTab('export')"> <span class="tab-emoji">🍂</span> Export</button>
+    </nav>
+    <div class="header-right">
+      <button onclick="showModal('m-about')">?</button>
+    </div>
+  </header>
+
+  <!-- ═══ Crawler ═══ -->
+  <div id="tab-crawl" class="tab-content active">
+
+    <div class="crawl-top">
+      <div class="field-group">
+        <label>Start URL</label>
+        <input type="url" id="start-url" placeholder="https://example.com" style="width:340px">
+      </div>
+      <button class="primary" id="btn-crawl" onclick="startCrawl()">🌱 Crawl site</button>
+      <button id="btn-stop" disabled onclick="stopCrawl()">◼ Stop</button>
+    </div>
+
+    <!-- Workbench -->
+    <div class="workbench-bar">
+      <button class="workbench-toggle" id="wb-btn" onclick="toggleWb()">
+        <span class="arrow">▶</span>&nbsp; Workbench
+      </button>
+      <div class="workbench-panel" id="wb-panel">
+        <div class="wb-group">
+          <div class="wb-title">Concurrency</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="number" id="concurrency" value="3" min="1" max="10" style="width:55px">
+            <span style="font-size:10px;color:var(--text-faint)">1 = careful &nbsp;·&nbsp; 5 = fast &nbsp;·&nbsp; 10 = aggressive</span>
+          </div>
+        </div>
+        <div class="wb-group">
+          <div class="wb-title">Exclude from crawl</div>
+          <label class="filter-item"><input type="checkbox" id="f-pagination" checked> Pagination (?page=, /page/)</label>
+          <label class="filter-item"><input type="checkbox" id="f-media"      checked> Media &amp; files (.png, .jpg, .pdf…)</label>
+          <label class="filter-item"><input type="checkbox" id="f-dev"        checked> Dev &amp; system (wp-admin, .css, .js…)</label>
+          <label class="filter-item"><input type="checkbox" id="f-query"             > All query strings</label>
+          <label class="filter-item"><input type="checkbox" id="f-hash"              > Hash / anchor links</label>
+        </div>
+        <div class="wb-group">
+          <div class="wb-title">Custom exclude patterns</div>
+          <textarea id="custom-patterns" placeholder="one pattern per line" rows="4" style="width:190px;resize:vertical;font-size:11px"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="crawl-status-bar">
+      <span><span class="status-dot" id="sdot"></span><span id="stext">ready</span></span>
+      <span>🌱 discovered: <strong id="ct-d">0</strong></span>
+      <span>✅ ok: <strong id="ct-ok" style="color:var(--good)">0</strong></span>
+      <span>❌ errors: <strong id="ct-e" style="color:var(--bad)">0</strong></span>
+      <span>🚧 blocked: <strong id="ct-b" style="color:var(--warn)">0</strong></span>
+    </div>
+
+    <div class="crawl-body">
+      <div class="crawl-results">
+
+        <div class="results-toolbar">
+          <div class="pill-group">
+            <button class="pill active" onclick="setFilter('all',this)">all</button>
+            <button class="pill"        onclick="setFilter('ok',this)">ok</button>
+            <button class="pill"        onclick="setFilter('error',this)">errors</button>
+            <button class="pill"        onclick="setFilter('blocked',this)">blocked</button>
+          </div>
+          <span id="url-count" style="font-size:11px;color:var(--text-faint);margin-left:4px">0 URLs</span>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button id="btn-diagram" disabled onclick="sendToDiagram()">→ build diagram</button>
+            <button id="btn-csv"     disabled onclick="exportCrawlCSV()">↓ export CSV</button>
+          </div>
+        </div>
+
+        <div class="results-list" id="rlist">
+          <div class="empty-state" id="empty-crawl">
+            <div class="empty-icon">🕸️</div>
+            <div>No crawl yet — enter a URL above and click <strong>Crawl site</strong></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Diagram ═══ -->
+  <div id="tab-diagram" class="tab-content">
+    <div id="diagram-canvas-wrap">
+      <svg id="diagram">
+        <g id="dg" transform="translate(0,0) scale(1)">
+          <g id="edges-g"></g>
+          <g id="nodes-g"></g>
+        </g>
+      </svg>
+      <div class="empty-state" id="empty-diagram" style="position:absolute;inset:0">
+        <div class="empty-icon">🌳</div>
+        <div>No diagram yet — run a crawl then click <strong>→ build diagram</strong></div>
+      </div>
+    </div>
+
+    <div class="diagram-legend" id="dlegend" style="display:none">
+      <div class="legend-item"><div class="legend-dot" style="background:#2a2a2a;border:2px solid #666"></div>root</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1e1e1e;border:1.5px solid #444"></div>section</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#181818;border:1px solid #2e2e2e"></div>page</div>
+    </div>
+
+    <div class="diagram-info-panel" id="dinfo" style="display:none">
+      <div class="dip-header">
+        <span class="dip-label">Overview</span>
+        <span id="info-domain" style="color:var(--text);font-size:11px"></span>
+      </div>
+      <div class="dip-body">
+        <div class="info-row"><span class="il">total pages</span><span class="iv" id="info-total">—</span></div>
+        <div class="info-row"><span class="il">sections</span>   <span class="iv" id="info-sec">—</span></div>
+        <div class="info-row"><span class="il">max depth</span>  <span class="iv" id="info-depth">—</span></div>
+        <div class="info-row"><span class="il">status</span>     <span class="iv good" id="info-st">—</span></div>
+      </div>
+    </div>
+
+    <div class="diagram-toolbar" id="dtoolbar" style="display:none">
+      <button title="Zoom in"   onclick="zoom(1.2)">+</button>
+      <button title="Zoom out"  onclick="zoom(0.83)">−</button>
+      <button title="Fit view"  onclick="fit()">⊡</button>
+      <div class="dt-divider"></div>
+      <button title="Re-layout" onclick="buildDiagram()">↺</button>
+      <div class="dt-divider"></div>
+      <button onclick="switchTab('export')">↓ export →</button>
+    </div>
+  </div>
+
+  <!-- ═══ Export ═══ -->
+  <div id="tab-export" class="tab-content">
+    <div class="export-body">
+
+      <div>
+        <div class="export-section-title">Format</div>
+        <div class="export-option-grid">
+          <div class="export-card selected" onclick="pickFmt(this,'png')">
+            <div class="card-label">🖼️ PNG</div>
+            <div class="card-desc">Flat image — easy to share or drop into a document</div>
+          </div>
+          <div class="export-card" onclick="pickFmt(this,'svg')">
+            <div class="card-label">⬡ SVG</div>
+            <div class="card-desc">Vector — scalable, good for print or large diagrams</div>
+          </div>
+          <div class="export-card" onclick="pickFmt(this,'csv')">
+            <div class="card-label">📋 CSV</div>
+            <div class="card-desc">URL list with depth and section — for spreadsheets</div>
+          </div>
+          <div class="export-card" onclick="pickFmt(this,'json')">
+            <div class="card-label">{ } JSON</div>
+            <div class="card-desc">Full tree structure — for devs or re-importing</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="export-section-title">Download</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="primary" onclick="doExport()">↓ download</button>
+          <button onclick="switchTab('diagram')">⧉ view diagram first</button>
+        </div>
+        <div id="export-msg" style="margin-top:8px;font-size:11px;color:var(--text-dim)"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <span>🌿 Canopy</span>
+    <span class="fsep">//</span>
+    <a href="#" onclick="showModal('m-about');return false">what is Canopy?</a>
+    <span class="fsep">//</span>
+    <a href="#" onclick="showModal('m-boring');return false">boring stuff</a>
+  </footer>
+
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="m-about" onclick="overlayClose(event,'m-about')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">What is Canopy?</span>
+      <button class="modal-close" onclick="closeModal('m-about')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Canopy is a sitemap toolkit.</strong></p>
+      <p>It crawls a live website, maps the structure of every page it can reach, and generates a visual tree diagram — useful for understanding a site before a redesign, migration, or audit, and for sharing that structure with a client.</p>
+      <div class="modal-section-title">The workflow</div>
+      <p><strong>🕷️ Crawler</strong> — point it at any URL and Canopy walks all reachable internal pages. Use the Workbench to filter out what you don't need before you start. When done, hit <strong>→ build diagram</strong>.</p>
+      <p><strong>🌳 Diagram</strong> — an interactive tree of the site laid out by section and depth. Pan and zoom to explore. Root, section nodes, and leaf pages are sized distinctly.</p>
+      <p><strong>🍂 Export</strong> — download as PNG or SVG for presentations, CSV for spreadsheets, or JSON for developers.</p>
+      <div class="modal-section-title">A note on crawling</div>
+      <p>Browsers block cross-origin requests, so some sites will return CORS errors. Canopy marks these as <strong>blocked</strong> and continues. For full crawl coverage of external sites, a proxy is needed — this is planned as a future feature.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="m-boring" onclick="overlayClose(event,'m-boring')">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">The Boring Stuff</span>
+      <button class="modal-close" onclick="closeModal('m-boring')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section-title">Disclaimer</div>
+      <p>Canopy is provided as-is, without warranty of any kind. You are solely responsible for ensuring you have permission to crawl any site you use Canopy on. The creator accepts no liability for any disruption or misuse arising from use of this tool.</p>
+      <div class="modal-section-title">Privacy</div>
+      <p>Canopy runs entirely in your browser. No URLs, crawl data, or session information are transmitted to any server. Everything stays on your device.</p>
+      <div class="modal-section-title">Licence</div>
+      <p>All rights reserved. This tool and its source code may not be reproduced or redistributed without explicit written permission.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── State ── */
+let results    = [];
+let running    = false;
+let stopped    = false;
+let filter     = 'all';
+let fmt        = 'png';
+let tree       = null;
+let dt         = { x:0, y:0, s:1 };
+let dragging   = false;
+let dragFrom   = { x:0, y:0 };
+
+/* ── Home / nav ── */
+function startSession() { document.getElementById('home-screen').classList.add('gone'); }
+function goHome()       { document.getElementById('home-screen').classList.remove('gone'); }
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelector(`.nav-tab[data-tab="${name}"]`).classList.add('active');
+}
+
+/* ── Workbench ── */
+function toggleWb() {
+  const btn = document.getElementById('wb-btn');
+  const pan = document.getElementById('wb-panel');
+  btn.classList.toggle('open');
+  pan.classList.toggle('open');
+}
+
+/* ── Crawl ── */
+function getFilters() {
+  return {
+    pagination: document.getElementById('f-pagination').checked,
+    media:      document.getElementById('f-media').checked,
+    dev:        document.getElementById('f-dev').checked,
+    query:      document.getElementById('f-query').checked,
+    hash:       document.getElementById('f-hash').checked,
+    patterns:   document.getElementById('custom-patterns').value.split('\n').map(s=>s.trim()).filter(Boolean),
+  };
+}
+
+function shouldExclude(url, f) {
+  if (f.pagination && /[?&]page=|\/page\/\d|\/p\/\d/.test(url)) return true;
+  if (f.media && /\.(png|jpe?g|gif|svg|ico|webp|pdf|zip|mp4|woff2?|ttf|eot)(\?|$)/i.test(url)) return true;
+  if (f.dev   && /wp-admin|wp-json|\.css(\?|$)|\.js(\?|$)|\/feed\/?$/.test(url)) return true;
+  if (f.query && url.includes('?')) return true;
+  if (f.hash  && url.includes('#')) return true;
+  for (const p of f.patterns) { if (p && url.includes(p)) return true; }
+  return false;
+}
+
+async function fetchPage(url) {
+  try {
+    const resp = await fetch(url, { mode:'cors', signal: AbortSignal.timeout(8000) });
+    if (!resp.ok) return { status:'error', links:[] };
+    const html = await resp.text();
+    const doc  = new DOMParser().parseFromString(html, 'text/html');
+    const links = [];
+    doc.querySelectorAll('a[href]').forEach(a => {
+      try { links.push(new URL(a.getAttribute('href'), url).href); } catch {}
+    });
+    return { status:'ok', links };
+  } catch(e) {
+    const msg = (e.message||'').toLowerCase();
+    return { status: (msg.includes('cors')||e.name==='TypeError') ? 'blocked' : 'error', links:[] };
+  }
+}
+
+async function startCrawl() {
+  const raw = document.getElementById('start-url').value.trim();
+  if (!raw) { alert('Enter a start URL.'); return; }
+  let startUrl;
+  try { startUrl = new URL(raw).href; } catch { alert('Invalid URL.'); return; }
+
+  results = [];
+  running = true;
+  stopped = false;
+  document.getElementById('btn-crawl').disabled  = true;
+  document.getElementById('btn-stop').disabled   = false;
+  document.getElementById('btn-diagram').disabled = true;
+  document.getElementById('btn-csv').disabled    = true;
+  document.getElementById('empty-crawl').classList.remove('hidden');
+  document.querySelectorAll('.result-item').forEach(el=>el.remove());
+  setStatus('running','🌱 crawling…');
+  resetCtrs();
+
+  const f    = getFilters();
+  const con  = parseInt(document.getElementById('concurrency').value)||3;
+  const base = new URL(startUrl).origin;
+  const seen = new Set([startUrl]);
+  const queue = [{ url:startUrl, depth:0 }];
+
+  const processOne = async ({ url, depth }) => {
+    if (stopped) return;
+    const { status, links } = await fetchPage(url);
+    const entry = { url, status, depth, section: getSection(url, base) };
+    results.push(entry);
+    updateCtrs();
+    appendItem(entry);
+    if (status==='ok' && depth<12) {
+      for (const lnk of links) {
+        try {
+          const u = new URL(lnk);
+          if (u.origin !== base) continue;
+          const clean = u.href.split('#')[0].replace(/\/+$/,'') || '/';
+          if (seen.has(clean)) continue;
+          if (shouldExclude(clean, f)) continue;
+          seen.add(clean);
+          queue.push({ url:clean, depth:depth+1 });
+        } catch {}
+      }
+    }
+  };
+
+  while (queue.length > 0 && !stopped) {
+    await Promise.all(queue.splice(0, con).map(processOne));
+  }
+
+  running = false;
+  document.getElementById('btn-crawl').disabled = false;
+  document.getElementById('btn-stop').disabled  = true;
+  if (results.length > 0) {
+    document.getElementById('btn-diagram').disabled = false;
+    document.getElementById('btn-csv').disabled     = false;
+  }
+  setStatus('done', stopped
+    ? `⛔ stopped — ${results.length} URL${results.length!==1?'s':''} found`
+    : `✅ done — ${results.length} URL${results.length!==1?'s':''}`);
+}
+
+function stopCrawl() {
+  stopped = true; running = false;
+  document.getElementById('btn-stop').disabled = true;
+}
+
+function setStatus(state, text) {
+  document.getElementById('sdot').className = 'status-dot ' + state;
+  document.getElementById('stext').textContent = text;
+}
+
+function resetCtrs() {
+  ['d','ok','e','b'].forEach(k => document.getElementById('ct-'+k).textContent='0');
+  document.getElementById('url-count').textContent = '0 URLs';
+}
+
+function updateCtrs() {
+  const n = results.length;
+  document.getElementById('ct-d').textContent  = n;
+  document.getElementById('ct-ok').textContent = results.filter(r=>r.status==='ok').length;
+  document.getElementById('ct-e').textContent  = results.filter(r=>r.status==='error').length;
+  document.getElementById('ct-b').textContent  = results.filter(r=>r.status==='blocked').length;
+  document.getElementById('url-count').textContent = n + ' URL'+(n!==1?'s':'');
+}
+
+function getSection(url, base) {
+  try { const p = new URL(url).pathname.split('/').filter(Boolean); return p.length ? '/'+p[0] : '/'; }
+  catch { return '/'; }
+}
+
+/* ── Results list ── */
+function setFilter(f, btn) {
+  filter = f;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  const list = document.getElementById('rlist');
+  list.querySelectorAll('.result-item').forEach(el=>el.remove());
+  const visible = filter==='all' ? results : results.filter(r=>r.status===filter);
+  visible.forEach(r => list.appendChild(makeItem(r)));
+  document.getElementById('empty-crawl').classList.toggle('hidden', results.length>0);
+}
+
+function appendItem(entry) {
+  document.getElementById('empty-crawl').classList.add('hidden');
+  if (filter !== 'all' && entry.status !== filter) return;
+  document.getElementById('rlist').appendChild(makeItem(entry));
+}
+
+function makeItem(r) {
+  const d = document.createElement('div');
+  d.className = 'result-item';
+  const bc = r.status==='ok' ? 'badge-ok' : r.status==='blocked' ? 'badge-block' : 'badge-err';
+  const bt = r.status==='ok' ? '200' : r.status==='blocked' ? 'CORS' : 'ERR';
+  d.innerHTML = `<span class="status-badge ${bc}">${bt}</span><span class="url-text" title="${r.url}">${r.url}</span><span style="font-size:10px;color:var(--text-faint);flex-shrink:0">depth ${r.depth}</span>`;
+  return d;
+}
+
+/* ── Diagram ── */
+function sendToDiagram() { buildDiagram(); switchTab('diagram'); }
+
+function buildDiagram() {
+  const pages = results.filter(r => r.status==='ok' || r.status==='blocked');
+  if (!pages.length) return;
+
+  document.getElementById('empty-diagram').style.display = 'none';
+  document.getElementById('dlegend').style.display = '';
+  document.getElementById('dinfo').style.display   = '';
+  document.getElementById('dtoolbar').style.display = '';
+
+  // Build tree
+  const root = { label:'/', url:'/', ch:{}, depth:0, isRoot:true };
+  for (const r of pages) {
+    let path; try { path = new URL(r.url).pathname; } catch { continue; }
+    const parts = path.split('/').filter(Boolean);
+    let node = root;
+    for (let i=0; i<parts.length; i++) {
+      const seg = parts[i];
+      if (!node.ch[seg]) node.ch[seg] = { label:'/'+seg, url:r.url, ch:{}, depth:i+1, isSection:i===0 };
+      if (i===parts.length-1) node.ch[seg].url = r.url;
+      node = node.ch[seg];
+    }
+  }
+
+  function toArr(obj) {
+    return { ...obj, children: Object.values(obj.ch).map(toArr) };
+  }
+  tree = toArr(root);
+
+  // Stats
+  let maxD=0, total=0, secs=0;
+  function count(n) { total++; if(n.depth>maxD)maxD=n.depth; if(n.isSection)secs++; n.children.forEach(count); }
+  count(tree);
+
+  let domain=''; try { domain = new URL(document.getElementById('start-url').value).hostname; } catch {}
+  document.getElementById('info-domain').textContent = domain;
+  document.getElementById('info-total').textContent  = total;
+  document.getElementById('info-sec').textContent    = secs;
+  document.getElementById('info-depth').textContent  = maxD;
+  document.getElementById('info-st').textContent     = '✅ crawled';
+
+  renderDiagram();
+}
+
+function subtreeW(n) { return (!n.children||!n.children.length) ? 1 : n.children.reduce((s,c)=>s+subtreeW(c),0); }
+
+function assignXY(n, x, y, xGap, yGap) {
+  n.x=x; n.y=y;
+  if (!n.children||!n.children.length) return;
+  const tot = subtreeW(n);
+  let cx = x - (tot*xGap)/2 + xGap/2;
+  for (const c of n.children) {
+    const w=subtreeW(c);
+    assignXY(c, cx+(w*xGap)/2-xGap/2, y+yGap, xGap, yGap);
+    cx += w*xGap;
+  }
+}
+
+function renderDiagram() {
+  if (!tree) return;
+  const svg  = document.getElementById('diagram');
+  document.getElementById('edges-g').innerHTML = '';
+  document.getElementById('nodes-g').innerHTML = '';
+
+  const W = svg.clientWidth  || window.innerWidth;
+  const H = svg.clientHeight || (window.innerHeight - 90);
+  const xGap = 160, yGap = 72;
+
+  assignXY(tree, 0, 0, xGap, yGap);
+
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  function bb(n) { if(n.x<minX)minX=n.x; if(n.x>maxX)maxX=n.x; if(n.y<minY)minY=n.y; if(n.y>maxY)maxY=n.y; n.children.forEach(bb); }
+  bb(tree);
+
+  const pad=80, tW=maxX-minX+pad*2, tH=maxY-minY+pad*2;
+  const sc = Math.min((W-60)/tW, (H-60)/tH, 1.2);
+  dt = { x: W/2-((minX+maxX)/2)*sc, y: pad+(-minY)*sc, s: sc };
+  applyDt();
+
+  const EG = document.getElementById('edges-g');
+  const NG = document.getElementById('nodes-g');
+
+  function drawEdges(n) {
+    for (const c of n.children) {
+      const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+      const mid=(n.y+c.y)/2;
+      p.setAttribute('d',`M${n.x} ${n.y}C${n.x} ${mid},${c.x} ${mid},${c.x} ${c.y}`);
+      p.setAttribute('class','edge'+(n.isRoot?' l1':''));
+      EG.appendChild(p);
+      drawEdges(c);
+    }
+  }
+  drawEdges(tree);
+
+  function drawNodes(n) {
+    const r = n.isRoot ? 20 : n.isSection ? 14 : 9;
+    const cc = n.isRoot ? 'node-root-circle' : n.isSection ? 'node-section-circle' : 'node-page-circle';
+    const tc = n.isRoot ? 'nlr' : n.isSection ? 'nls' : 'nlp';
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','node');
+    g.setAttribute('transform',`translate(${n.x},${n.y})`);
+    g.dataset.url = n.url;
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('r', r);
+    circle.setAttribute('class', cc);
+    g.appendChild(circle);
+
+    const lbl = n.label.length>18 ? n.label.slice(0,17)+'…' : n.label;
+    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('y', r+13);
+    t.setAttribute('class', tc);
+    t.textContent = lbl;
+    g.appendChild(t);
+
+    if (n.children.length && !n.isRoot) {
+      const sub = document.createElementNS('http://www.w3.org/2000/svg','text');
+      sub.setAttribute('y', r+24);
+      sub.setAttribute('class','nlsub');
+      sub.textContent = n.children.length + (n.children.length===1?' page':' pages');
+      g.appendChild(sub);
+    }
+
+    g.addEventListener('click', () => {
+      document.querySelectorAll('.node.selected').forEach(el=>el.classList.remove('selected'));
+      g.classList.add('selected');
+    });
+    NG.appendChild(g);
+    n.children.forEach(drawNodes);
+  }
+  drawNodes(tree);
+}
+
+function applyDt() {
+  document.getElementById('dg').setAttribute('transform',`translate(${dt.x},${dt.y}) scale(${dt.s})`);
+}
+function zoom(f) { dt.s = Math.min(Math.max(dt.s*f, 0.08), 6); applyDt(); }
+function fit() { if(tree) buildDiagram(); }
+
+// Pan
+const dcw = document.getElementById('diagram-canvas-wrap');
+dcw.addEventListener('mousedown', e => {
+  if (e.target.closest('.node')) return;
+  dragging=true; dragFrom={x:e.clientX-dt.x, y:e.clientY-dt.y};
+});
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  dt.x=e.clientX-dragFrom.x; dt.y=e.clientY-dragFrom.y; applyDt();
+});
+window.addEventListener('mouseup', () => dragging=false);
+dcw.addEventListener('wheel', e => { e.preventDefault(); zoom(e.deltaY<0?1.1:0.9); }, {passive:false});
+
+/* ── Export ── */
+function pickFmt(card, f) {
+  document.querySelectorAll('.export-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected'); fmt=f;
+}
+
+function doExport() {
+  const msg = document.getElementById('export-msg');
+  msg.textContent='';
+  if (!results.length && fmt!=='png' && fmt!=='svg') { msg.textContent='⚠ Run a crawl first.'; return; }
+  if (fmt==='csv')  exportCSV();
+  else if (fmt==='json') exportJSON();
+  else if (fmt==='svg')  exportSVG();
+  else exportPNG();
+}
+
+function exportCSV() {
+  const rows=['url,status,depth,section'];
+  results.forEach(r=>rows.push(`"${r.url}","${r.status}",${r.depth},"${r.section}"`));
+  dl('canopy-sitemap.csv', rows.join('\n'), 'text/csv');
+}
+function exportJSON() {
+  dl('canopy-sitemap.json', JSON.stringify({crawledAt:new Date().toISOString(),urls:results,tree},null,2), 'application/json');
+}
+function exportSVG() {
+  const s = new XMLSerializer().serializeToString(document.getElementById('diagram'));
+  dl('canopy-sitemap.svg', s, 'image/svg+xml');
+}
+function exportPNG() {
+  const svg=document.getElementById('diagram');
+  const W=svg.clientWidth||1400, H=svg.clientHeight||900;
+  const canvas=document.createElement('canvas');
+  canvas.width=W*2; canvas.height=H*2;
+  const ctx=canvas.getContext('2d'); ctx.scale(2,2);
+  ctx.fillStyle='#0e0e0e'; ctx.fillRect(0,0,W,H);
+  const blob=new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml'});
+  const url=URL.createObjectURL(blob);
+  const img=new Image();
+  img.onload=()=>{ ctx.drawImage(img,0,0); URL.revokeObjectURL(url); canvas.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='canopy-sitemap.png'; a.click(); }); };
+  img.src=url;
+}
+function exportCrawlCSV() { exportCSV(); }
+
+function dl(name, content, type) {
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type}));
+  a.download=name; a.click();
+}
+
+/* ── Modals ── */
+function showModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function overlayClose(e, id) { if(e.target===document.getElementById(id)) closeModal(id); }
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+});
+</script>
+</body>
+</html>
