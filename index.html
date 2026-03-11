@@ -35,6 +35,20 @@
       --placeholder:  #303038;
       --empty-text:   #333;
       --flip-bd:      #262630;
+      /* ── Diagram colour theme (overridden per theme) ── */
+      --dt-root-fill:    #1a1a24;
+      --dt-root-stroke:  #555566;
+      --dt-sec-fill:     #111118;
+      --dt-sec-stroke:   #2a2a38;
+      --dt-leaf-fill:    #0d0d14;
+      --dt-leaf-stroke:  #1e1e28;
+      --dt-rail:         #2a2a38;
+      --dt-rail-root:    #383848;
+      --dt-text:         #c0bbb4;
+      --dt-text-root:    #f0ece4;
+      --dt-text-sub:     #555;
+      --dt-sel-stroke:   #008080;
+      --dt-anc-stroke:   #005f5f;
     }
     html.light {
       --bg:           #e8e8e2;
@@ -62,6 +76,20 @@
       --placeholder:  #999;
       --empty-text:   #999;
       --flip-bd:      #aaa;
+      /* ── Diagram colour theme (light overrides) ── */
+      --dt-root-fill:    #e8e8e0;
+      --dt-root-stroke:  #888898;
+      --dt-sec-fill:     #f0f0ea;
+      --dt-sec-stroke:   #c8c8be;
+      --dt-leaf-fill:    #f8f8f4;
+      --dt-leaf-stroke:  #d8d8d0;
+      --dt-rail:         #b8b8ae;
+      --dt-rail-root:    #888898;
+      --dt-text:         #2a2a38;
+      --dt-text-root:    #020208;
+      --dt-text-sub:     #888;
+      --dt-sel-stroke:   #008080;
+      --dt-anc-stroke:   #50a0a0;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -219,21 +247,21 @@
     svg#diagram { width: 100%; height: 100%; overflow: visible; }
     .diagram-toolbar-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
 
-    /* SVG node styles */
+    /* SVG node styles — colours driven by --dt-* vars so themes work */
     .dnode { cursor: pointer; }
-    .dnode rect { transition: filter 0.1s; }
-    .dnode.root rect    { fill: var(--bg-card-hd); stroke: #444; stroke-width: 1.5; rx: 4; ry: 4; }
-    .dnode.section rect { fill: var(--bg-card);    stroke: var(--border-soft); stroke-width: 1; }
-    .dnode.leaf rect    { fill: var(--bg-input);   stroke: var(--border-inner); stroke-width: 1; }
-    .dnode:hover rect   { filter: brightness(1.4); }
-    .dnode.selected rect { stroke: #008080 !important; stroke-width: 2 !important; filter: brightness(1.3); }
-    .dnode.ancestor rect { stroke: #005f5f !important; stroke-width: 1.5 !important; filter: brightness(1.15); opacity: 0.9; }
-    .dnode text { font-family: 'IBM Plex Mono', monospace; fill: var(--text-body); pointer-events: none; user-select: none; text-anchor: middle; }
-    .dnode text.nl-slug { font-size: 10px; fill: var(--text-body); }
-    .dnode text.nl-root { font-size: 11px; font-weight: 600; fill: var(--text-strong); }
-    .dnode text.nl-sub  { font-size: 9px;  fill: var(--text-muted); }
-    .dedge { stroke: var(--border-soft); stroke-width: 1; fill: none; }
-    .dedge.root-edge { stroke: var(--border); stroke-width: 1.5; }
+    .dnode rect { transition: fill 0.2s, stroke 0.2s, filter 0.1s; }
+    .dnode.root rect    { fill: var(--dt-root-fill); stroke: var(--dt-root-stroke); stroke-width: 1.5; }
+    .dnode.section rect { fill: var(--dt-sec-fill);  stroke: var(--dt-sec-stroke);  stroke-width: 1; }
+    .dnode.leaf rect    { fill: var(--dt-leaf-fill); stroke: var(--dt-leaf-stroke); stroke-width: 1; }
+    .dnode:hover rect   { filter: brightness(1.35); }
+    .dnode.selected rect { stroke: var(--dt-sel-stroke) !important; stroke-width: 2 !important; filter: brightness(1.3); }
+    .dnode.ancestor rect { stroke: var(--dt-anc-stroke) !important; stroke-width: 1.5 !important; filter: brightness(1.15); }
+    .dnode text { font-family: 'IBM Plex Mono', monospace; fill: var(--dt-text); pointer-events: none; user-select: none; text-anchor: middle; transition: fill 0.2s; }
+    .dnode text.nl-slug { font-size: 10px; fill: var(--dt-text); }
+    .dnode text.nl-root { font-size: 11px; font-weight: 600; fill: var(--dt-text-root); }
+    .dnode text.nl-sub  { font-size: 9px;  fill: var(--dt-text-sub); }
+    .dedge { stroke: var(--dt-rail); stroke-width: 1; fill: none; transition: stroke 0.2s; }
+    .dedge.root-edge { stroke: var(--dt-rail-root); stroke-width: 1.5; }
 
     /* Diagram overlay panels */
     .diagram-overlay { position: absolute; background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; }
@@ -261,6 +289,87 @@
     .d-info-row .dv { color: var(--text-body); }
     .d-info-row .dv.good { color: #5aab72; }
     html.light .d-info-row .dv.good { color: #145828; }
+
+    /* ── Colour themes for diagram ── */
+    /* Applied to html element as data-diagram-theme="X" */
+    [data-diagram-theme="teal"] {
+      --dt-root-fill: #001f1f; --dt-root-stroke: #008080;
+      --dt-sec-fill:  #001414; --dt-sec-stroke:  #005f5f;
+      --dt-leaf-fill: #000d0d; --dt-leaf-stroke: #003838;
+      --dt-rail: #004444; --dt-rail-root: #006060;
+      --dt-text: #a0d0d0; --dt-text-root: #c0eaea; --dt-text-sub: #408080;
+      --dt-sel-stroke: #00c0c0; --dt-anc-stroke: #008080;
+    }
+    [data-diagram-theme="slate"] {
+      --dt-root-fill: #1c1c2e; --dt-root-stroke: #6060a0;
+      --dt-sec-fill:  #141422; --dt-sec-stroke:  #404070;
+      --dt-leaf-fill: #0e0e18; --dt-leaf-stroke: #282840;
+      --dt-rail: #303050; --dt-rail-root: #505080;
+      --dt-text: #b0b0d8; --dt-text-root: #d8d8f8; --dt-text-sub: #606090;
+      --dt-sel-stroke: #9090e0; --dt-anc-stroke: #6060b0;
+    }
+    [data-diagram-theme="forest"] {
+      --dt-root-fill: #0e1e12; --dt-root-stroke: #3a7a4a;
+      --dt-sec-fill:  #0a1610; --dt-sec-stroke:  #285a35;
+      --dt-leaf-fill: #080f0a; --dt-leaf-stroke: #1a3c22;
+      --dt-rail: #1e4828; --dt-rail-root: #2e6838;
+      --dt-text: #90c8a0; --dt-text-root: #b8e8c8; --dt-text-sub: #3a6848;
+      --dt-sel-stroke: #5aab72; --dt-anc-stroke: #3a7a4a;
+    }
+    [data-diagram-theme="ember"] {
+      --dt-root-fill: #1e1008; --dt-root-stroke: #a05030;
+      --dt-sec-fill:  #160c06; --dt-sec-stroke:  #703820;
+      --dt-leaf-fill: #0e0804; --dt-leaf-stroke: #442010;
+      --dt-rail: #583020; --dt-rail-root: #804838;
+      --dt-text: #d0a080; --dt-text-root: #f0c8a0; --dt-text-sub: #805040;
+      --dt-sel-stroke: #e07840; --dt-anc-stroke: #a05030;
+    }
+    /* Light mode adjustments for named themes */
+    html.light [data-diagram-theme="teal"] {
+      --dt-root-fill: #c0eaea; --dt-root-stroke: #008080;
+      --dt-sec-fill:  #d8f4f4; --dt-sec-stroke:  #60b0b0;
+      --dt-leaf-fill: #eef8f8; --dt-leaf-stroke: #a0d8d8;
+      --dt-rail: #80c0c0; --dt-rail-root: #008080;
+      --dt-text: #004848; --dt-text-root: #002828; --dt-text-sub: #608888;
+    }
+    html.light [data-diagram-theme="slate"] {
+      --dt-root-fill: #d8d8f0; --dt-root-stroke: #6060a0;
+      --dt-sec-fill:  #e8e8f8; --dt-sec-stroke:  #9090c0;
+      --dt-leaf-fill: #f4f4fc; --dt-leaf-stroke: #c0c0e0;
+      --dt-rail: #a0a0d0; --dt-rail-root: #6060a0;
+      --dt-text: #303060; --dt-text-root: #101040; --dt-text-sub: #7070a0;
+    }
+    html.light [data-diagram-theme="forest"] {
+      --dt-root-fill: #c8e8d0; --dt-root-stroke: #3a7a4a;
+      --dt-sec-fill:  #daf0e0; --dt-sec-stroke:  #70aa80;
+      --dt-leaf-fill: #eef8f0; --dt-leaf-stroke: #a8d8b4;
+      --dt-rail: #80b890; --dt-rail-root: #3a7a4a;
+      --dt-text: #1a4828; --dt-text-root: #0a2814; --dt-text-sub: #5a8868;
+    }
+    html.light [data-diagram-theme="ember"] {
+      --dt-root-fill: #f0d8c0; --dt-root-stroke: #a05030;
+      --dt-sec-fill:  #f8e8d4; --dt-sec-stroke:  #c08060;
+      --dt-leaf-fill: #fdf4ec; --dt-leaf-stroke: #d8b090;
+      --dt-rail: #c09070; --dt-rail-root: #a05030;
+      --dt-text: #502010; --dt-text-root: #300800; --dt-text-sub: #906050;
+    }
+
+    /* Theme picker swatch buttons */
+    .theme-swatch { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s, transform 0.1s; flex-shrink: 0; }
+    .theme-swatch:hover { transform: scale(1.15); }
+    .theme-swatch.active { border-color: var(--text-strong); }
+    .theme-swatch-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+    /* ── Import file label ── */
+    .import-file-label {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 0.3rem;
+      border: 1px dashed var(--border-soft); border-radius: 4px;
+      padding: 0.7rem 0.9rem; cursor: pointer;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.71rem;
+      color: var(--text-muted); transition: border-color 0.15s, color 0.15s;
+    }
+    .import-file-label:hover { border-color: #008080; color: #008080; }
+    .import-file-name { font-size: 0.65rem; color: var(--text-body); word-break: break-all; }
 
     /* ── Export tab ── */
     .export-grid { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
@@ -331,13 +440,20 @@
        PAGE: Crawler
   ══════════════════════════════════════ -->
   <div id="page-crawler">
-    <div class="page-heading">
-      <div class="page-heading-title">Crawler</div>
-      <div class="page-heading-sub">Crawl a site to discover all its internal URLs — then build a sitemap diagram.</div>
+    <div class="page-heading" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+      <div>
+        <div class="page-heading-title">Crawler</div>
+        <div class="page-heading-sub" id="crawler-mode-sub">Crawl a site to discover all its internal URLs — then build a sitemap diagram.</div>
+      </div>
+      <!-- Mode toggle: Crawl ↔ Import -->
+      <div class="pill-group" style="margin-bottom:1.25rem;">
+        <button class="pill active" id="mode-crawl-btn"  onclick="setCrawlerMode('crawl')">🕷️ Crawl</button>
+        <button class="pill"        id="mode-import-btn" onclick="setCrawlerMode('import')">↑ Import URLs</button>
+      </div>
     </div>
 
     <!-- Crawl settings card -->
-    <div class="section-card">
+    <div class="section-card" id="crawl-mode-card">
       <div class="card-header">
         <div class="card-header-text">
           <div class="card-title">Crawl settings</div>
@@ -470,6 +586,46 @@
       </div>
     </div>
 
+    <!-- ── IMPORT MODE card ───────────────────────────────── -->
+    <div class="section-card hidden" id="import-mode-card">
+      <div class="card-header">
+        <div class="card-header-text">
+          <div class="card-title">Import URL list</div>
+          <div class="card-help">Paste URLs directly, or upload a file — no crawl needed. Accepts raw URL lists, CSV, and sitemap XML.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.85rem;">
+
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.4rem;">Paste URLs</div>
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);margin-bottom:0.5rem;">One URL per line, or paste a sitemap XML block.</div>
+            <textarea id="import-textarea" class="base-url-input" style="height:160px;resize:vertical;font-size:0.68rem;" placeholder="https://example.com/&#10;https://example.com/about/&#10;https://example.com/services/&#10;..."></textarea>
+          </div>
+
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.4rem;">Upload a file</div>
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);margin-bottom:0.5rem;">Accepts .txt, .csv, or sitemap.xml</div>
+            <label class="import-file-label" id="import-file-label">
+              <input type="file" id="import-file-input" accept=".txt,.csv,.xml,text/plain,text/csv,application/xml,text/xml" hidden onchange="handleImportFile(this)" />
+              <span>↑ choose file</span>
+              <span class="import-file-name" id="import-file-name"></span>
+            </label>
+            <div style="margin-top:0.75rem;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.4rem;">Base URL <span style="text-transform:none;letter-spacing:0;color:var(--text-dim);font-size:0.6rem;">(optional — used to resolve relative paths)</span></div>
+              <input class="base-url-input" id="import-base-url" type="url" placeholder="https://example.com" style="width:100%;" />
+            </div>
+          </div>
+
+        </div>
+
+        <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+          <button class="btn-check" id="btn-import-run" onclick="runImport()">↑ Build sitemap</button>
+          <span id="import-status" style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--text-muted);"></span>
+        </div>
+      </div>
+    </div>
+
     <!-- Results card -->
     <div id="crawler-results" class="hidden">
       <div class="section-card" style="margin-top:0.75rem;">
@@ -562,6 +718,18 @@
                 <label class="spider-opt-row"><input type="checkbox" id="d-show-counts" checked /> <span>Show child counts on sections</span></label>
                 <label class="spider-opt-row"><input type="checkbox" id="d-show-errors" checked /> <span>Include error / blocked pages</span></label>
               </div>
+            </div>
+
+            <div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.5rem;">Colour theme</div>
+              <div class="theme-swatch-row" id="theme-swatch-row">
+                <button class="theme-swatch active" id="swatch-default" title="Default" style="background:linear-gradient(135deg,#1a1a24 50%,#2a2a38 50%);" onclick="setDiagramTheme('default',this)"></button>
+                <button class="theme-swatch" id="swatch-teal"    title="Teal"    style="background:linear-gradient(135deg,#001f1f 50%,#008080 50%);"  onclick="setDiagramTheme('teal',this)"></button>
+                <button class="theme-swatch" id="swatch-slate"   title="Slate"   style="background:linear-gradient(135deg,#1c1c2e 50%,#6060a0 50%);"  onclick="setDiagramTheme('slate',this)"></button>
+                <button class="theme-swatch" id="swatch-forest"  title="Forest"  style="background:linear-gradient(135deg,#0e1e12 50%,#3a7a4a 50%);"  onclick="setDiagramTheme('forest',this)"></button>
+                <button class="theme-swatch" id="swatch-ember"   title="Ember"   style="background:linear-gradient(135deg,#1e1008 50%,#a05030 50%);"   onclick="setDiagramTheme('ember',this)"></button>
+              </div>
+              <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.68rem;color:var(--text-help);margin-top:0.4rem;" id="theme-label">Default</div>
             </div>
 
           </div>
@@ -833,6 +1001,27 @@ function toggleTheme() {
 }
 
 /* ═══════════════════════════════════════════
+   Diagram colour theme
+═══════════════════════════════════════════ */
+const THEME_NAMES = { default:'Default', teal:'Teal', slate:'Slate', forest:'Forest', ember:'Ember' };
+let currentDiagramTheme = 'default';
+
+function setDiagramTheme(theme, btn) {
+  currentDiagramTheme = theme;
+  const el = document.documentElement;
+  if (theme === 'default') {
+    el.removeAttribute('data-diagram-theme');
+  } else {
+    el.setAttribute('data-diagram-theme', theme);
+  }
+  // Update swatch active state
+  document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const lbl = document.getElementById('theme-label');
+  if (lbl) lbl.textContent = THEME_NAMES[theme] || theme;
+}
+
+/* ═══════════════════════════════════════════
    Navigation
 ═══════════════════════════════════════════ */
 function startSession() { document.getElementById('home-screen').classList.add('gone'); }
@@ -855,6 +1044,123 @@ function toggleAccordion(headerId, bodyId) {
   const b = document.getElementById(bodyId);
   h.classList.toggle('open');
   b.classList.toggle('open');
+}
+
+/* ═══════════════════════════════════════════
+   Crawler mode toggle (Crawl / Import)
+═══════════════════════════════════════════ */
+function setCrawlerMode(mode) {
+  const isCrawl = mode === 'crawl';
+  document.getElementById('crawl-mode-card').classList.toggle('hidden', !isCrawl);
+  document.getElementById('import-mode-card').classList.toggle('hidden', isCrawl);
+  // Workbench only relevant to crawl mode
+  document.querySelectorAll('.section-card').forEach(c => {
+    if (c.id === 'wb-row-card') c.classList.toggle('hidden', !isCrawl);
+  });
+  document.getElementById('mode-crawl-btn').classList.toggle('active', isCrawl);
+  document.getElementById('mode-import-btn').classList.toggle('active', !isCrawl);
+  const sub = document.getElementById('crawler-mode-sub');
+  if (sub) sub.textContent = isCrawl
+    ? 'Crawl a site to discover all its internal URLs — then build a sitemap diagram.'
+    : 'Import a URL list from a file or paste — build a diagram without crawling.';
+}
+
+/* ═══════════════════════════════════════════
+   URL Import engine
+═══════════════════════════════════════════ */
+function handleImportFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('import-file-name').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('import-textarea').value = e.target.result;
+  };
+  reader.readAsText(file);
+}
+
+function parseImportText(raw, baseUrl) {
+  const urls = new Set();
+  const text = raw.trim();
+
+  // Try sitemap XML
+  if (text.startsWith('<') || text.includes('<urlset') || text.includes('<loc>')) {
+    try {
+      const doc = new DOMParser().parseFromString(text, 'application/xml');
+      doc.querySelectorAll('loc').forEach(loc => {
+        const u = loc.textContent.trim();
+        if (u) urls.add(u);
+      });
+      if (urls.size > 0) return [...urls];
+    } catch {}
+  }
+
+  // Try CSV — look for a column that looks like URLs
+  const lines = text.split(/
+?
+/).map(l => l.trim()).filter(Boolean);
+  for (const line of lines) {
+    // Skip header-ish lines
+    if (line.toLowerCase().startsWith('url') && !line.startsWith('http')) continue;
+    // If it's CSV, take the first column that starts with http
+    const cols = line.split(',').map(c => c.replace(/^"|"$/g,'').trim());
+    const urlCol = cols.find(c => c.startsWith('http'));
+    if (urlCol) { urls.add(urlCol); continue; }
+    // Plain URL
+    if (line.startsWith('http')) { urls.add(line); continue; }
+    // Relative path + base URL
+    if (baseUrl && line.startsWith('/')) {
+      try { urls.add(new URL(line, baseUrl).href); } catch {}
+    }
+  }
+  return [...urls];
+}
+
+function runImport() {
+  const raw     = document.getElementById('import-textarea').value.trim();
+  const baseUrl = document.getElementById('import-base-url').value.trim();
+  const status  = document.getElementById('import-status');
+
+  if (!raw) { status.textContent = '⚠ Paste some URLs or upload a file first.'; return; }
+
+  const urls = parseImportText(raw, baseUrl);
+  if (!urls.length) { status.textContent = '⚠ No valid URLs found. Check the format.'; return; }
+
+  // Determine origin for section/depth calculations
+  let origin = baseUrl;
+  if (!origin && urls.length) {
+    try { origin = new URL(urls[0]).origin; } catch {}
+  }
+
+  // Build synthetic crawl results
+  crawlState.results = urls.map(url => {
+    let depth = 0, section = '/';
+    try {
+      const u = new URL(url);
+      const parts = u.pathname.split('/').filter(Boolean);
+      depth = parts.length;
+      section = parts.length ? '/' + parts[0] : '/';
+    } catch {}
+    return { url, ok: true, status: 200, statusText: 'imported', depth, section };
+  });
+  crawlResults = crawlState.results;
+
+  // Set base URL field for diagram domain label
+  if (baseUrl) document.getElementById('crawl-url').value = baseUrl;
+  else if (urls.length) {
+    try { document.getElementById('crawl-url').value = new URL(urls[0]).origin; } catch {}
+  }
+
+  // Show results
+  document.getElementById('crawler-results').classList.remove('hidden');
+  document.getElementById('crawl-progress-wrap').classList.remove('hidden');
+  updateStats();
+  renderResults();
+  document.getElementById('btn-to-diagram').disabled = false;
+  document.getElementById('btn-export-csv').disabled = false;
+
+  status.textContent = `✓ ${urls.length} URL${urls.length !== 1 ? 's' : ''} imported`;
+  saveSession();
 }
 
 /* ═══════════════════════════════════════════
