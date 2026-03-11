@@ -238,6 +238,19 @@
     /* Diagram overlay panels */
     .diagram-overlay { position: absolute; background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; }
     .d-info-panel { top: 14px; right: 14px; width: 200px; }
+    .d-node-panel { bottom: 14px; right: 14px; width: 240px; }
+    .dnode-hovered rect { filter: brightness(1.5); }
+    /* Tooltip on hover */
+    .d-tooltip {
+      position: absolute; pointer-events: none; z-index: 20;
+      background: var(--bg-card); border: 1px solid var(--border-soft);
+      border-radius: 4px; padding: 0.3rem 0.6rem;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem;
+      color: var(--text-body); white-space: nowrap; max-width: 320px;
+      overflow: hidden; text-overflow: ellipsis;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      transition: opacity 0.1s;
+    }
     .d-legend    { top: 14px; left: 14px; padding: 0.65rem 0.85rem; display: flex; flex-direction: column; gap: 5px; color: var(--text-muted); }
     .legend-item { display: flex; align-items: center; gap: 8px; }
     .legend-box  { width: 30px; height: 14px; border-radius: 2px; border: 1px solid; flex-shrink: 0; }
@@ -419,6 +432,16 @@
             </div>
           </div>
 
+          <!-- Max depth + Divider -->
+          <div style="margin-bottom:0.85rem;padding-top:0.65rem;border-top:1px solid var(--border-soft);margin-top:0.85rem;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.4rem;">Max crawl depth</div>
+            <div style="display:flex;align-items:center;gap:0.65rem;flex-wrap:wrap;">
+              <input class="base-url-input" id="crawl-max-depth" type="number" min="1" max="20" value="6" style="width:65px;flex:0 0 auto;" />
+              <span style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);">How many URL levels deep to crawl. Shallow sites rarely go past 4. Set lower to crawl faster on large sites.</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--text-muted);">1 = homepage only &nbsp;·&nbsp; 4 = typical &nbsp;·&nbsp; 8+ = deep</span>
+            </div>
+          </div>
+
           <!-- Divider -->
           <div style="border-top:1px solid var(--border-soft);margin-bottom:0.85rem;"></div>
 
@@ -457,6 +480,7 @@
               <div class="stat"><strong id="stat-ok"    style="color:#5aab72;">0</strong> ok</div>
               <div class="stat"><strong id="stat-err"   style="color:#c86a5a;">0</strong> errors</div>
               <div class="stat"><strong id="stat-blk"   style="color:var(--text-muted);">0</strong> blocked</div>
+              <div class="stat" id="stat-excl-wrap" style="display:none;border-left:1px solid var(--border);padding-left:1.25rem;"><strong id="stat-excl" style="color:var(--text-dimmer);">0</strong> excluded</div>
             </div>
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
               <button class="btn-session" id="btn-to-diagram" disabled onclick="sendToDiagram()">→ build diagram</button>
@@ -541,7 +565,7 @@
             </div>
 
           </div>
-          <div class="card-body" style="padding-top:0;border-top:1px solid var(--border-soft);margin-top:0.25rem;display:flex;align-items:center;gap:0.5rem;">
+          <div class="card-body" style="padding-top:0.75rem;border-top:1px solid var(--border-soft);margin-top:0.25rem;display:flex;align-items:center;gap:0.5rem;">
             <button class="btn-check" onclick="buildDiagram()">↺ apply &amp; re-draw</button>
             <span style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--text-muted);">Changes take effect when you re-draw.</span>
           </div>
@@ -571,7 +595,7 @@
           </div>
         </div>
 
-        <!-- Info overlay -->
+        <!-- Overview overlay -->
         <div class="diagram-overlay d-info-panel" id="d-info">
           <div class="d-info-header">
             <span>Overview</span>
@@ -582,6 +606,27 @@
             <div class="d-info-row"><span class="dk">sections</span>   <span class="dv" id="d-secs">—</span></div>
             <div class="d-info-row"><span class="dk">max depth</span>  <span class="dv" id="d-depth">—</span></div>
             <div class="d-info-row"><span class="dk">status</span>     <span class="dv good" id="d-status">—</span></div>
+          </div>
+        </div>
+
+        <!-- Node detail panel — shown on click ──────────────────── -->
+        <div class="diagram-overlay d-node-panel hidden" id="d-node-panel">
+          <div class="d-info-header" style="justify-content:space-between;">
+            <span id="d-node-type" style="color:var(--text-muted);">page</span>
+            <button onclick="clearNodePanel()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.85rem;padding:0;line-height:1;">✕</button>
+          </div>
+          <div class="d-info-body" style="gap:0.6rem;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--text-body);word-break:break-all;line-height:1.5;" id="d-node-url">—</div>
+            <div style="border-top:1px solid var(--border-soft);padding-top:0.5rem;display:flex;flex-direction:column;gap:4px;">
+              <div class="d-info-row"><span class="dk">path</span><span class="dv" id="d-node-path" style="word-break:break-all;">—</span></div>
+              <div class="d-info-row"><span class="dk">depth</span><span class="dv" id="d-node-depth">—</span></div>
+              <div class="d-info-row"><span class="dk">status</span><span class="dv" id="d-node-status">—</span></div>
+              <div class="d-info-row" id="d-node-children-row"><span class="dk">children</span><span class="dv" id="d-node-children">—</span></div>
+            </div>
+            <div style="border-top:1px solid var(--border-soft);padding-top:0.5rem;display:flex;gap:0.4rem;flex-wrap:wrap;">
+              <a id="d-node-link" href="#" target="_blank" rel="noopener" class="btn-session" style="font-size:0.62rem;padding:0.2rem 0.5rem;text-decoration:none;">↗ open URL</a>
+              <button id="d-node-toggle-btn" class="btn-session" style="font-size:0.62rem;padding:0.2rem 0.5rem;display:none;" onclick="toggleNodeCollapse()">▸ expand</button>
+            </div>
           </div>
         </div>
       </div>
@@ -617,15 +662,21 @@
         </div>
       </div>
       <div class="card-body">
-        <div class="export-grid">
+        <!-- Row 1: Visual exports -->
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.5rem;">Visual</div>
+        <div class="export-grid" style="margin-bottom:1rem;">
           <div class="export-card selected" onclick="pickFmt(this,'png')">
             <div class="ec-label">🖼️ PNG</div>
-            <div class="ec-desc">Flat image — easy to share or drop into a doc or presentation</div>
+            <div class="ec-desc">Flat image — easy to share or drop into docs</div>
           </div>
           <div class="export-card" onclick="pickFmt(this,'svg')">
             <div class="ec-label">⬡ SVG</div>
             <div class="ec-desc">Vector — scalable, good for large diagrams or print</div>
           </div>
+        </div>
+        <!-- Row 2: Data exports -->
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.5rem;">Data</div>
+        <div class="export-grid" style="margin-bottom:1rem;">
           <div class="export-card" onclick="pickFmt(this,'csv')">
             <div class="ec-label">📋 CSV</div>
             <div class="ec-desc">URL list with depth and section — for spreadsheets</div>
@@ -633,6 +684,18 @@
           <div class="export-card" onclick="pickFmt(this,'json')">
             <div class="ec-label">{ } JSON</div>
             <div class="ec-desc">Full tree structure — for developers or re-importing</div>
+          </div>
+        </div>
+        <!-- Row 3: Web / integration -->
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.5rem;">Web &amp; integrations</div>
+        <div class="export-grid" style="margin-bottom:1.25rem;">
+          <div class="export-card" onclick="pickFmt(this,'xml')">
+            <div class="ec-label">🗺️ Sitemap XML</div>
+            <div class="ec-desc">Standard sitemap.xml — submit to search engines</div>
+          </div>
+          <div class="export-card" onclick="sendToWaypoint()" id="export-waypoint-card" style="border-color:var(--border-soft);">
+            <div class="ec-label">📍 Send to Waypoint</div>
+            <div class="ec-desc">Open Waypoint with these URLs pre-loaded into the Mapper</div>
           </div>
         </div>
         <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
@@ -706,6 +769,58 @@ let dt           = { x:0, y:0, s:1 };
 let dragging     = false;
 let dragFrom     = { x:0, y:0 };
 let isDark       = true;
+let excludedCount = 0;
+let selectedDNode = null;  // currently selected diagram node data object
+
+/* ── Session persistence ── */
+const SESSION_KEY = 'canopy_session_v1';
+
+function saveSession() {
+  if (!crawlState.results.length) return;
+  try {
+    const data = {
+      savedAt:  new Date().toISOString(),
+      startUrl: document.getElementById('crawl-url').value,
+      results:  crawlState.results.map(r => ({
+        url: r.url, ok: r.ok, status: r.status,
+        statusText: r.statusText, depth: r.depth, section: r.section
+      })),
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(data));
+  } catch(e) { /* storage full or blocked */ }
+}
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data.results || !data.results.length) return;
+    crawlState.results = data.results;
+    crawlResults = data.results;
+    if (data.startUrl) document.getElementById('crawl-url').value = data.startUrl;
+    document.getElementById('crawler-results').classList.remove('hidden');
+    document.getElementById('crawl-progress-wrap').classList.remove('hidden');
+    updateStats();
+    renderResults();
+    document.getElementById('btn-to-diagram').disabled = false;
+    document.getElementById('btn-export-csv').disabled = false;
+    const age = data.savedAt ? timeSince(new Date(data.savedAt)) : '';
+    setStatusText(`session restored${age ? ' — saved ' + age : ''}`);
+  } catch(e) { /* corrupt data */ }
+}
+
+function clearSession() {
+  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+}
+
+function timeSince(date) {
+  const s = Math.floor((Date.now() - date) / 1000);
+  if (s < 60)   return s + 's ago';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
 
 /* ═══════════════════════════════════════════
    Theme
@@ -837,8 +952,10 @@ async function startCrawl() {
   const origin = new URL(startUrl).origin;
   const f = getFilters();
   const concurrency = parseInt(document.getElementById('concurrency').value) || 3;
+  const maxDepth    = parseInt(document.getElementById('crawl-max-depth').value) || 6;
 
   crawlResults = [];
+  excludedCount = 0;
   // visited tracks URLs already queued or processed — add startUrl so it isn't queued twice
   // but do NOT skip it when dequeued; the worker checks visited before adding to queue, not before fetching
   crawlState = { running: true, queue: [startUrl], visited: new Set([startUrl]), results: [], base: origin };
@@ -892,7 +1009,9 @@ async function startCrawl() {
             if (u.origin !== origin) continue;
             const clean = (u.origin + u.pathname).replace(/\/+$/, '') || u.origin + '/';
             if (crawlState.visited.has(clean)) continue;
-            if (shouldExclude(clean, f)) continue;
+            const linkDepth = clean.split('/').filter(Boolean).length - new URL(origin).pathname.split('/').filter(Boolean).length;
+            if (linkDepth >= maxDepth) { excludedCount++; updateExcluded(); continue; }
+            if (shouldExclude(clean, f)) { excludedCount++; updateExcluded(); crawlState.visited.add(clean); continue; }
             crawlState.visited.add(clean);
             crawlState.queue.push(clean);
           } catch {}
@@ -919,6 +1038,7 @@ async function startCrawl() {
     document.getElementById('btn-to-diagram').disabled = false;
     document.getElementById('btn-export-csv').disabled = false;
     setStatusText(`done — ${n} URL${n!==1?'s':''} found`);
+    saveSession();
   } else {
     setStatusText('done — no URLs found');
   }
@@ -952,9 +1072,17 @@ function updateStats() {
   document.getElementById('stat-blk').textContent   = blk;
 }
 
-/* ═══════════════════════════════════════════
-   Result rows
-═══════════════════════════════════════════ */
+function updateExcluded() {
+  const wrap = document.getElementById('stat-excl-wrap');
+  const el   = document.getElementById('stat-excl');
+  if (!el) return;
+  if (excludedCount > 0) {
+    el.textContent = excludedCount;
+    wrap.style.display = '';
+  }
+}
+
+
 const rowMap = new WeakMap();
 
 function badgeInfo(item) {
@@ -1121,12 +1249,13 @@ function buildDiagram() {
 }
 
 /* ── Layout engine ──
-   Each "column" is one section node + all its descendants stacked vertically.
-   Columns are placed side by side horizontally.
-   The root sits centred above all columns.
-   Deep subtrees (section children that also have children) recurse:
-   their own children are indented and stacked below them.
+   Sections spread HORIZONTALLY under root.
+   Each section's children stack VERTICALLY, LEFT-ALIGNED
+   with a fixed indent, so hierarchy is visually unambiguous.
+   Children never share the same x as a sibling at a different depth.
 */
+
+const CHILD_INDENT = 24;  // how far right children shift from their parent's left edge
 
 // Returns the total HEIGHT of a subtree when laid out vertically
 function subtreeHeight(n) {
@@ -1135,54 +1264,54 @@ function subtreeHeight(n) {
   for (const c of n.children) {
     h += subtreeHeight(c) + LEAF_V_GAP;
   }
-  h -= LEAF_V_GAP; // no trailing gap after last child
+  h -= LEAF_V_GAP;
   return h;
 }
 
-// Returns the total WIDTH of a column rooted at n
-// Section nodes that have children get extra indent for sub-children
-function columnWidth(n) {
+// Returns the total WIDTH needed by a subtree (node + indented children)
+function subtreeW(n) {
   if (!n.children || !n.children.length) return NODE_W;
-  // Children are stacked vertically — column width = max(own width, deepest child width + indent)
-  const childMaxW = Math.max(...n.children.map(c => columnWidth(c)));
-  return Math.max(NODE_W, childMaxW + (n.isSection ? 0 : RAIL_OFFSET + 8));
+  const childW = Math.max(...n.children.map(c => subtreeW(c)));
+  return Math.max(NODE_W, CHILD_INDENT + childW);
 }
 
-// Assign x,y to every node using the hybrid layout
+// Assign x,y to every node — hybrid layout
 function assignPositions(tree) {
-  const sections = tree.children; // direct children of root = section nodes
+  const sections = tree.children;
 
-  // Work out each section column width and place them side by side
-  const colWidths = sections.map(s => Math.max(NODE_W, columnWidth(s)));
+  // Each section column is as wide as its subtree needs
+  const colWidths = sections.map(s => subtreeW(s));
   const totalW = colWidths.reduce((a,b)=>a+b, 0) + (sections.length-1)*SEC_H_GAP;
 
   // Root centred above all columns
   tree.x = totalW / 2;
   tree.y = 0;
 
-  // Place section columns
+  // Place each section column — section node is LEFT-ALIGNED to column start
   let cx = 0;
   sections.forEach((sec, i) => {
-    const colCx = cx + colWidths[i]/2;  // centre of this column
-    sec.x = colCx;
+    const colLeft = cx;  // left edge of this section's column
+    // Section node: x = its own centre (left edge + half its own width)
+    sec.x = colLeft + NODE_W / 2;
     sec.y = ROOT_H + ROOT_TO_SEC;
 
-    // Stack this section's children vertically below it
-    placeChildrenVertically(sec, colCx, sec.y + NODE_H + SEC_TO_LEAF, colWidths[i]);
+    // Children stacked vertically, indented from the section's left edge
+    placeChildrenVertically(sec, colLeft, sec.y + NODE_H + SEC_TO_LEAF);
 
     cx += colWidths[i] + SEC_H_GAP;
   });
 }
 
-function placeChildrenVertically(parent, colCx, startY, colW) {
+function placeChildrenVertically(parent, parentLeft, startY) {
   if (!parent.children || !parent.children.length) return;
+  // Children are indented relative to their parent's left edge
+  const childLeft = parentLeft + CHILD_INDENT;
   let y = startY;
   for (const child of parent.children) {
-    child.x = colCx;
+    child.x = childLeft + NODE_W / 2;  // centre of child node
     child.y = y;
-    // If this child also has children, place them indented below
     if (child.children && child.children.length) {
-      placeChildrenVertically(child, colCx, child.y + NODE_H + SEC_TO_LEAF, colW);
+      placeChildrenVertically(child, childLeft, child.y + NODE_H + SEC_TO_LEAF);
     }
     y += subtreeHeight(child) + LEAF_V_GAP;
   }
@@ -1261,25 +1390,26 @@ function renderDiagram(showCounts) {
     }
 
     if (!n.isRoot && n.children && n.children.length) {
-      // Section/leaf → vertical children: left-rail style
-      // Rail x is left edge of node + RAIL_OFFSET
-      const railX = n.x - NODE_W/2 + RAIL_OFFSET;
+      // Vertical rail hangs from the parent's left edge + RAIL_OFFSET
+      // Children are indented CHILD_INDENT from the parent's left edge,
+      // so the rail x = parent.x - NODE_W/2 + RAIL_OFFSET, and ticks reach right to each child's left edge
+      const railX   = n.x - NODE_W/2 + RAIL_OFFSET;
       const railTop = n.y + NODE_H;
       const lastChild = n.children[n.children.length-1];
       const railBot = lastChild.y + NODE_H/2;
 
-      // Vertical rail
       const rail = document.createElementNS('http://www.w3.org/2000/svg','line');
       rail.setAttribute('x1', railX); rail.setAttribute('y1', railTop);
       rail.setAttribute('x2', railX); rail.setAttribute('y2', railBot);
       rail.setAttribute('class','dedge');
       EG.appendChild(rail);
 
-      // Horizontal tick to each child
       for (const c of n.children) {
         const tick = document.createElementNS('http://www.w3.org/2000/svg','line');
-        tick.setAttribute('x1', railX);       tick.setAttribute('y1', c.y + NODE_H/2);
-        tick.setAttribute('x2', c.x - NODE_W/2); tick.setAttribute('y2', c.y + NODE_H/2);
+        tick.setAttribute('x1', railX);
+        tick.setAttribute('y1', c.y + NODE_H/2);
+        tick.setAttribute('x2', c.x - NODE_W/2);
+        tick.setAttribute('y2', c.y + NODE_H/2);
         tick.setAttribute('class','dedge');
         EG.appendChild(tick);
       }
@@ -1331,21 +1461,34 @@ function renderDiagram(showCounts) {
     // Register in map
     nodeElemMap.set(n, g);
 
-    // Click: select this node + highlight ancestor path to root
-    g.addEventListener('click', () => {
-      // Clear all previous highlights
+    // Hover tooltip — shows full URL path
+    g.addEventListener('mouseenter', e => {
+      showTooltip(e, n.isRoot ? crawlState.base || '/' : (n.url || n.slug));
+      g.classList.add('dnode-hovered');
+    });
+    g.addEventListener('mousemove', e => { moveTooltip(e); });
+    g.addEventListener('mouseleave', () => {
+      hideTooltip();
+      g.classList.remove('dnode-hovered');
+    });
+
+    // Click: show detail panel + highlight ancestor path
+    g.addEventListener('click', e => {
+      e.stopPropagation();
+      // Clear previous highlights
       document.querySelectorAll('.dnode.selected,.dnode.ancestor').forEach(el => {
         el.classList.remove('selected','ancestor');
       });
-      // Mark this node as selected
       g.classList.add('selected');
-      // Walk up parent chain and mark each as ancestor
+      selectedDNode = n;
+      // Highlight ancestor chain
       let p = parentMap.get(n);
       while (p) {
         const pEl = nodeElemMap.get(p);
         if (pEl) pEl.classList.add('ancestor');
         p = parentMap.get(p);
       }
+      showNodePanel(n);
     });
 
     NG.appendChild(g);
@@ -1357,6 +1500,117 @@ function renderDiagram(showCounts) {
 function applyDt() {
   document.getElementById('dg').setAttribute('transform',`translate(${dt.x},${dt.y}) scale(${dt.s})`);
 }
+
+/* ── Node detail panel ── */
+function showNodePanel(n) {
+  const panel = document.getElementById('d-node-panel');
+  if (!panel) return;
+
+  // Find matching crawl result for status info
+  const result = crawlState.results.find(r => r.url === n.url) || null;
+
+  document.getElementById('d-node-type').textContent = n.isRoot ? 'root' : n.isSection ? 'section' : 'page';
+  document.getElementById('d-node-url').textContent  = n.url || '/';
+
+  let path = '/';
+  try { path = new URL(n.url).pathname || '/'; } catch {}
+  document.getElementById('d-node-path').textContent  = path;
+  document.getElementById('d-node-depth').textContent = n.depth ?? '—';
+
+  let statusTxt = '—';
+  if (result) {
+    if (result.statusText === 'blocked') statusTxt = 'blocked';
+    else if (result.ok) statusTxt = String(result.status);
+    else if (result.status) statusTxt = String(result.status) + ' error';
+    else statusTxt = result.statusText || '—';
+  }
+  document.getElementById('d-node-status').textContent = statusTxt;
+
+  const childRow = document.getElementById('d-node-children-row');
+  const childVal = document.getElementById('d-node-children');
+  if (!n.isRoot && !n.isSection) {
+    childRow.style.display = 'none';
+  } else {
+    childRow.style.display = '';
+    const cnt = n.collapsed ? n.collapsedCount : (n.children?.length ?? 0);
+    childVal.textContent = n.collapsed ? `${cnt} (collapsed)` : String(cnt);
+  }
+
+  // Open URL link
+  const link = document.getElementById('d-node-link');
+  link.href = n.url || '#';
+
+  // Collapse/expand toggle for section nodes
+  const toggleBtn = document.getElementById('d-node-toggle-btn');
+  if (n.isSection) {
+    toggleBtn.style.display = '';
+    toggleBtn.textContent = n.collapsed ? '▸ expand' : '▾ collapse';
+  } else {
+    toggleBtn.style.display = 'none';
+  }
+
+  panel.classList.remove('hidden');
+}
+
+function clearNodePanel() {
+  document.getElementById('d-node-panel').classList.add('hidden');
+  document.querySelectorAll('.dnode.selected,.dnode.ancestor').forEach(el => {
+    el.classList.remove('selected','ancestor');
+  });
+  selectedDNode = null;
+}
+
+function toggleNodeCollapse() {
+  if (!selectedDNode) return;
+  const n = selectedDNode;
+  if (!n.isSection) return;
+  if (n.collapsed) {
+    // Restore children from full tree
+    n.collapsed = false;
+    // Re-build diagram to restore children (full rebuild is simplest)
+    buildDiagram();
+  } else {
+    n.collapsed = true;
+    n.collapsedCount = n.children.length;
+    n.children = [];
+    buildDiagram();
+  }
+}
+
+/* ── Tooltip ── */
+let tooltipEl = null;
+
+function ensureTooltip() {
+  if (!tooltipEl) {
+    tooltipEl = document.createElement('div');
+    tooltipEl.className = 'd-tooltip';
+    tooltipEl.style.opacity = '0';
+    document.getElementById('diagram-canvas').appendChild(tooltipEl);
+  }
+  return tooltipEl;
+}
+
+function showTooltip(e, text) {
+  const t = ensureTooltip();
+  t.textContent = text;
+  t.style.opacity = '1';
+  moveTooltip(e);
+}
+
+function moveTooltip(e) {
+  if (!tooltipEl) return;
+  const rect = document.getElementById('diagram-canvas').getBoundingClientRect();
+  let x = e.clientX - rect.left + 12;
+  let y = e.clientY - rect.top - 28;
+  if (x + 340 > rect.width) x = e.clientX - rect.left - 20 - tooltipEl.offsetWidth;
+  if (y < 0) y = e.clientY - rect.top + 16;
+  tooltipEl.style.left = x + 'px';
+  tooltipEl.style.top  = y + 'px';
+}
+
+function hideTooltip() {
+  if (tooltipEl) tooltipEl.style.opacity = '0';
+}
 function dzoom(f) { dt.s=Math.min(Math.max(dt.s*f,0.06),6); applyDt(); }
 function dfit()   { if(diagramTree) buildDiagram(); }
 
@@ -1364,10 +1618,8 @@ function dfit()   { if(diagramTree) buildDiagram(); }
 const dc = document.getElementById('diagram-canvas');
 dc.addEventListener('mousedown', e => {
   if (e.target.closest('.dnode')) return;
-  // Click on background — clear selection
-  document.querySelectorAll('.dnode.selected,.dnode.ancestor').forEach(el => {
-    el.classList.remove('selected','ancestor');
-  });
+  // Click on background — clear selection and panel
+  clearNodePanel();
   dragging=true; dragFrom={x:e.clientX-dt.x,y:e.clientY-dt.y};
 });
 window.addEventListener('mousemove', e => {
@@ -1391,6 +1643,7 @@ function doExport() {
   if (exportFmt==='csv')       exportCSV();
   else if (exportFmt==='json') exportJSON();
   else if (exportFmt==='svg')  exportSVGFile();
+  else if (exportFmt==='xml')  exportXML();
   else exportPNG();
 }
 
@@ -1399,6 +1652,18 @@ function exportCSV() {
   const rows=['url,status,depth,section'];
   crawlState.results.forEach(r=>rows.push(`"${r.url}","${r.statusText}",${r.depth},"${r.section}"`));
   dl('canopy-sitemap.csv', rows.join('\n'), 'text/csv');
+}
+
+function exportXML() {
+  if (!crawlState.results.length) { document.getElementById('export-msg').textContent='⚠ Run a crawl first.'; return; }
+  const ok = crawlState.results.filter(r => r.ok);
+  const rows = ok.map(r => `  <url>\n    <loc>${escXml(r.url)}</loc>\n  </url>`);
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows.join('\n')}\n</urlset>`;
+  dl('sitemap.xml', xml, 'application/xml');
+}
+
+function escXml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function exportJSON() {
   dl('canopy-sitemap.json', JSON.stringify({crawledAt:new Date().toISOString(),urls:crawlState.results,tree:diagramTree},null,2), 'application/json');
@@ -1424,7 +1689,38 @@ function exportPNG() {
   };
   img.src=url;
 }
-function exportCrawlCSV() { exportCSV(); }
+function sendToWaypoint() {
+  if (!crawlState.results.length) {
+    document.getElementById('export-msg').textContent = '⚠ Run a crawl first.';
+    return;
+  }
+  const ok = crawlState.results.filter(r => r.ok);
+  if (!ok.length) {
+    document.getElementById('export-msg').textContent = '⚠ No successful URLs to send.';
+    return;
+  }
+  // Encode URL list as a data: URI and open Waypoint with it as a query param
+  // Waypoint accepts a ?urls= param with newline-separated URLs
+  const urlList = ok.map(r => r.url).join('\n');
+  const encoded = encodeURIComponent(urlList);
+  // Open Waypoint — it will pick up ?oldurls= on load if supported,
+  // otherwise fall back to copying to clipboard with instructions
+  const waypointUrl = `https://elleiana.github.io/Waypoint/?oldurls=${encoded}`;
+  if (waypointUrl.length < 8000) {
+    window.open(waypointUrl, '_blank', 'noopener');
+  } else {
+    // URL list too large for query string — copy to clipboard instead
+    navigator.clipboard.writeText(urlList).then(() => {
+      document.getElementById('export-msg').textContent =
+        `✓ ${ok.length} URLs copied to clipboard — paste into Waypoint's Mapper (existing site URLs).`;
+    }).catch(() => {
+      document.getElementById('export-msg').textContent =
+        `⚠ URL list too large to open directly. Export as CSV and import into Waypoint instead.`;
+    });
+  }
+}
+
+
 
 function dl(name, content, type) {
   const a=document.createElement('a');
@@ -1476,6 +1772,11 @@ function showModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.addEventListener('keydown', e => {
   if (e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+});
+
+/* ── On load: restore last session ── */
+document.addEventListener('DOMContentLoaded', () => {
+  loadSession();
 });
 </script>
 </body>
