@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,183 +7,452 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  --bg:        #0e0e0e;
-  --surface:   #161616;
-  --surface2:  #1c1c1c;
-  --surface3:  #222222;
-  --border:    #2a2a2a;
-  --border2:   #333333;
-  --text:      #d4d4d4;
-  --text-dim:  #777777;
-  --text-faint:#444444;
-  --accent:    #e0e0e0;
-  --active:    #ffffff;
-  --link:      #a8a8a8;
-  --good:      #5a9e6f;
-  --warn:      #b89a4e;
-  --bad:       #9e5a5a;
+/* ── Themes ── */
+[data-theme="dark"] {
+  --bg:         #0e0e0e;
+  --surface:    #161616;
+  --surface2:   #1c1c1c;
+  --surface3:   #222222;
+  --border:     #2a2a2a;
+  --border2:    #333333;
+  --text:       #d4d4d4;
+  --text-dim:   #777777;
+  --text-faint: #444444;
+  --accent:     #e0e0e0;
+  --active:     #ffffff;
+  --link:       #a8a8a8;
+  --good:       #5a9e6f;
+  --warn:       #b89a4e;
+  --bad:        #9e5a5a;
+  --dot-grid:   #1e1e1e;
+  --node-fill:  #1a1a1a;
+  --node-stroke:#3a3a3a;
+  --node-root-fill:   #232323;
+  --node-root-stroke: #666666;
+  --node-sec-fill:    #1c1c1c;
+  --node-sec-stroke:  #444444;
+  --node-leaf-fill:   #161616;
+  --node-leaf-stroke: #303030;
+  --edge-color: #2e2e2e;
+  --edge-root:  #404040;
+  --node-text:  #c8c8c8;
+  --node-text-dim: #666666;
+}
+[data-theme="light"] {
+  --bg:         #f5f5f5;
+  --surface:    #ffffff;
+  --surface2:   #f0f0f0;
+  --surface3:   #e8e8e8;
+  --border:     #e0e0e0;
+  --border2:    #d0d0d0;
+  --text:       #2a2a2a;
+  --text-dim:   #777777;
+  --text-faint: #aaaaaa;
+  --accent:     #1a1a1a;
+  --active:     #000000;
+  --link:       #555555;
+  --good:       #3a7a52;
+  --warn:       #8a6e28;
+  --bad:        #7a3a3a;
+  --dot-grid:   #e0e0e0;
+  --node-fill:  #ffffff;
+  --node-stroke:#bbbbbb;
+  --node-root-fill:   #f8f8f8;
+  --node-root-stroke: #888888;
+  --node-sec-fill:    #ffffff;
+  --node-sec-stroke:  #cccccc;
+  --node-leaf-fill:   #fafafa;
+  --node-leaf-stroke: #dddddd;
+  --edge-color: #cccccc;
+  --edge-root:  #aaaaaa;
+  --node-text:  #2a2a2a;
+  --node-text-dim: #888888;
 }
 
-html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Courier New', Courier, monospace; font-size: 13px; line-height: 1.5; overflow: hidden; }
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow: hidden;
+  transition: background 0.2s, color 0.2s;
+}
 
 a { color: var(--link); text-decoration: none; }
 a:hover { color: var(--active); text-decoration: underline; }
 
-button { font-family: inherit; font-size: 12px; cursor: pointer; border: 1px solid var(--border2); background: var(--surface2); color: var(--text); padding: 4px 10px; border-radius: 2px; transition: background 0.1s, border-color 0.1s, color 0.1s; white-space: nowrap; }
-button:hover { background: var(--surface3); border-color: #4a4a4a; color: var(--active); }
-button.primary { background: var(--surface3); border-color: #555; color: var(--active); }
-button.primary:hover { background: #2a2a2a; border-color: #666; }
+button {
+  font-family: inherit; font-size: 12px; cursor: pointer;
+  border: 1px solid var(--border2); background: var(--surface2);
+  color: var(--text); padding: 4px 10px; border-radius: 2px;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+  white-space: nowrap;
+}
+button:hover { background: var(--surface3); border-color: var(--text-dim); color: var(--active); }
+button.primary { background: var(--surface3); border-color: var(--text-dim); color: var(--active); }
+button.primary:hover { border-color: var(--text); }
 button:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 
-input[type="text"], input[type="url"], input[type="number"], select, textarea {
-  font-family: inherit; font-size: 12px; background: var(--surface); border: 1px solid var(--border2); color: var(--text); padding: 5px 8px; border-radius: 2px; outline: none; transition: border-color 0.15s;
+input[type="text"], input[type="url"], input[type="number"], textarea {
+  font-family: inherit; font-size: 12px; background: var(--surface);
+  border: 1px solid var(--border2); color: var(--text);
+  padding: 5px 8px; border-radius: 2px; outline: none;
+  transition: border-color 0.15s, background 0.2s, color 0.2s;
 }
-input:focus, select:focus, textarea:focus { border-color: #555; color: var(--active); }
+input:focus, textarea:focus { border-color: var(--text-dim); color: var(--active); }
 input::placeholder, textarea::placeholder { color: var(--text-faint); }
-
-label { color: var(--text-dim); font-size: 11px; letter-spacing: 0.04em; }
 
 /* ── Layout ── */
 #app { display: flex; flex-direction: column; height: 100vh; }
 
 /* ── Header ── */
-header { display: flex; align-items: center; padding: 0 16px; height: 42px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); gap: 0; }
+header {
+  display: flex; align-items: center;
+  padding: 0 16px; height: 42px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0; background: var(--surface); gap: 0;
+  transition: background 0.2s, border-color 0.2s;
+}
 
-.logo-wrap { display: flex; align-items: baseline; gap: 8px; margin-right: 24px; cursor: pointer; }
+.logo-wrap {
+  display: flex; align-items: baseline; gap: 8px;
+  margin-right: 24px; cursor: pointer;
+}
 .logo-wrap:hover .logo-name { color: var(--active); }
 .logo-name { font-size: 15px; font-weight: bold; letter-spacing: 0.04em; color: var(--accent); transition: color 0.1s; }
 .logo-tagline { font-size: 11px; color: var(--text-faint); letter-spacing: 0.05em; }
 
-nav { display: flex; gap: 0; flex: 1; }
+nav { display: flex; gap: 0; }
 
-.nav-tab { padding: 0 16px; height: 42px; display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-dim); cursor: pointer; border-right: 1px solid transparent; border-left: 1px solid transparent; border-bottom: 2px solid transparent; border-top: none; border-radius: 0; transition: color 0.1s; user-select: none; letter-spacing: 0.02em; background: none; }
+.nav-tab {
+  padding: 0 16px; height: 42px;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text-dim); cursor: pointer;
+  border-left: 1px solid transparent; border-right: 1px solid transparent;
+  border-bottom: 2px solid transparent; border-top: none; border-radius: 0;
+  background: none; transition: color 0.1s; user-select: none; letter-spacing: 0.02em;
+}
 .nav-tab:hover { color: var(--text); background: none; border-color: transparent; border-bottom-color: transparent; }
-.nav-tab.active { color: var(--active); border-left-color: var(--border); border-right-color: var(--border); border-bottom-color: var(--bg); background: var(--bg); }
-.tab-emoji { font-size: 14px; }
+.nav-tab.active {
+  color: var(--active);
+  border-left-color: var(--border); border-right-color: var(--border);
+  border-bottom-color: var(--bg); background: var(--bg);
+}
 
 .header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+/* Theme toggle — matches Waypoint's 🌙 style */
+.theme-toggle {
+  background: none; border: none; padding: 4px 6px;
+  font-size: 15px; cursor: pointer; color: var(--text-dim);
+  border-radius: 2px; line-height: 1;
+}
+.theme-toggle:hover { background: var(--surface2); color: var(--active); border-color: transparent; }
 
 /* ── Tab panels ── */
 .tab-content { display: none; flex: 1; overflow: hidden; }
 .tab-content.active { display: flex; }
 
-/* ══ Crawler tab ══ */
+/* ══════════════════════════════════════════
+   CRAWLER TAB — mirrors Waypoint Spider
+══════════════════════════════════════════ */
 #tab-crawl { flex-direction: column; }
 
-.crawl-top { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-end; gap: 12px; flex-shrink: 0; flex-wrap: wrap; background: var(--bg); }
-.field-group { display: flex; flex-direction: column; gap: 4px; }
-.crawl-top input[type="url"] { width: 360px; }
+/* Top section with URL + controls — matches Spider's "Crawl settings" block */
+.crawl-settings {
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s;
+}
+.crawl-settings-title {
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-faint); margin-bottom: 8px;
+}
+.crawl-settings-sub {
+  font-size: 11px; color: var(--text-dim); margin-bottom: 10px;
+}
+.crawl-input-row {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.crawl-input-row input[type="url"] { width: 320px; }
+.crawl-input-row .crawl-label { font-size: 11px; color: var(--text-dim); margin-right: 4px; }
 
-.workbench-bar { padding: 0 20px; flex-shrink: 0; border-bottom: 1px solid var(--border); background: var(--bg); }
-.workbench-toggle { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-dim); cursor: pointer; user-select: none; border: none; background: none; padding: 7px 0; border-radius: 0; }
-.workbench-toggle:hover { color: var(--text); background: none; border-color: transparent; }
-.workbench-toggle .arrow { display: inline-block; transition: transform 0.15s; font-size: 9px; }
-.workbench-toggle.open .arrow { transform: rotate(90deg); }
+/* Snail loading indicator */
+.snail-wrap {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text-dim);
+  min-width: 60px;
+}
+.snail {
+  display: inline-block;
+  font-size: 16px;
+  line-height: 1;
+  animation: none;
+}
+.snail.crawling { animation: snail-walk 2.4s ease-in-out infinite; }
 
-.workbench-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; padding: 14px; margin: 0 0 10px; display: none; gap: 24px; flex-wrap: wrap; }
-.workbench-panel.open { display: flex; }
-.wb-group { display: flex; flex-direction: column; gap: 6px; }
-.wb-title { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 2px; }
-.filter-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text-dim); cursor: pointer; }
-.filter-item input[type="checkbox"] { cursor: pointer; accent-color: #888; }
+@keyframes snail-walk {
+  0%   { transform: translateX(0)    scaleX(1);  }
+  40%  { transform: translateX(14px) scaleX(1);  }
+  50%  { transform: translateX(14px) scaleX(-1); }
+  90%  { transform: translateX(0)    scaleX(-1); }
+  100% { transform: translateX(0)    scaleX(1);  }
+}
+
+/* Stats row — exactly like Spider's "0 discovered / 0 ok / 0 errors / 0 blocked" */
+.crawl-stats-bar {
+  display: flex; align-items: center; gap: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s;
+}
+.stat-cell {
+  padding: 6px 18px; border-right: 1px solid var(--border);
+  font-size: 11px; color: var(--text-dim);
+  transition: border-color 0.2s;
+}
+.stat-cell:last-child { border-right: none; }
+.stat-cell strong { color: var(--text); }
+.stat-cell strong.good { color: var(--good); }
+.stat-cell strong.bad  { color: var(--bad); }
+.stat-cell strong.warn { color: var(--warn); }
+
+/* Workbench — collapsible, matches Waypoint exactly */
+.workbench-row {
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface);
+  transition: background 0.2s, border-color 0.2s;
+}
+.workbench-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 20px; cursor: pointer; user-select: none;
+}
+.workbench-header-left { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-dim); }
+.workbench-header-left:hover { color: var(--text); }
+.wb-arrow { font-size: 10px; transition: transform 0.15s; display: inline-block; }
+.workbench-row.open .wb-arrow { transform: rotate(90deg); }
+.workbench-header-right { font-size: 11px; color: var(--text-faint); }
+
+.workbench-body {
+  display: none; padding: 12px 20px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  transition: background 0.2s;
+}
+.workbench-row.open .workbench-body { display: flex; gap: 32px; flex-wrap: wrap; }
+
+.wb-section { display: flex; flex-direction: column; gap: 6px; min-width: 160px; }
+.wb-section-title {
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-faint); margin-bottom: 4px;
+}
+.wb-desc { font-size: 10px; color: var(--text-faint); line-height: 1.5; margin-bottom: 4px; }
+
+.filter-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 11px; color: var(--text-dim); cursor: pointer; line-height: 1.4;
+}
+.filter-item input[type="checkbox"] { cursor: pointer; accent-color: var(--text-dim); margin-top: 2px; flex-shrink: 0; }
 .filter-item:hover { color: var(--text); }
+.filter-hint { font-size: 10px; color: var(--text-faint); }
 
-.crawl-status-bar { padding: 6px 20px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; gap: 20px; font-size: 11px; color: var(--text-dim); flex-shrink: 0; }
-.crawl-status-bar strong { color: var(--text); }
-.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint); display: inline-block; margin-right: 5px; vertical-align: middle; }
-.status-dot.running { background: var(--good); animation: pulse 1.2s infinite; }
-.status-dot.done    { background: var(--good); }
-.status-dot.error   { background: var(--bad); }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+/* Results area — split: list on the right, actions on right of toolbar */
+.crawl-body { display: flex; flex: 1; overflow: hidden; flex-direction: column; }
 
-.crawl-body { display: flex; flex: 1; overflow: hidden; }
-
-.crawl-results { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-.results-toolbar { padding: 7px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-size: 11px; flex-shrink: 0; background: var(--surface); }
+.results-toolbar {
+  padding: 7px 14px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; flex-shrink: 0;
+  background: var(--surface);
+  transition: background 0.2s, border-color 0.2s;
+}
 .pill-group { display: flex; gap: 0; }
-.pill { padding: 3px 10px; border: 1px solid var(--border2); font-size: 11px; color: var(--text-dim); cursor: pointer; background: none; border-radius: 0; transition: all 0.1s; }
+.pill {
+  padding: 3px 10px; border: 1px solid var(--border2);
+  font-size: 11px; color: var(--text-dim); cursor: pointer;
+  background: none; border-radius: 0; transition: all 0.1s;
+}
 .pill:first-child { border-radius: 2px 0 0 2px; }
 .pill:last-child  { border-radius: 0 2px 2px 0; }
 .pill + .pill { border-left: none; }
 .pill:hover  { color: var(--text); background: var(--surface2); }
-.pill.active { background: var(--surface3); color: var(--active); border-color: #555; }
+.pill.active { background: var(--surface3); color: var(--active); border-color: var(--text-dim); }
 
 .results-list { flex: 1; overflow-y: auto; font-size: 11px; }
 .results-list::-webkit-scrollbar { width: 6px; }
 .results-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
-.result-item { display: flex; align-items: center; gap: 10px; padding: 5px 14px; border-bottom: 1px solid var(--border); transition: background 0.05s; }
+.result-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 5px 14px; border-bottom: 1px solid var(--border);
+  transition: background 0.05s;
+}
 .result-item:hover { background: var(--surface); }
 .url-text { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.status-badge { font-size: 10px; padding: 1px 6px; border-radius: 2px; flex-shrink: 0; }
-.badge-ok    { background: rgba(90,158,111,0.15); color: var(--good); border: 1px solid rgba(90,158,111,0.3); }
-.badge-err   { background: rgba(158,90,90,0.15);  color: var(--bad);  border: 1px solid rgba(158,90,90,0.3); }
-.badge-block { background: rgba(184,154,78,0.12); color: var(--warn); border: 1px solid rgba(184,154,78,0.25); }
+.depth-tag { font-size: 10px; color: var(--text-faint); flex-shrink: 0; }
+.section-tag { font-size: 10px; color: var(--text-faint); flex-shrink: 0; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 10px; color: var(--text-faint); font-size: 12px; text-align: center; }
-.empty-icon { font-size: 30px; opacity: 0.4; }
+.status-badge { font-size: 10px; padding: 1px 6px; border-radius: 2px; flex-shrink: 0; }
+.badge-ok    { background: rgba(90,158,111,0.12); color: var(--good); border: 1px solid rgba(90,158,111,0.25); }
+.badge-err   { background: rgba(158,90,90,0.12);  color: var(--bad);  border: 1px solid rgba(158,90,90,0.25); }
+.badge-block { background: rgba(184,154,78,0.10); color: var(--warn); border: 1px solid rgba(184,154,78,0.22); }
+
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 100%; gap: 10px;
+  color: var(--text-faint); font-size: 12px; text-align: center;
+}
+.empty-icon { font-size: 28px; opacity: 0.45; }
 .empty-state strong { color: var(--text-dim); }
 
-/* ══ Diagram tab ══ */
+/* ══════════════════════════════════════════
+   DIAGRAM TAB
+══════════════════════════════════════════ */
 #tab-diagram { position: relative; }
 
-#diagram-canvas-wrap { flex: 1; overflow: hidden; position: relative; cursor: grab; background: var(--bg); background-image: radial-gradient(circle, #1e1e1e 1px, transparent 1px); background-size: 24px 24px; }
+#diagram-canvas-wrap {
+  flex: 1; overflow: hidden; position: relative; cursor: grab;
+  background: var(--bg);
+  background-image: radial-gradient(circle, var(--dot-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  transition: background 0.2s;
+}
 #diagram-canvas-wrap:active { cursor: grabbing; }
-
 svg#diagram { width: 100%; height: 100%; overflow: visible; }
 
-.diagram-toolbar { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 1px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 3px; padding: 3px; z-index: 10; }
+/* Diagram node boxes */
+.dnode { cursor: pointer; }
+.dnode rect {
+  fill: var(--node-fill); stroke: var(--node-stroke); stroke-width: 1;
+  rx: 2; ry: 2; transition: filter 0.1s;
+}
+.dnode.root rect   { fill: var(--node-root-fill); stroke: var(--node-root-stroke); stroke-width: 1.5; }
+.dnode.section rect { fill: var(--node-sec-fill);  stroke: var(--node-sec-stroke);  stroke-width: 1; }
+.dnode.leaf rect   { fill: var(--node-leaf-fill); stroke: var(--node-leaf-stroke); stroke-width: 1; }
+.dnode:hover rect  { filter: brightness(1.25); }
+.dnode.selected rect { stroke: var(--text) !important; stroke-width: 2 !important; }
+
+.dnode text {
+  font-family: 'Courier New', monospace;
+  fill: var(--node-text);
+  pointer-events: none; user-select: none;
+  text-anchor: middle;
+}
+.dnode text.nl-slug { font-size: 10px; font-weight: bold; fill: var(--node-text); }
+.dnode text.nl-root { font-size: 11px; font-weight: bold; fill: var(--active); }
+.dnode text.nl-sub  { font-size: 9px; fill: var(--node-text-dim); }
+
+/* Straight orthogonal connectors */
+.dedge { stroke: var(--edge-color); stroke-width: 1; fill: none; }
+.dedge.root-edge { stroke: var(--edge-root); stroke-width: 1.5; }
+
+.diagram-toolbar {
+  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 1px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 3px; padding: 3px; z-index: 10;
+  transition: background 0.2s;
+}
 .diagram-toolbar button { border: none; background: none; padding: 4px 10px; font-size: 13px; color: var(--text-dim); border-radius: 2px; }
 .diagram-toolbar button:hover { background: var(--surface3); color: var(--active); border-color: transparent; }
-.dt-divider { width: 1px; background: var(--border2); height: 18px; margin: 0 2px; }
+.dt-div { width: 1px; background: var(--border2); height: 18px; margin: 0 2px; }
 
-.diagram-info-panel { position: absolute; top: 14px; right: 14px; width: 210px; background: var(--surface); border: 1px solid var(--border2); border-radius: 2px; z-index: 10; font-size: 11px; }
-.dip-header { padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.dip-header .dip-label { color: var(--text-dim); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.diagram-info-panel {
+  position: absolute; top: 14px; right: 14px; width: 210px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 2px; z-index: 10; font-size: 11px;
+  transition: background 0.2s;
+}
+.dip-header {
+  padding: 8px 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  transition: border-color 0.2s;
+}
+.dip-label { color: var(--text-dim); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
 .dip-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 5px; }
 .info-row { display: flex; justify-content: space-between; }
-.info-row .il { color: var(--text-dim); }
-.info-row .iv { color: var(--text); }
-.info-row .iv.good { color: var(--good); }
+.il { color: var(--text-dim); }
+.iv { color: var(--text); }
+.iv.good { color: var(--good); }
 
-.diagram-legend { position: absolute; top: 14px; left: 14px; background: var(--surface); border: 1px solid var(--border2); border-radius: 2px; padding: 8px 12px; font-size: 10px; z-index: 10; display: flex; flex-direction: column; gap: 5px; color: var(--text-dim); }
-.legend-item { display: flex; align-items: center; gap: 7px; }
-.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.diagram-legend {
+  position: absolute; top: 14px; left: 14px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 2px; padding: 8px 12px;
+  font-size: 10px; z-index: 10;
+  display: flex; flex-direction: column; gap: 5px;
+  color: var(--text-dim); transition: background 0.2s;
+}
+.legend-item { display: flex; align-items: center; gap: 8px; }
+.legend-box {
+  width: 28px; height: 14px; border-radius: 1px; flex-shrink: 0;
+  border: 1px solid;
+}
 
-/* SVG */
-.node-root-circle    { fill: #2a2a2a; stroke: #666; stroke-width: 2; }
-.node-section-circle { fill: #1e1e1e; stroke: #444; stroke-width: 1.5; }
-.node-page-circle    { fill: #181818; stroke: #2e2e2e; stroke-width: 1; }
-.node text { font-family: 'Courier New', monospace; fill: var(--text); font-size: 10px; text-anchor: middle; pointer-events: none; user-select: none; }
-.node text.nlr { font-size: 11px; fill: var(--active); font-weight: bold; }
-.node text.nls { font-size: 10px; fill: var(--text); }
-.node text.nlp { font-size: 9px; fill: var(--text-dim); }
-.node text.nlsub { font-size: 8px; fill: var(--text-faint); }
-.edge { stroke: #2e2e2e; stroke-width: 1; fill: none; }
-.edge.l1 { stroke-width: 1.5; stroke: #383838; }
-.node circle { cursor: pointer; transition: filter 0.1s; }
-.node:hover circle { filter: brightness(1.6); }
-.node.selected circle { stroke: #999 !important; stroke-width: 2.5 !important; }
-
-/* ══ Export tab ══ */
+/* ══════════════════════════════════════════
+   EXPORT TAB
+══════════════════════════════════════════ */
 #tab-export { flex-direction: column; }
-.export-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; max-width: 600px; overflow-y: auto; }
-.export-section-title { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 10px; }
+.export-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; max-width: 580px; overflow-y: auto; }
+.export-section-title {
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-faint); border-bottom: 1px solid var(--border);
+  padding-bottom: 6px; margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
 .export-option-grid { display: flex; gap: 8px; flex-wrap: wrap; }
-.export-card { border: 1px solid var(--border2); border-radius: 2px; padding: 10px 14px; cursor: pointer; transition: border-color 0.1s, background 0.1s; background: var(--surface); min-width: 130px; }
-.export-card:hover { border-color: #444; background: var(--surface2); }
-.export-card.selected { border-color: #666; background: var(--surface2); }
-.export-card .card-label { color: var(--text); font-size: 12px; margin-bottom: 3px; }
-.export-card .card-desc  { color: var(--text-faint); font-size: 10px; line-height: 1.4; }
+.export-card {
+  border: 1px solid var(--border2); border-radius: 2px;
+  padding: 10px 14px; cursor: pointer;
+  transition: border-color 0.1s, background 0.1s;
+  background: var(--surface); min-width: 130px;
+}
+.export-card:hover { border-color: var(--text-dim); background: var(--surface2); }
+.export-card.selected { border-color: var(--text-dim); background: var(--surface2); }
+.card-label { color: var(--text); font-size: 12px; margin-bottom: 3px; }
+.card-desc  { color: var(--text-faint); font-size: 10px; line-height: 1.4; }
 
-/* ══ Modals ══ */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.15s; }
+/* ══════════════════════════════════════════
+   HOME SCREEN
+══════════════════════════════════════════ */
+#home-screen {
+  position: fixed; inset: 0; background: var(--bg); z-index: 500;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 28px; transition: opacity 0.2s, background 0.2s;
+}
+#home-screen.gone { opacity: 0; pointer-events: none; }
+.home-logo-name    { font-size: 26px; font-weight: bold; letter-spacing: 0.06em; color: var(--accent); }
+.home-logo-tagline { font-size: 12px; color: var(--text-faint); letter-spacing: 0.1em; margin-top: 6px; }
+.home-desc { font-size: 12px; color: var(--text-dim); text-align: center; max-width: 380px; line-height: 1.7; }
+
+/* ══════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+  z-index: 1000; display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+}
 .modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 3px; width: 460px; max-width: 94vw; max-height: 80vh; display: flex; flex-direction: column; transform: translateY(8px); transition: transform 0.15s; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 3px; width: 460px; max-width: 94vw; max-height: 80vh;
+  display: flex; flex-direction: column;
+  transform: translateY(8px); transition: transform 0.15s, background 0.2s;
+}
 .modal-overlay.open .modal { transform: translateY(0); }
-.modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.modal-header {
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  transition: border-color 0.2s;
+}
 .modal-title { color: var(--active); font-size: 13px; }
 .modal-close { background: none; border: none; color: var(--text-dim); font-size: 16px; padding: 0 4px; line-height: 1; }
 .modal-close:hover { color: var(--active); background: none; border-color: transparent; }
@@ -191,42 +460,42 @@ svg#diagram { width: 100%; height: 100%; overflow: visible; }
 .modal-body p { margin-bottom: 10px; }
 .modal-body p:last-child { margin-bottom: 0; }
 .modal-body strong { color: var(--active); }
-.modal-section-title { color: var(--text-dim); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; margin-top: 14px; }
+.modal-st { color: var(--text-dim); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin: 14px 0 6px; }
+.modal-st:first-child { margin-top: 0; }
 
-/* ══ Home screen ══ */
-#home-screen { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; transition: opacity 0.2s; }
-#home-screen.gone { opacity: 0; pointer-events: none; }
-.home-logo-name    { font-size: 28px; font-weight: bold; letter-spacing: 0.06em; color: var(--accent); text-align: center; }
-.home-logo-tagline { font-size: 12px; color: var(--text-faint); letter-spacing: 0.1em; margin-top: 6px; text-align: center; }
-.home-desc { font-size: 12px; color: var(--text-dim); text-align: center; max-width: 380px; line-height: 1.7; }
-
-/* ══ Footer ══ */
-footer { border-top: 1px solid var(--border); padding: 6px 16px; display: flex; align-items: center; gap: 12px; font-size: 11px; color: var(--text-faint); flex-shrink: 0; background: var(--surface); }
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border); padding: 6px 16px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 11px; color: var(--text-faint);
+  flex-shrink: 0; background: var(--surface);
+  transition: background 0.2s, border-color 0.2s;
+}
 footer a { color: var(--text-faint); }
 footer a:hover { color: var(--text); }
 .fsep { color: var(--text-faint); }
 
-/* ══ Scrollbars ══ */
+/* ── Misc ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
 .hidden { display: none !important; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 </style>
 </head>
 <body>
 
-<!-- Home screen -->
+<!-- ── Home screen ── -->
 <div id="home-screen">
-  <div>
+  <div style="text-align:center">
     <div class="home-logo-name">🌿 Canopy</div>
     <div class="home-logo-tagline">// sitemap toolkit</div>
   </div>
   <p class="home-desc">Crawl a live site, map its page structure, and export a visual sitemap — for internal planning or sharing with clients.</p>
-  <button class="primary" style="padding:8px 24px;font-size:13px;border-color:#555" onclick="startSession()">+ new sitemap</button>
+  <button class="primary" style="padding:8px 24px;font-size:13px" onclick="startSession()">+ new sitemap</button>
 </div>
 
-<!-- App -->
+<!-- ── App ── -->
 <div id="app">
 
   <header>
@@ -235,93 +504,110 @@ footer a:hover { color: var(--text); }
       <span class="logo-tagline">// sitemap toolkit</span>
     </div>
     <nav>
-      <button class="nav-tab active" data-tab="crawl"   onclick="switchTab('crawl')">  <span class="tab-emoji">🕷️</span> Crawler</button>
-      <button class="nav-tab"        data-tab="diagram" onclick="switchTab('diagram')"><span class="tab-emoji">🌳</span> Diagram</button>
-      <button class="nav-tab"        data-tab="export"  onclick="switchTab('export')"> <span class="tab-emoji">🍂</span> Export</button>
+      <button class="nav-tab active" data-tab="crawl"   onclick="switchTab('crawl')">🕷️ Crawler</button>
+      <button class="nav-tab"        data-tab="diagram" onclick="switchTab('diagram')">🌳 Diagram</button>
+      <button class="nav-tab"        data-tab="export"  onclick="switchTab('export')">🍂 Export</button>
     </nav>
     <div class="header-right">
-      <button onclick="showModal('m-about')">?</button>
+      <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
+      <button onclick="showModal('m-about')" style="font-size:11px">?</button>
     </div>
   </header>
 
-  <!-- ═══ Crawler ═══ -->
+  <!-- ═══════════════ CRAWLER ═══════════════ -->
   <div id="tab-crawl" class="tab-content active">
 
-    <div class="crawl-top">
-      <div class="field-group">
-        <label>Start URL</label>
-        <input type="url" id="start-url" placeholder="https://example.com" style="width:340px">
+    <!-- Settings block -->
+    <div class="crawl-settings">
+      <div class="crawl-settings-title">Crawl settings</div>
+      <div class="crawl-settings-sub">Enter a URL to crawl all reachable internal pages and map the site structure.</div>
+      <div class="crawl-input-row">
+        <span class="crawl-label">Start URL</span>
+        <input type="url" id="start-url" placeholder="https://example.com">
+        <button class="primary" id="btn-crawl" onclick="startCrawl()">Crawl site</button>
+        <button id="btn-stop" disabled onclick="stopCrawl()">Stop</button>
+        <div class="snail-wrap">
+          <span class="snail" id="snail">🐌</span>
+        </div>
       </div>
-      <button class="primary" id="btn-crawl" onclick="startCrawl()">🌱 Crawl site</button>
-      <button id="btn-stop" disabled onclick="stopCrawl()">◼ Stop</button>
+    </div>
+
+    <!-- Stats bar — mirrors Spider's stat cells -->
+    <div class="crawl-stats-bar">
+      <div class="stat-cell"><strong id="ct-d">0</strong> discovered</div>
+      <div class="stat-cell"><strong id="ct-ok" class="good">0</strong> ok</div>
+      <div class="stat-cell"><strong id="ct-e"  class="bad">0</strong> errors</div>
+      <div class="stat-cell"><strong id="ct-b"  class="warn">0</strong> blocked</div>
+      <div class="stat-cell" style="margin-left:auto;border-left:1px solid var(--border);border-right:none;display:flex;gap:8px">
+        <button id="btn-to-diagram" disabled onclick="sendToDiagram()">→ build diagram</button>
+        <button id="btn-csv"        disabled onclick="exportCrawlCSV()">↓ export CSV</button>
+      </div>
     </div>
 
     <!-- Workbench -->
-    <div class="workbench-bar">
-      <button class="workbench-toggle" id="wb-btn" onclick="toggleWb()">
-        <span class="arrow">▶</span>&nbsp; Workbench
-      </button>
-      <div class="workbench-panel" id="wb-panel">
-        <div class="wb-group">
-          <div class="wb-title">Concurrency</div>
+    <div class="workbench-row" id="wb-row">
+      <div class="workbench-header" onclick="toggleWb()">
+        <div class="workbench-header-left">
+          <span class="wb-arrow">▶</span>
+          <span>Workbench</span>
+          <span style="color:var(--text-faint);font-size:11px">Advanced crawl options — filter out URLs you don't need before the crawl starts.</span>
+        </div>
+        <span class="workbench-header-right" id="wb-excluded"></span>
+      </div>
+      <div class="workbench-body">
+
+        <div class="wb-section">
+          <div class="wb-section-title">Concurrency</div>
+          <div class="wb-desc">How many pages to fetch simultaneously. Higher values crawl faster but may trigger rate limiting. 3 is a safe default.</div>
           <div style="display:flex;align-items:center;gap:8px">
-            <input type="number" id="concurrency" value="3" min="1" max="10" style="width:55px">
+            <input type="number" id="concurrency" value="3" min="1" max="10" style="width:52px">
             <span style="font-size:10px;color:var(--text-faint)">1 = careful &nbsp;·&nbsp; 5 = fast &nbsp;·&nbsp; 10 = aggressive</span>
           </div>
         </div>
-        <div class="wb-group">
-          <div class="wb-title">Exclude from crawl</div>
-          <label class="filter-item"><input type="checkbox" id="f-pagination" checked> Pagination (?page=, /page/)</label>
-          <label class="filter-item"><input type="checkbox" id="f-media"      checked> Media &amp; files (.png, .jpg, .pdf…)</label>
-          <label class="filter-item"><input type="checkbox" id="f-dev"        checked> Dev &amp; system (wp-admin, .css, .js…)</label>
-          <label class="filter-item"><input type="checkbox" id="f-query"             > All query strings</label>
-          <label class="filter-item"><input type="checkbox" id="f-hash"              > Hash / anchor links</label>
+
+        <div class="wb-section">
+          <div class="wb-section-title">Exclude from crawl</div>
+          <div class="wb-desc">Tick anything you don't want in your results.</div>
+          <label class="filter-item"><input type="checkbox" id="f-pagination" checked><span>Pagination <span class="filter-hint">?page=, /page/, /p/</span></span></label>
+          <label class="filter-item"><input type="checkbox" id="f-media"      checked><span>Media &amp; files <span class="filter-hint">.png, .jpg, .gif, .svg, .ico, .pdf, .zip, .mp4</span></span></label>
+          <label class="filter-item"><input type="checkbox" id="f-dev"        checked><span>Dev &amp; system URLs <span class="filter-hint">wp-admin, wp-json, .css, .js, .woff, /feed</span></span></label>
+          <label class="filter-item"><input type="checkbox" id="f-query"             ><span>All query strings <span class="filter-hint">any URL containing ?</span></span></label>
+          <label class="filter-item"><input type="checkbox" id="f-hash"              ><span>Hash / anchor links <span class="filter-hint">URLs containing #</span></span></label>
         </div>
-        <div class="wb-group">
-          <div class="wb-title">Custom exclude patterns</div>
-          <textarea id="custom-patterns" placeholder="one pattern per line" rows="4" style="width:190px;resize:vertical;font-size:11px"></textarea>
+
+        <div class="wb-section">
+          <div class="wb-section-title">Custom patterns</div>
+          <div class="wb-desc">One per line — any URL containing the pattern will be skipped.</div>
+          <textarea id="custom-patterns" placeholder="e.g. /archive/" rows="5" style="width:180px;resize:vertical;font-size:11px"></textarea>
         </div>
+
       </div>
     </div>
 
-    <!-- Status bar -->
-    <div class="crawl-status-bar">
-      <span><span class="status-dot" id="sdot"></span><span id="stext">ready</span></span>
-      <span>🌱 discovered: <strong id="ct-d">0</strong></span>
-      <span>✅ ok: <strong id="ct-ok" style="color:var(--good)">0</strong></span>
-      <span>❌ errors: <strong id="ct-e" style="color:var(--bad)">0</strong></span>
-      <span>🚧 blocked: <strong id="ct-b" style="color:var(--warn)">0</strong></span>
-    </div>
-
+    <!-- Results -->
     <div class="crawl-body">
-      <div class="crawl-results">
-
-        <div class="results-toolbar">
-          <div class="pill-group">
-            <button class="pill active" onclick="setFilter('all',this)">all</button>
-            <button class="pill"        onclick="setFilter('ok',this)">ok</button>
-            <button class="pill"        onclick="setFilter('error',this)">errors</button>
-            <button class="pill"        onclick="setFilter('blocked',this)">blocked</button>
-          </div>
-          <span id="url-count" style="font-size:11px;color:var(--text-faint);margin-left:4px">0 URLs</span>
-          <div style="margin-left:auto;display:flex;gap:8px">
-            <button id="btn-diagram" disabled onclick="sendToDiagram()">→ build diagram</button>
-            <button id="btn-csv"     disabled onclick="exportCrawlCSV()">↓ export CSV</button>
-          </div>
+      <div class="results-toolbar">
+        <div class="pill-group">
+          <button class="pill active" onclick="setFilter('all',this)">all</button>
+          <button class="pill"        onclick="setFilter('ok',this)">ok</button>
+          <button class="pill"        onclick="setFilter('error',this)">errors</button>
+          <button class="pill"        onclick="setFilter('blocked',this)">blocked</button>
         </div>
+        <span id="url-count" style="color:var(--text-faint);font-size:11px;margin-left:4px">0 URLs</span>
+        <span id="status-text" style="color:var(--text-dim);font-size:11px;margin-left:8px"></span>
+      </div>
 
-        <div class="results-list" id="rlist">
-          <div class="empty-state" id="empty-crawl">
-            <div class="empty-icon">🕸️</div>
-            <div>No crawl yet — enter a URL above and click <strong>Crawl site</strong></div>
-          </div>
+      <div class="results-list" id="rlist">
+        <div class="empty-state" id="empty-crawl">
+          <div class="empty-icon">🌱</div>
+          <div>No crawl yet — enter a URL above and click <strong>Crawl site</strong></div>
         </div>
-
       </div>
     </div>
-  </div>
 
-  <!-- ═══ Diagram ═══ -->
+  </div><!-- /crawl -->
+
+  <!-- ═══════════════ DIAGRAM ═══════════════ -->
   <div id="tab-diagram" class="tab-content">
     <div id="diagram-canvas-wrap">
       <svg id="diagram">
@@ -331,15 +617,24 @@ footer a:hover { color: var(--text); }
         </g>
       </svg>
       <div class="empty-state" id="empty-diagram" style="position:absolute;inset:0">
-        <div class="empty-icon">🌳</div>
+        <div class="empty-icon">🌿</div>
         <div>No diagram yet — run a crawl then click <strong>→ build diagram</strong></div>
       </div>
     </div>
 
     <div class="diagram-legend" id="dlegend" style="display:none">
-      <div class="legend-item"><div class="legend-dot" style="background:#2a2a2a;border:2px solid #666"></div>root</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#1e1e1e;border:1.5px solid #444"></div>section</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#181818;border:1px solid #2e2e2e"></div>page</div>
+      <div class="legend-item">
+        <div class="legend-box" style="background:var(--node-root-fill);border-color:var(--node-root-stroke)"></div>
+        root
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background:var(--node-sec-fill);border-color:var(--node-sec-stroke)"></div>
+        section
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background:var(--node-leaf-fill);border-color:var(--node-leaf-stroke)"></div>
+        page
+      </div>
     </div>
 
     <div class="diagram-info-panel" id="dinfo" style="display:none">
@@ -356,30 +651,29 @@ footer a:hover { color: var(--text); }
     </div>
 
     <div class="diagram-toolbar" id="dtoolbar" style="display:none">
-      <button title="Zoom in"   onclick="zoom(1.2)">+</button>
-      <button title="Zoom out"  onclick="zoom(0.83)">−</button>
-      <button title="Fit view"  onclick="fit()">⊡</button>
-      <div class="dt-divider"></div>
-      <button title="Re-layout" onclick="buildDiagram()">↺</button>
-      <div class="dt-divider"></div>
+      <button onclick="dzoom(1.2)" title="Zoom in">+</button>
+      <button onclick="dzoom(0.83)" title="Zoom out">−</button>
+      <button onclick="dfit()" title="Fit to view">⊡</button>
+      <div class="dt-div"></div>
+      <button onclick="buildDiagram()" title="Re-layout">↺</button>
+      <div class="dt-div"></div>
       <button onclick="switchTab('export')">↓ export →</button>
     </div>
   </div>
 
-  <!-- ═══ Export ═══ -->
+  <!-- ═══════════════ EXPORT ═══════════════ -->
   <div id="tab-export" class="tab-content">
     <div class="export-body">
-
       <div>
         <div class="export-section-title">Format</div>
         <div class="export-option-grid">
           <div class="export-card selected" onclick="pickFmt(this,'png')">
             <div class="card-label">🖼️ PNG</div>
-            <div class="card-desc">Flat image — easy to share or drop into a document</div>
+            <div class="card-desc">Flat image — easy to share or drop into a doc</div>
           </div>
           <div class="export-card" onclick="pickFmt(this,'svg')">
             <div class="card-label">⬡ SVG</div>
-            <div class="card-desc">Vector — scalable, good for print or large diagrams</div>
+            <div class="card-desc">Vector — scalable, good for large diagrams</div>
           </div>
           <div class="export-card" onclick="pickFmt(this,'csv')">
             <div class="card-label">📋 CSV</div>
@@ -391,7 +685,6 @@ footer a:hover { color: var(--text); }
           </div>
         </div>
       </div>
-
       <div>
         <div class="export-section-title">Download</div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -400,12 +693,11 @@ footer a:hover { color: var(--text); }
         </div>
         <div id="export-msg" style="margin-top:8px;font-size:11px;color:var(--text-dim)"></div>
       </div>
-
     </div>
   </div>
 
   <footer>
-    <span>🌿 Canopy</span>
+    <span>🌿</span>
     <span class="fsep">//</span>
     <a href="#" onclick="showModal('m-about');return false">what is Canopy?</a>
     <span class="fsep">//</span>
@@ -414,7 +706,7 @@ footer a:hover { color: var(--text); }
 
 </div>
 
-<!-- Modals -->
+<!-- ── Modals ── -->
 <div class="modal-overlay" id="m-about" onclick="overlayClose(event,'m-about')">
   <div class="modal">
     <div class="modal-header">
@@ -424,12 +716,12 @@ footer a:hover { color: var(--text); }
     <div class="modal-body">
       <p><strong>Canopy is a sitemap toolkit.</strong></p>
       <p>It crawls a live website, maps the structure of every page it can reach, and generates a visual tree diagram — useful for understanding a site before a redesign, migration, or audit, and for sharing that structure with a client.</p>
-      <div class="modal-section-title">The workflow</div>
+      <div class="modal-st">The workflow</div>
       <p><strong>🕷️ Crawler</strong> — point it at any URL and Canopy walks all reachable internal pages. Use the Workbench to filter out what you don't need before you start. When done, hit <strong>→ build diagram</strong>.</p>
-      <p><strong>🌳 Diagram</strong> — an interactive tree of the site laid out by section and depth. Pan and zoom to explore. Root, section nodes, and leaf pages are sized distinctly.</p>
+      <p><strong>🌳 Diagram</strong> — an interactive tree laid out by section and depth. Nodes are rectangular boxes showing the URL slug. Pan and zoom to explore.</p>
       <p><strong>🍂 Export</strong> — download as PNG or SVG for presentations, CSV for spreadsheets, or JSON for developers.</p>
-      <div class="modal-section-title">A note on crawling</div>
-      <p>Browsers block cross-origin requests, so some sites will return CORS errors. Canopy marks these as <strong>blocked</strong> and continues. For full crawl coverage of external sites, a proxy is needed — this is planned as a future feature.</p>
+      <div class="modal-st">A note on crawling</div>
+      <p>Browsers block cross-origin requests (CORS), so some sites will show as blocked. Canopy marks these clearly and continues crawling what it can reach. Proxy support is planned for a future release.</p>
     </div>
   </div>
 </div>
@@ -441,29 +733,45 @@ footer a:hover { color: var(--text); }
       <button class="modal-close" onclick="closeModal('m-boring')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="modal-section-title">Disclaimer</div>
-      <p>Canopy is provided as-is, without warranty of any kind. You are solely responsible for ensuring you have permission to crawl any site you use Canopy on. The creator accepts no liability for any disruption or misuse arising from use of this tool.</p>
-      <div class="modal-section-title">Privacy</div>
+      <div class="modal-st">Disclaimer</div>
+      <p>Canopy is provided as-is, without warranty of any kind. You are solely responsible for ensuring you have permission to crawl any site you use Canopy on. The creator accepts no liability for any disruption or misuse.</p>
+      <div class="modal-st">Privacy</div>
       <p>Canopy runs entirely in your browser. No URLs, crawl data, or session information are transmitted to any server. Everything stays on your device.</p>
-      <div class="modal-section-title">Licence</div>
+      <div class="modal-st">Licence</div>
       <p>All rights reserved. This tool and its source code may not be reproduced or redistributed without explicit written permission.</p>
     </div>
   </div>
 </div>
 
 <script>
-/* ── State ── */
-let results    = [];
-let running    = false;
-let stopped    = false;
-let filter     = 'all';
-let fmt        = 'png';
-let tree       = null;
-let dt         = { x:0, y:0, s:1 };
-let dragging   = false;
-let dragFrom   = { x:0, y:0 };
+/* ─────────────────────────────────────────
+   State
+───────────────────────────────────────── */
+let results  = [];
+let running  = false;
+let stopped  = false;
+let filter   = 'all';
+let fmt      = 'png';
+let tree     = null;
+let dt       = { x:0, y:0, s:1 };
+let dragging = false;
+let dragFrom = { x:0, y:0 };
+let isDark   = true;
 
-/* ── Home / nav ── */
+/* ─────────────────────────────────────────
+   Theme
+───────────────────────────────────────── */
+function toggleTheme() {
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  document.getElementById('theme-btn').textContent = isDark ? '🌙' : '☀️';
+  // Re-render diagram with new theme colours if it exists
+  if (tree) renderDiagram();
+}
+
+/* ─────────────────────────────────────────
+   Home / nav
+───────────────────────────────────────── */
 function startSession() { document.getElementById('home-screen').classList.add('gone'); }
 function goHome()       { document.getElementById('home-screen').classList.remove('gone'); }
 
@@ -474,15 +782,22 @@ function switchTab(name) {
   document.querySelector(`.nav-tab[data-tab="${name}"]`).classList.add('active');
 }
 
-/* ── Workbench ── */
+/* ─────────────────────────────────────────
+   Workbench
+───────────────────────────────────────── */
 function toggleWb() {
-  const btn = document.getElementById('wb-btn');
-  const pan = document.getElementById('wb-panel');
-  btn.classList.toggle('open');
-  pan.classList.toggle('open');
+  document.getElementById('wb-row').classList.toggle('open');
 }
 
-/* ── Crawl ── */
+/* ─────────────────────────────────────────
+   Snail animation
+───────────────────────────────────────── */
+function snailStart() { document.getElementById('snail').classList.add('crawling'); }
+function snailStop()  { document.getElementById('snail').classList.remove('crawling'); }
+
+/* ─────────────────────────────────────────
+   Crawl engine
+───────────────────────────────────────── */
 function getFilters() {
   return {
     pagination: document.getElementById('f-pagination').checked,
@@ -521,22 +836,26 @@ async function fetchPage(url) {
   }
 }
 
+function getSection(url) {
+  try { const p = new URL(url).pathname.split('/').filter(Boolean); return p.length ? '/'+p[0] : '/'; }
+  catch { return '/'; }
+}
+
 async function startCrawl() {
   const raw = document.getElementById('start-url').value.trim();
   if (!raw) { alert('Enter a start URL.'); return; }
   let startUrl;
   try { startUrl = new URL(raw).href; } catch { alert('Invalid URL.'); return; }
 
-  results = [];
-  running = true;
-  stopped = false;
-  document.getElementById('btn-crawl').disabled  = true;
-  document.getElementById('btn-stop').disabled   = false;
-  document.getElementById('btn-diagram').disabled = true;
-  document.getElementById('btn-csv').disabled    = true;
+  results = []; running = true; stopped = false;
+  document.getElementById('btn-crawl').disabled    = true;
+  document.getElementById('btn-stop').disabled     = false;
+  document.getElementById('btn-to-diagram').disabled = true;
+  document.getElementById('btn-csv').disabled      = true;
   document.getElementById('empty-crawl').classList.remove('hidden');
-  document.querySelectorAll('.result-item').forEach(el=>el.remove());
-  setStatus('running','🌱 crawling…');
+  document.querySelectorAll('#rlist .result-item').forEach(el=>el.remove());
+  document.getElementById('status-text').textContent = 'crawling…';
+  snailStart();
   resetCtrs();
 
   const f    = getFilters();
@@ -548,7 +867,7 @@ async function startCrawl() {
   const processOne = async ({ url, depth }) => {
     if (stopped) return;
     const { status, links } = await fetchPage(url);
-    const entry = { url, status, depth, section: getSection(url, base) };
+    const entry = { url, status, depth, section: getSection(url) };
     results.push(entry);
     updateCtrs();
     appendItem(entry);
@@ -557,7 +876,7 @@ async function startCrawl() {
         try {
           const u = new URL(lnk);
           if (u.origin !== base) continue;
-          const clean = u.href.split('#')[0].replace(/\/+$/,'') || '/';
+          const clean = (u.origin + u.pathname).replace(/\/+$/,'') || u.origin+'/';
           if (seen.has(clean)) continue;
           if (shouldExclude(clean, f)) continue;
           seen.add(clean);
@@ -572,25 +891,21 @@ async function startCrawl() {
   }
 
   running = false;
+  snailStop();
   document.getElementById('btn-crawl').disabled = false;
   document.getElementById('btn-stop').disabled  = true;
   if (results.length > 0) {
-    document.getElementById('btn-diagram').disabled = false;
-    document.getElementById('btn-csv').disabled     = false;
+    document.getElementById('btn-to-diagram').disabled = false;
+    document.getElementById('btn-csv').disabled        = false;
   }
-  setStatus('done', stopped
-    ? `⛔ stopped — ${results.length} URL${results.length!==1?'s':''} found`
-    : `✅ done — ${results.length} URL${results.length!==1?'s':''}`);
+  document.getElementById('status-text').textContent = stopped
+    ? `stopped — ${results.length} URL${results.length!==1?'s':''} found`
+    : `done — ${results.length} URL${results.length!==1?'s':''}`;
 }
 
 function stopCrawl() {
   stopped = true; running = false;
   document.getElementById('btn-stop').disabled = true;
-}
-
-function setStatus(state, text) {
-  document.getElementById('sdot').className = 'status-dot ' + state;
-  document.getElementById('stext').textContent = text;
 }
 
 function resetCtrs() {
@@ -599,29 +914,29 @@ function resetCtrs() {
 }
 
 function updateCtrs() {
-  const n = results.length;
+  const n   = results.length;
+  const ok  = results.filter(r=>r.status==='ok').length;
+  const err = results.filter(r=>r.status==='error').length;
+  const blk = results.filter(r=>r.status==='blocked').length;
   document.getElementById('ct-d').textContent  = n;
-  document.getElementById('ct-ok').textContent = results.filter(r=>r.status==='ok').length;
-  document.getElementById('ct-e').textContent  = results.filter(r=>r.status==='error').length;
-  document.getElementById('ct-b').textContent  = results.filter(r=>r.status==='blocked').length;
+  document.getElementById('ct-ok').textContent = ok;
+  document.getElementById('ct-e').textContent  = err;
+  document.getElementById('ct-b').textContent  = blk;
   document.getElementById('url-count').textContent = n + ' URL'+(n!==1?'s':'');
 }
 
-function getSection(url, base) {
-  try { const p = new URL(url).pathname.split('/').filter(Boolean); return p.length ? '/'+p[0] : '/'; }
-  catch { return '/'; }
-}
-
-/* ── Results list ── */
+/* ─────────────────────────────────────────
+   Results list
+───────────────────────────────────────── */
 function setFilter(f, btn) {
   filter = f;
   document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
+  document.querySelectorAll('#rlist .result-item').forEach(el=>el.remove());
+  const vis = filter==='all' ? results : results.filter(r=>r.status===filter);
   const list = document.getElementById('rlist');
-  list.querySelectorAll('.result-item').forEach(el=>el.remove());
-  const visible = filter==='all' ? results : results.filter(r=>r.status===filter);
-  visible.forEach(r => list.appendChild(makeItem(r)));
-  document.getElementById('empty-crawl').classList.toggle('hidden', results.length>0);
+  vis.forEach(r => list.appendChild(makeItem(r)));
+  document.getElementById('empty-crawl').classList.toggle('hidden', results.length>0 && vis.length>0);
 }
 
 function appendItem(entry) {
@@ -635,31 +950,45 @@ function makeItem(r) {
   d.className = 'result-item';
   const bc = r.status==='ok' ? 'badge-ok' : r.status==='blocked' ? 'badge-block' : 'badge-err';
   const bt = r.status==='ok' ? '200' : r.status==='blocked' ? 'CORS' : 'ERR';
-  d.innerHTML = `<span class="status-badge ${bc}">${bt}</span><span class="url-text" title="${r.url}">${r.url}</span><span style="font-size:10px;color:var(--text-faint);flex-shrink:0">depth ${r.depth}</span>`;
+  d.innerHTML = `
+    <span class="status-badge ${bc}">${bt}</span>
+    <span class="url-text" title="${r.url}">${r.url}</span>
+    <span class="section-tag">${r.section}</span>
+    <span class="depth-tag">d${r.depth}</span>`;
   return d;
 }
 
-/* ── Diagram ── */
+/* ─────────────────────────────────────────
+   Diagram — rectangular nodes, orthogonal lines
+───────────────────────────────────────── */
 function sendToDiagram() { buildDiagram(); switchTab('diagram'); }
+
+// Node dimensions
+const NODE_W      = 130;
+const NODE_H      = 30;
+const NODE_ROOT_W = 150;
+const NODE_ROOT_H = 36;
+const H_GAP       = 40;   // horizontal gap between siblings
+const V_GAP       = 60;   // vertical gap between levels
 
 function buildDiagram() {
   const pages = results.filter(r => r.status==='ok' || r.status==='blocked');
   if (!pages.length) return;
 
   document.getElementById('empty-diagram').style.display = 'none';
-  document.getElementById('dlegend').style.display = '';
-  document.getElementById('dinfo').style.display   = '';
+  document.getElementById('dlegend').style.display  = '';
+  document.getElementById('dinfo').style.display    = '';
   document.getElementById('dtoolbar').style.display = '';
 
-  // Build tree
-  const root = { label:'/', url:'/', ch:{}, depth:0, isRoot:true };
+  // Build tree from URL paths
+  const root = { label:'/', slug:'/', url:'/', ch:{}, depth:0, isRoot:true };
   for (const r of pages) {
     let path; try { path = new URL(r.url).pathname; } catch { continue; }
     const parts = path.split('/').filter(Boolean);
     let node = root;
     for (let i=0; i<parts.length; i++) {
       const seg = parts[i];
-      if (!node.ch[seg]) node.ch[seg] = { label:'/'+seg, url:r.url, ch:{}, depth:i+1, isSection:i===0 };
+      if (!node.ch[seg]) node.ch[seg] = { label:'/'+seg, slug:seg, url:r.url, ch:{}, depth:i+1, isSection:i===0 };
       if (i===parts.length-1) node.ch[seg].url = r.url;
       node = node.ch[seg];
     }
@@ -680,93 +1009,122 @@ function buildDiagram() {
   document.getElementById('info-total').textContent  = total;
   document.getElementById('info-sec').textContent    = secs;
   document.getElementById('info-depth').textContent  = maxD;
-  document.getElementById('info-st').textContent     = '✅ crawled';
+  document.getElementById('info-st').textContent     = '✅ complete';
 
   renderDiagram();
 }
 
-function subtreeW(n) { return (!n.children||!n.children.length) ? 1 : n.children.reduce((s,c)=>s+subtreeW(c),0); }
+function nodeW(n) { return n.isRoot ? NODE_ROOT_W : NODE_W; }
+function nodeH(n) { return n.isRoot ? NODE_ROOT_H : NODE_H; }
 
-function assignXY(n, x, y, xGap, yGap) {
-  n.x=x; n.y=y;
-  if (!n.children||!n.children.length) return;
-  const tot = subtreeW(n);
-  let cx = x - (tot*xGap)/2 + xGap/2;
+function subtreeW(n) {
+  if (!n.children || !n.children.length) return nodeW(n);
+  const childrenTotal = n.children.reduce((s,c) => s + subtreeW(c), 0)
+                      + (n.children.length-1) * H_GAP;
+  return Math.max(nodeW(n), childrenTotal);
+}
+
+function assignXY(n, cx, y) {
+  n.x = cx;
+  n.y = y;
+  if (!n.children || !n.children.length) return;
+  const total = n.children.reduce((s,c)=>s+subtreeW(c),0) + (n.children.length-1)*H_GAP;
+  let x = cx - total/2;
   for (const c of n.children) {
-    const w=subtreeW(c);
-    assignXY(c, cx+(w*xGap)/2-xGap/2, y+yGap, xGap, yGap);
-    cx += w*xGap;
+    const w = subtreeW(c);
+    assignXY(c, x + w/2, y + nodeH(n) + V_GAP);
+    x += w + H_GAP;
   }
 }
 
 function renderDiagram() {
   if (!tree) return;
-  const svg  = document.getElementById('diagram');
+  const svg = document.getElementById('diagram');
   document.getElementById('edges-g').innerHTML = '';
   document.getElementById('nodes-g').innerHTML = '';
 
   const W = svg.clientWidth  || window.innerWidth;
   const H = svg.clientHeight || (window.innerHeight - 90);
-  const xGap = 160, yGap = 72;
 
-  assignXY(tree, 0, 0, xGap, yGap);
+  assignXY(tree, 0, 0);
 
+  // Bounding box
   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
-  function bb(n) { if(n.x<minX)minX=n.x; if(n.x>maxX)maxX=n.x; if(n.y<minY)minY=n.y; if(n.y>maxY)maxY=n.y; n.children.forEach(bb); }
+  function bb(n) {
+    const hw = nodeW(n)/2;
+    if(n.x-hw<minX)minX=n.x-hw; if(n.x+hw>maxX)maxX=n.x+hw;
+    if(n.y<minY)minY=n.y; if(n.y+nodeH(n)>maxY)maxY=n.y+nodeH(n);
+    n.children.forEach(bb);
+  }
   bb(tree);
 
-  const pad=80, tW=maxX-minX+pad*2, tH=maxY-minY+pad*2;
-  const sc = Math.min((W-60)/tW, (H-60)/tH, 1.2);
-  dt = { x: W/2-((minX+maxX)/2)*sc, y: pad+(-minY)*sc, s: sc };
+  const pad=60, tW=maxX-minX+pad*2, tH=maxY-minY+pad*2;
+  const sc = Math.min((W-40)/tW, (H-40)/tH, 1.0);
+  dt = { x: W/2 - ((minX+maxX)/2)*sc, y: pad + (-minY)*sc, s: sc };
   applyDt();
 
   const EG = document.getElementById('edges-g');
   const NG = document.getElementById('nodes-g');
 
+  // Orthogonal edges: elbow connectors
   function drawEdges(n) {
+    const pw = nodeW(n), ph = nodeH(n);
+    const px = n.x, py = n.y;
     for (const c of n.children) {
-      const p = document.createElementNS('http://www.w3.org/2000/svg','path');
-      const mid=(n.y+c.y)/2;
-      p.setAttribute('d',`M${n.x} ${n.y}C${n.x} ${mid},${c.x} ${mid},${c.x} ${c.y}`);
-      p.setAttribute('class','edge'+(n.isRoot?' l1':''));
-      EG.appendChild(p);
+      const cw = nodeW(c), ch = nodeH(c);
+      // parent bottom-centre → child top-centre, with a horizontal elbow midway
+      const x1 = px;
+      const y1 = py + ph;
+      const x2 = c.x;
+      const y2 = c.y;
+      const mid = y1 + (y2 - y1) / 2;
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', `M ${x1} ${y1} L ${x1} ${mid} L ${x2} ${mid} L ${x2} ${y2}`);
+      path.setAttribute('class', 'dedge' + (n.isRoot ? ' root-edge' : ''));
+      EG.appendChild(path);
       drawEdges(c);
     }
   }
   drawEdges(tree);
 
+  // Node boxes
   function drawNodes(n) {
-    const r = n.isRoot ? 20 : n.isSection ? 14 : 9;
-    const cc = n.isRoot ? 'node-root-circle' : n.isSection ? 'node-section-circle' : 'node-page-circle';
-    const tc = n.isRoot ? 'nlr' : n.isSection ? 'nls' : 'nlp';
-
+    const w = nodeW(n), h = nodeH(n);
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-    g.setAttribute('class','node');
-    g.setAttribute('transform',`translate(${n.x},${n.y})`);
+    g.setAttribute('class', 'dnode' + (n.isRoot?' root':n.isSection?' section':' leaf'));
+    g.setAttribute('transform', `translate(${n.x - w/2},${n.y})`);
     g.dataset.url = n.url;
 
-    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    circle.setAttribute('r', r);
-    circle.setAttribute('class', cc);
-    g.appendChild(circle);
+    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('width', w);
+    rect.setAttribute('height', h);
+    rect.setAttribute('rx', 2);
+    rect.setAttribute('ry', 2);
+    g.appendChild(rect);
 
-    const lbl = n.label.length>18 ? n.label.slice(0,17)+'…' : n.label;
+    // Primary label: slug
+    const slug = n.isRoot ? '/' : (n.slug.length>14 ? n.slug.slice(0,13)+'…' : n.slug);
     const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('y', r+13);
-    t.setAttribute('class', tc);
-    t.textContent = lbl;
+    t.setAttribute('x', w/2);
+    t.setAttribute('y', n.isRoot ? h/2+4 : h/2+3);
+    t.setAttribute('class', n.isRoot ? 'nl-root' : 'nl-slug');
+    t.textContent = slug;
     g.appendChild(t);
 
-    if (n.children.length && !n.isRoot) {
+    // Child count sub-label (sections only)
+    if (n.isSection && n.children.length > 0) {
       const sub = document.createElementNS('http://www.w3.org/2000/svg','text');
-      sub.setAttribute('y', r+24);
-      sub.setAttribute('class','nlsub');
+      sub.setAttribute('x', w/2);
+      sub.setAttribute('y', h + 14);
+      sub.setAttribute('class','nl-sub');
+      sub.setAttribute('text-anchor','middle');
       sub.textContent = n.children.length + (n.children.length===1?' page':' pages');
       g.appendChild(sub);
     }
 
     g.addEventListener('click', () => {
-      document.querySelectorAll('.node.selected').forEach(el=>el.classList.remove('selected'));
+      document.querySelectorAll('.dnode.selected').forEach(el=>el.classList.remove('selected'));
       g.classList.add('selected');
     });
     NG.appendChild(g);
@@ -778,13 +1136,13 @@ function renderDiagram() {
 function applyDt() {
   document.getElementById('dg').setAttribute('transform',`translate(${dt.x},${dt.y}) scale(${dt.s})`);
 }
-function zoom(f) { dt.s = Math.min(Math.max(dt.s*f, 0.08), 6); applyDt(); }
-function fit() { if(tree) buildDiagram(); }
+function dzoom(f) { dt.s = Math.min(Math.max(dt.s*f, 0.06), 6); applyDt(); }
+function dfit()   { if(tree) buildDiagram(); }
 
-// Pan
+// Pan + scroll zoom
 const dcw = document.getElementById('diagram-canvas-wrap');
 dcw.addEventListener('mousedown', e => {
-  if (e.target.closest('.node')) return;
+  if (e.target.closest('.dnode')) return;
   dragging=true; dragFrom={x:e.clientX-dt.x, y:e.clientY-dt.y};
 });
 window.addEventListener('mousemove', e => {
@@ -792,9 +1150,13 @@ window.addEventListener('mousemove', e => {
   dt.x=e.clientX-dragFrom.x; dt.y=e.clientY-dragFrom.y; applyDt();
 });
 window.addEventListener('mouseup', () => dragging=false);
-dcw.addEventListener('wheel', e => { e.preventDefault(); zoom(e.deltaY<0?1.1:0.9); }, {passive:false});
+dcw.addEventListener('wheel', e => {
+  e.preventDefault(); dzoom(e.deltaY<0?1.1:0.9);
+}, {passive:false});
 
-/* ── Export ── */
+/* ─────────────────────────────────────────
+   Export
+───────────────────────────────────────── */
 function pickFmt(card, f) {
   document.querySelectorAll('.export-card').forEach(c=>c.classList.remove('selected'));
   card.classList.add('selected'); fmt=f;
@@ -804,10 +1166,10 @@ function doExport() {
   const msg = document.getElementById('export-msg');
   msg.textContent='';
   if (!results.length && fmt!=='png' && fmt!=='svg') { msg.textContent='⚠ Run a crawl first.'; return; }
-  if (fmt==='csv')  exportCSV();
+  if (fmt==='csv')       exportCSV();
   else if (fmt==='json') exportJSON();
   else if (fmt==='svg')  exportSVG();
-  else exportPNG();
+  else                   exportPNG();
 }
 
 function exportCSV() {
@@ -819,8 +1181,7 @@ function exportJSON() {
   dl('canopy-sitemap.json', JSON.stringify({crawledAt:new Date().toISOString(),urls:results,tree},null,2), 'application/json');
 }
 function exportSVG() {
-  const s = new XMLSerializer().serializeToString(document.getElementById('diagram'));
-  dl('canopy-sitemap.svg', s, 'image/svg+xml');
+  dl('canopy-sitemap.svg', new XMLSerializer().serializeToString(document.getElementById('diagram')), 'image/svg+xml');
 }
 function exportPNG() {
   const svg=document.getElementById('diagram');
@@ -828,11 +1189,15 @@ function exportPNG() {
   const canvas=document.createElement('canvas');
   canvas.width=W*2; canvas.height=H*2;
   const ctx=canvas.getContext('2d'); ctx.scale(2,2);
-  ctx.fillStyle='#0e0e0e'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle= isDark ? '#0e0e0e' : '#f5f5f5';
+  ctx.fillRect(0,0,W,H);
   const blob=new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml'});
   const url=URL.createObjectURL(blob);
   const img=new Image();
-  img.onload=()=>{ ctx.drawImage(img,0,0); URL.revokeObjectURL(url); canvas.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='canopy-sitemap.png'; a.click(); }); };
+  img.onload=()=>{
+    ctx.drawImage(img,0,0); URL.revokeObjectURL(url);
+    canvas.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='canopy-sitemap.png'; a.click(); });
+  };
   img.src=url;
 }
 function exportCrawlCSV() { exportCSV(); }
@@ -843,7 +1208,9 @@ function dl(name, content, type) {
   a.download=name; a.click();
 }
 
-/* ── Modals ── */
+/* ─────────────────────────────────────────
+   Modals
+───────────────────────────────────────── */
 function showModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function overlayClose(e, id) { if(e.target===document.getElementById(id)) closeModal(id); }
