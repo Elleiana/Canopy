@@ -1,713 +1,602 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Canopy</title>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Canopy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── THEME VARIABLES (mirrors Waypoint exactly) ── */
+    :root {
+      --bg:           #0a0a0d;
+      --bg-card:      #111114;
+      --bg-card-hd:   #0d0d10;
+      --bg-input:     #0d0d10;
+      --border:       #1e1e26;
+      --border-soft:  #1a1a22;
+      --border-inner: #161620;
+      --text:         #e0ddd8;
+      --text-strong:  #f0ece4;
+      --text-title:   #d0cdc8;
+      --text-muted:   #555;
+      --text-dim:     #444;
+      --text-dimmer:  #383840;
+      --text-body:    #c0bbb4;
+      --text-help:    #484848;
+      --text-stat:    #666;
+      --scrollbar:    #222228;
+      --row-bg:       #111114;
+      --row-bd:       #1e1e26;
+      --tag-ok-bg:    #172a1c;
+      --tag-ok-text:  #5aab72;
+      --tag-ok-bd:    #243d28;
+      --placeholder:  #303038;
+      --empty-text:   #333;
+      --flip-bd:      #262630;
+    }
+    html.light {
+      --bg:           #e8e8e2;
+      --bg-card:      #f5f5f0;
+      --bg-card-hd:   #e2e2da;
+      --bg-input:     #edede8;
+      --border:       #b8b8ae;
+      --border-soft:  #c8c8be;
+      --border-inner: #d0d0c4;
+      --text:         #0d0d12;
+      --text-strong:  #020208;
+      --text-title:   #141420;
+      --text-muted:   #555;
+      --text-dim:     #666;
+      --text-dimmer:  #999;
+      --text-body:    #1e1e28;
+      --text-help:    #585858;
+      --text-stat:    #444;
+      --scrollbar:    #aaa;
+      --row-bg:       #edede8;
+      --row-bd:       #b8b8ae;
+      --tag-ok-bg:    #c8e8d2;
+      --tag-ok-text:  #145828;
+      --tag-ok-bd:    #7ab888;
+      --placeholder:  #999;
+      --empty-text:   #999;
+      --flip-bd:      #aaa;
+    }
 
-/* ── Themes ── */
-[data-theme="dark"] {
-  --bg:         #0e0e0e;
-  --surface:    #161616;
-  --surface2:   #1c1c1c;
-  --surface3:   #222222;
-  --border:     #2a2a2a;
-  --border2:    #333333;
-  --text:       #d4d4d4;
-  --text-dim:   #777777;
-  --text-faint: #444444;
-  --accent:     #e0e0e0;
-  --active:     #ffffff;
-  --link:       #a8a8a8;
-  --good:       #5a9e6f;
-  --warn:       #b89a4e;
-  --bad:        #9e5a5a;
-  --dot-grid:   #1e1e1e;
-  --node-fill:  #1a1a1a;
-  --node-stroke:#3a3a3a;
-  --node-root-fill:   #232323;
-  --node-root-stroke: #666666;
-  --node-sec-fill:    #1c1c1c;
-  --node-sec-stroke:  #444444;
-  --node-leaf-fill:   #161616;
-  --node-leaf-stroke: #303030;
-  --edge-color: #2e2e2e;
-  --edge-root:  #404040;
-  --node-text:  #c8c8c8;
-  --node-text-dim: #666666;
-}
-[data-theme="light"] {
-  --bg:         #f5f5f5;
-  --surface:    #ffffff;
-  --surface2:   #f0f0f0;
-  --surface3:   #e8e8e8;
-  --border:     #e0e0e0;
-  --border2:    #d0d0d0;
-  --text:       #2a2a2a;
-  --text-dim:   #777777;
-  --text-faint: #aaaaaa;
-  --accent:     #1a1a1a;
-  --active:     #000000;
-  --link:       #555555;
-  --good:       #3a7a52;
-  --warn:       #8a6e28;
-  --bad:        #7a3a3a;
-  --dot-grid:   #e0e0e0;
-  --node-fill:  #ffffff;
-  --node-stroke:#bbbbbb;
-  --node-root-fill:   #f8f8f8;
-  --node-root-stroke: #888888;
-  --node-sec-fill:    #ffffff;
-  --node-sec-stroke:  #cccccc;
-  --node-leaf-fill:   #fafafa;
-  --node-leaf-stroke: #dddddd;
-  --edge-color: #cccccc;
-  --edge-root:  #aaaaaa;
-  --node-text:  #2a2a2a;
-  --node-text-dim: #888888;
-}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); font-family: 'IBM Plex Sans', sans-serif; color: var(--text); min-height: 100vh; transition: background 0.2s, color 0.2s; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 3px; }
+    textarea::placeholder, input::placeholder { color: var(--placeholder); }
 
-html, body {
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 13px;
-  line-height: 1.5;
-  overflow: hidden;
-  transition: background 0.2s, color 0.2s;
-}
+    #app { max-width: 1280px; width: 100%; margin: 0 auto; padding: 2rem clamp(1rem, 4vw, 3rem); }
 
-a { color: var(--link); text-decoration: none; }
-a:hover { color: var(--active); text-decoration: underline; }
+    /* ── Header ── */
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+    .header-left { display: flex; align-items: baseline; gap: 0.85rem; padding-bottom: 1.25rem; cursor: pointer; }
+    .header-left:hover h1 { color: var(--text-strong); }
+    header h1 { font-family: 'IBM Plex Mono', monospace; font-size: 1.35rem; font-weight: 600; color: var(--text-strong); letter-spacing: -0.02em; }
+    header .subtitle { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--text-muted); }
 
-button {
-  font-family: inherit; font-size: 12px; cursor: pointer;
-  border: 1px solid var(--border2); background: var(--surface2);
-  color: var(--text); padding: 4px 10px; border-radius: 2px;
-  transition: background 0.1s, border-color 0.1s, color 0.1s;
-  white-space: nowrap;
-}
-button:hover { background: var(--surface3); border-color: var(--text-dim); color: var(--active); }
-button.primary { background: var(--surface3); border-color: var(--text-dim); color: var(--active); }
-button.primary:hover { border-color: var(--text); }
-button:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+    .header-nav { display: flex; align-items: flex-end; gap: 0; }
+    .nav-tab { font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; padding: 0.5rem 1.25rem 0.65rem; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); cursor: pointer; margin-bottom: -1px; transition: color 0.15s; white-space: nowrap; display: flex; flex-direction: column; align-items: center; gap: 0.25rem; line-height: 1; }
+    .nav-tab .nav-emoji { font-size: 1.25rem; line-height: 1; }
+    .nav-tab:hover { color: var(--text-title); }
+    .nav-tab.active { color: #008080; border-bottom-color: #008080; }
 
-input[type="text"], input[type="url"], input[type="number"], textarea {
-  font-family: inherit; font-size: 12px; background: var(--surface);
-  border: 1px solid var(--border2); color: var(--text);
-  padding: 5px 8px; border-radius: 2px; outline: none;
-  transition: border-color 0.15s, background 0.2s, color 0.2s;
-}
-input:focus, textarea:focus { border-color: var(--text-dim); color: var(--active); }
-input::placeholder, textarea::placeholder { color: var(--text-faint); }
+    /* ── Theme toggle (fixed, top-right — same as Waypoint) ── */
+    .btn-theme { position: fixed; top: 1.25rem; right: 1.5rem; z-index: 100; background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: 50%; width: 36px; height: 36px; font-size: 1.1rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; display: flex; align-items: center; justify-content: center; }
+    .btn-theme:hover { border-color: #008080; color: #008080; }
 
-/* ── Layout ── */
-#app { display: flex; flex-direction: column; height: 100vh; }
+    /* ── Section cards (identical to Waypoint) ── */
+    .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1rem; }
+    .card-header { padding: 0.85rem 1rem 0.7rem; border-bottom: 1px solid var(--border-soft); background: var(--bg-card-hd); display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .card-header-text { flex: 1; }
+    .card-title { font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; font-weight: 600; color: var(--text-title); letter-spacing: -0.01em; margin-bottom: 0.2rem; }
+    .card-help { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.72rem; color: var(--text-help); line-height: 1.5; }
+    .card-body { padding: 1rem; }
 
-/* ── Header ── */
-header {
-  display: flex; align-items: center;
-  padding: 0 16px; height: 42px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0; background: var(--surface); gap: 0;
-  transition: background 0.2s, border-color 0.2s;
-}
+    /* ── Page heading ── */
+    .page-heading { margin-bottom: 1.25rem; }
+    .page-heading-title { font-family: 'IBM Plex Mono', monospace; font-size: 1.1rem; font-weight: 600; color: var(--text-strong); letter-spacing: -0.02em; margin-bottom: 0.25rem; }
+    .page-heading-sub { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.78rem; color: var(--text-muted); }
 
-.logo-wrap {
-  display: flex; align-items: baseline; gap: 8px;
-  margin-right: 24px; cursor: pointer;
-}
-.logo-wrap:hover .logo-name { color: var(--active); }
-.logo-name { font-size: 15px; font-weight: bold; letter-spacing: 0.04em; color: var(--accent); transition: color 0.1s; }
-.logo-tagline { font-size: 11px; color: var(--text-faint); letter-spacing: 0.05em; }
+    /* ── Form elements (Waypoint style) ── */
+    .check-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .base-url-wrap { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 160px; }
+    .base-url-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.63rem; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+    .base-url-input { background: var(--bg-input); border: 1px solid var(--border-soft); border-radius: 4px; padding: 0.45rem 0.7rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.71rem; color: var(--text-body); outline: none; width: 100%; transition: border-color 0.15s; }
+    .base-url-input:focus { border-color: #008080; }
+    .check-divider { width: 1px; height: 32px; background: var(--border); flex-shrink: 0; }
 
-nav { display: flex; gap: 0; }
+    .btn-check { background: #008080; border: none; color: #e0ddd8; border-radius: 4px; padding: 0.5rem 1rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: background 0.15s; white-space: nowrap; flex-shrink: 0; }
+    .btn-check:hover { background: #009999; }
+    .btn-check:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; pointer-events: none; }
+    .btn-check.stop { background: #c86a5a; }
+    .btn-check.stop:hover { background: #d97a6a; }
 
-.nav-tab {
-  padding: 0 16px; height: 42px;
-  display: flex; align-items: center; gap: 6px;
-  font-size: 12px; color: var(--text-dim); cursor: pointer;
-  border-left: 1px solid transparent; border-right: 1px solid transparent;
-  border-bottom: 2px solid transparent; border-top: none; border-radius: 0;
-  background: none; transition: color 0.1s; user-select: none; letter-spacing: 0.02em;
-}
-.nav-tab:hover { color: var(--text); background: none; border-color: transparent; border-bottom-color: transparent; }
-.nav-tab.active {
-  color: var(--active);
-  border-left-color: var(--border); border-right-color: var(--border);
-  border-bottom-color: var(--bg); background: var(--bg);
-}
+    .btn-session { background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: 3px; padding: 0.3rem 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .btn-session:hover { border-color: #008080; color: #008080; }
+    .btn-session:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .btn-session.save { border-color: #243d28; color: #5aab72; }
+    .btn-session.save:hover { border-color: #5aab72; }
+    html.light .btn-session.save { border-color: #7ab888; color: #145828; }
 
-.header-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    /* ── Accordion (Workbench) ── */
+    .card-header.accordion { cursor: pointer; user-select: none; }
+    .card-header.accordion:hover .card-title { color: var(--text-strong); }
+    .accordion-toggle { font-family: 'IBM Plex Mono', monospace; font-size: 1rem; color: var(--text-dim); flex-shrink: 0; transition: transform 0.25s ease, color 0.15s; display: inline-block; }
+    .card-header.accordion.open .accordion-toggle { transform: rotate(-90deg); color: #008080; }
+    .accordion-body { overflow: hidden; transition: max-height 0.3s ease, opacity 0.25s ease; max-height: 0; opacity: 0; }
+    .accordion-body.open { max-height: 700px; opacity: 1; }
+    .accordion-help { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.72rem; color: var(--text-help); line-height: 1.5; display: none; }
+    .card-header.accordion.open .accordion-help { display: block; }
 
-/* Theme toggle — matches Waypoint's 🌙 style */
-.theme-toggle {
-  background: none; border: none; padding: 4px 6px;
-  font-size: 15px; cursor: pointer; color: var(--text-dim);
-  border-radius: 2px; line-height: 1;
-}
-.theme-toggle:hover { background: var(--surface2); color: var(--active); border-color: transparent; }
+    /* ── Proxy pills ── */
+    .pill-group { display: flex; gap: 0; }
+    .pill { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; padding: 0.28rem 0.75rem; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; background: none; transition: all 0.15s; }
+    .pill:first-child { border-radius: 99px 0 0 99px; }
+    .pill:last-child  { border-radius: 0 99px 99px 0; }
+    .pill + .pill { border-left: none; }
+    .pill:hover { color: var(--text-title); }
+    .pill.active { background: #008080; border-color: #008080; color: #e0ddd8; }
 
-/* ── Tab panels ── */
-.tab-content { display: none; flex: 1; overflow: hidden; }
-.tab-content.active { display: flex; }
+    /* ── Progress bar ── */
+    .progress-bar-track { height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #008080, #00a0a0); transition: width 0.3s ease; width: 0%; }
+    .progress-fill.crawling { animation: barPulse 1.5s ease-in-out infinite; width: 100%; }
+    @keyframes barPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-/* ══════════════════════════════════════════
-   CRAWLER TAB — mirrors Waypoint Spider
-══════════════════════════════════════════ */
-#tab-crawl { flex-direction: column; }
+    /* ── Snail animation ── */
+    #snail-emoji { display: inline-block; font-size: 1rem; line-height: 1; }
+    #snail-emoji.crawling { animation: snailWalk 2.6s ease-in-out infinite; }
+    @keyframes snailWalk {
+      0%   { transform: translateX(0px)   scaleX(1);  }
+      42%  { transform: translateX(16px)  scaleX(1);  }
+      50%  { transform: translateX(16px)  scaleX(-1); }
+      92%  { transform: translateX(0px)   scaleX(-1); }
+      100% { transform: translateX(0px)   scaleX(1);  }
+    }
 
-/* Top section with URL + controls — matches Spider's "Crawl settings" block */
-.crawl-settings {
-  padding: 14px 20px 12px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  flex-shrink: 0;
-  transition: background 0.2s, border-color 0.2s;
-}
-.crawl-settings-title {
-  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--text-faint); margin-bottom: 8px;
-}
-.crawl-settings-sub {
-  font-size: 11px; color: var(--text-dim); margin-bottom: 10px;
-}
-.crawl-input-row {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-}
-.crawl-input-row input[type="url"] { width: 320px; }
-.crawl-input-row .crawl-label { font-size: 11px; color: var(--text-dim); margin-right: 4px; }
+    /* ── Stats row ── */
+    .stat { font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--text-stat); }
+    .stat strong { font-size: 1.1rem; font-weight: 600; margin-right: 0.3rem; }
 
-/* Snail loading indicator */
-.snail-wrap {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 11px; color: var(--text-dim);
-  min-width: 60px;
-}
-.snail {
-  display: inline-block;
-  font-size: 16px;
-  line-height: 1;
-  animation: none;
-}
-.snail.crawling { animation: snail-walk 2.4s ease-in-out infinite; }
+    /* ── Crawler filter pills ── */
+    .filter-pills { display: flex; gap: 0; }
+    .fpill { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; padding: 0.25rem 0.65rem; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; background: none; transition: all 0.15s; }
+    .fpill:first-child { border-radius: 3px 0 0 3px; }
+    .fpill:last-child  { border-radius: 0 3px 3px 0; }
+    .fpill + .fpill { border-left: none; }
+    .fpill:hover { color: var(--text-title); background: var(--bg-input); }
+    .fpill.active { background: var(--bg-input); color: var(--text-title); border-color: var(--border-soft); }
 
-@keyframes snail-walk {
-  0%   { transform: translateX(0)    scaleX(1);  }
-  40%  { transform: translateX(14px) scaleX(1);  }
-  50%  { transform: translateX(14px) scaleX(-1); }
-  90%  { transform: translateX(0)    scaleX(-1); }
-  100% { transform: translateX(0)    scaleX(1);  }
-}
+    /* ── Spider result rows ── */
+    .spider-row { display: flex; align-items: center; gap: 0.65rem; padding: 0.45rem 0.85rem; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; background: var(--row-bg); border: 1px solid var(--row-bd); flex-wrap: wrap; }
+    .spider-url { color: var(--text-body); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .spider-depth { color: var(--text-dim); font-size: 0.62rem; flex-shrink: 0; }
+    .spider-badge { font-size: 0.63rem; padding: 0.18rem 0.5rem; border-radius: 3px; white-space: nowrap; flex-shrink: 0; font-family: 'IBM Plex Mono', monospace; }
+    .badge-ok   { color: #5aab72; border: 1px solid #243d28; background: #172a1c; }
+    .badge-err  { color: #c86a5a; border: 1px solid #3a1e1a; background: #1e0f0c; }
+    .badge-blk  { color: var(--text-muted); border: 1px solid var(--border); background: var(--bg-input); }
+    .badge-pend { color: var(--text-muted); border: 1px solid var(--border); background: var(--bg-input); animation: pulse 1.2s ease-in-out infinite; }
+    html.light .badge-ok  { color: #145828; border-color: #7ab888; background: #c8e8d2; }
+    html.light .badge-err { color: #7a1818; border-color: #c08080; background: #f0e0e0; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
 
-/* Stats row — exactly like Spider's "0 discovered / 0 ok / 0 errors / 0 blocked" */
-.crawl-stats-bar {
-  display: flex; align-items: center; gap: 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  flex-shrink: 0;
-  transition: background 0.2s, border-color 0.2s;
-}
-.stat-cell {
-  padding: 6px 18px; border-right: 1px solid var(--border);
-  font-size: 11px; color: var(--text-dim);
-  transition: border-color 0.2s;
-}
-.stat-cell:last-child { border-right: none; }
-.stat-cell strong { color: var(--text); }
-.stat-cell strong.good { color: var(--good); }
-.stat-cell strong.bad  { color: var(--bad); }
-.stat-cell strong.warn { color: var(--warn); }
+    /* ── Workbench filter checkboxes ── */
+    .spider-opt-row { display: flex; align-items: flex-start; gap: 0.5rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.71rem; color: var(--text-body); cursor: pointer; line-height: 1.5; }
+    .spider-opt-row input[type="checkbox"] { accent-color: #008080; width: 13px; height: 13px; flex-shrink: 0; cursor: pointer; margin-top: 3px; }
+    .rule-preview { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--text-muted); }
 
-/* Workbench — collapsible, matches Waypoint exactly */
-.workbench-row {
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  background: var(--surface);
-  transition: background 0.2s, border-color 0.2s;
-}
-.workbench-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 20px; cursor: pointer; user-select: none;
-}
-.workbench-header-left { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-dim); }
-.workbench-header-left:hover { color: var(--text); }
-.wb-arrow { font-size: 10px; transition: transform 0.15s; display: inline-block; }
-.workbench-row.open .wb-arrow { transform: rotate(90deg); }
-.workbench-header-right { font-size: 11px; color: var(--text-faint); }
+    /* ── Proxy instructions box ── */
+    .proxy-info-box { background: var(--bg-input); border: 1px solid var(--border-soft); border-radius: 6px; padding: 0.85rem 1rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--text-body); line-height: 1.9; margin-top: 0.85rem; }
+    .proxy-info-box a { color: #008080; text-decoration: none; }
+    .proxy-info-box a:hover { text-decoration: underline; }
 
-.workbench-body {
-  display: none; padding: 12px 20px 16px;
-  border-top: 1px solid var(--border);
-  background: var(--bg);
-  transition: background 0.2s;
-}
-.workbench-row.open .workbench-body { display: flex; gap: 32px; flex-wrap: wrap; }
+    /* ── Search input ── */
+    .search-input { background: var(--bg-input); border: 1px solid var(--border-soft); border-radius: 4px; padding: 0.3rem 0.65rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--text-body); outline: none; transition: border-color 0.15s; }
+    .search-input:focus { border-color: #008080; }
 
-.wb-section { display: flex; flex-direction: column; gap: 6px; min-width: 160px; }
-.wb-section-title {
-  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--text-faint); margin-bottom: 4px;
-}
-.wb-desc { font-size: 10px; color: var(--text-faint); line-height: 1.5; margin-bottom: 4px; }
+    /* ── Diagram canvas tab ── */
+    #page-diagram { overflow: hidden; }
+    .diagram-canvas-wrap {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: grab;
+      height: calc(100vh - 240px);
+      min-height: 400px;
+      background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .diagram-canvas-wrap:active { cursor: grabbing; }
+    svg#diagram { width: 100%; height: 100%; overflow: visible; }
+    .diagram-toolbar-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
 
-.filter-item {
-  display: flex; align-items: flex-start; gap: 8px;
-  font-size: 11px; color: var(--text-dim); cursor: pointer; line-height: 1.4;
-}
-.filter-item input[type="checkbox"] { cursor: pointer; accent-color: var(--text-dim); margin-top: 2px; flex-shrink: 0; }
-.filter-item:hover { color: var(--text); }
-.filter-hint { font-size: 10px; color: var(--text-faint); }
+    /* SVG node styles */
+    .dnode { cursor: pointer; }
+    .dnode rect { transition: filter 0.1s; }
+    .dnode.root rect    { fill: var(--bg-card-hd); stroke: #444; stroke-width: 1.5; rx: 4; ry: 4; }
+    .dnode.section rect { fill: var(--bg-card);    stroke: var(--border-soft); stroke-width: 1; }
+    .dnode.leaf rect    { fill: var(--bg-input);   stroke: var(--border-inner); stroke-width: 1; }
+    .dnode:hover rect   { filter: brightness(1.4); }
+    .dnode.selected rect { stroke: #008080 !important; stroke-width: 2 !important; }
+    .dnode text { font-family: 'IBM Plex Mono', monospace; fill: var(--text-body); pointer-events: none; user-select: none; text-anchor: middle; }
+    .dnode text.nl-slug { font-size: 10px; fill: var(--text-body); }
+    .dnode text.nl-root { font-size: 11px; font-weight: 600; fill: var(--text-strong); }
+    .dnode text.nl-sub  { font-size: 9px;  fill: var(--text-muted); }
+    .dedge { stroke: var(--border-soft); stroke-width: 1; fill: none; }
+    .dedge.root-edge { stroke: var(--border); stroke-width: 1.5; }
 
-/* Results area — split: list on the right, actions on right of toolbar */
-.crawl-body { display: flex; flex: 1; overflow: hidden; flex-direction: column; }
+    /* Diagram overlay panels */
+    .diagram-overlay { position: absolute; background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; }
+    .d-info-panel { top: 14px; right: 14px; width: 200px; }
+    .d-legend    { top: 14px; left: 14px; padding: 0.65rem 0.85rem; display: flex; flex-direction: column; gap: 5px; color: var(--text-muted); }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .legend-box  { width: 30px; height: 14px; border-radius: 2px; border: 1px solid; flex-shrink: 0; }
+    .d-info-header { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; display: flex; justify-content: space-between; }
+    .d-info-body { padding: 0.65rem 0.75rem; display: flex; flex-direction: column; gap: 5px; }
+    .d-info-row { display: flex; justify-content: space-between; font-size: 0.68rem; }
+    .d-info-row .dk { color: var(--text-muted); }
+    .d-info-row .dv { color: var(--text-body); }
+    .d-info-row .dv.good { color: #5aab72; }
+    html.light .d-info-row .dv.good { color: #145828; }
 
-.results-toolbar {
-  padding: 7px 14px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px;
-  font-size: 11px; flex-shrink: 0;
-  background: var(--surface);
-  transition: background 0.2s, border-color 0.2s;
-}
-.pill-group { display: flex; gap: 0; }
-.pill {
-  padding: 3px 10px; border: 1px solid var(--border2);
-  font-size: 11px; color: var(--text-dim); cursor: pointer;
-  background: none; border-radius: 0; transition: all 0.1s;
-}
-.pill:first-child { border-radius: 2px 0 0 2px; }
-.pill:last-child  { border-radius: 0 2px 2px 0; }
-.pill + .pill { border-left: none; }
-.pill:hover  { color: var(--text); background: var(--surface2); }
-.pill.active { background: var(--surface3); color: var(--active); border-color: var(--text-dim); }
+    /* ── Export tab ── */
+    .export-grid { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .export-card { border: 1px solid var(--border); border-radius: 6px; padding: 0.85rem 1rem; cursor: pointer; transition: border-color 0.15s, background 0.15s; background: var(--bg-card); min-width: 140px; }
+    .export-card:hover { border-color: var(--border-soft); background: var(--bg-card-hd); }
+    .export-card.selected { border-color: #008080; background: var(--bg-card-hd); }
+    .export-card .ec-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; font-weight: 600; color: var(--text-title); margin-bottom: 0.3rem; }
+    .export-card .ec-desc  { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.68rem; color: var(--text-help); line-height: 1.4; }
 
-.results-list { flex: 1; overflow-y: auto; font-size: 11px; }
-.results-list::-webkit-scrollbar { width: 6px; }
-.results-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    /* ── Modals ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.15s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: var(--bg-card); border: 1px solid var(--border-soft); border-radius: 8px; width: 480px; max-width: 94vw; max-height: 80vh; display: flex; flex-direction: column; transform: translateY(8px); transition: transform 0.15s; }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-soft); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; font-weight: 600; color: var(--text-strong); }
+    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 1rem; cursor: pointer; padding: 0 4px; line-height: 1; }
+    .modal-close:hover { color: var(--text-strong); }
+    .modal-body { padding: 1rem 1.25rem; overflow-y: auto; font-size: 0.78rem; line-height: 1.7; color: var(--text-body); }
+    .modal-body p { margin-bottom: 0.75rem; }
+    .modal-body p:last-child { margin-bottom: 0; }
+    .modal-body strong { color: var(--text-strong); }
+    .modal-st { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin: 1rem 0 0.4rem; }
 
-.result-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 5px 14px; border-bottom: 1px solid var(--border);
-  transition: background 0.05s;
-}
-.result-item:hover { background: var(--surface); }
-.url-text { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.depth-tag { font-size: 10px; color: var(--text-faint); flex-shrink: 0; }
-.section-tag { font-size: 10px; color: var(--text-faint); flex-shrink: 0; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* ── Home screen ── */
+    #home-screen { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; transition: opacity 0.2s; }
+    #home-screen.gone { opacity: 0; pointer-events: none; }
+    .home-title { font-family: 'IBM Plex Mono', monospace; font-size: 1.6rem; font-weight: 600; color: var(--text-strong); }
+    .home-sub   { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: var(--text-muted); }
+    .home-desc  { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.82rem; color: var(--text-body); text-align: center; max-width: 400px; line-height: 1.7; }
 
-.status-badge { font-size: 10px; padding: 1px 6px; border-radius: 2px; flex-shrink: 0; }
-.badge-ok    { background: rgba(90,158,111,0.12); color: var(--good); border: 1px solid rgba(90,158,111,0.25); }
-.badge-err   { background: rgba(158,90,90,0.12);  color: var(--bad);  border: 1px solid rgba(158,90,90,0.25); }
-.badge-block { background: rgba(184,154,78,0.10); color: var(--warn); border: 1px solid rgba(184,154,78,0.22); }
+    /* ── Footer ── */
+    footer { border-top: 1px solid var(--border); margin-top: 2.5rem; padding-top: 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--text-muted); display: flex; gap: 0.75rem; align-items: center; }
+    footer a { color: var(--text-muted); text-decoration: none; }
+    footer a:hover { color: #008080; }
 
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; height: 100%; gap: 10px;
-  color: var(--text-faint); font-size: 12px; text-align: center;
-}
-.empty-icon { font-size: 28px; opacity: 0.45; }
-.empty-state strong { color: var(--text-dim); }
-
-/* ══════════════════════════════════════════
-   DIAGRAM TAB
-══════════════════════════════════════════ */
-#tab-diagram { position: relative; }
-
-#diagram-canvas-wrap {
-  flex: 1; overflow: hidden; position: relative; cursor: grab;
-  background: var(--bg);
-  background-image: radial-gradient(circle, var(--dot-grid) 1px, transparent 1px);
-  background-size: 24px 24px;
-  transition: background 0.2s;
-}
-#diagram-canvas-wrap:active { cursor: grabbing; }
-svg#diagram { width: 100%; height: 100%; overflow: visible; }
-
-/* Diagram node boxes */
-.dnode { cursor: pointer; }
-.dnode rect {
-  fill: var(--node-fill); stroke: var(--node-stroke); stroke-width: 1;
-  rx: 2; ry: 2; transition: filter 0.1s;
-}
-.dnode.root rect   { fill: var(--node-root-fill); stroke: var(--node-root-stroke); stroke-width: 1.5; }
-.dnode.section rect { fill: var(--node-sec-fill);  stroke: var(--node-sec-stroke);  stroke-width: 1; }
-.dnode.leaf rect   { fill: var(--node-leaf-fill); stroke: var(--node-leaf-stroke); stroke-width: 1; }
-.dnode:hover rect  { filter: brightness(1.25); }
-.dnode.selected rect { stroke: var(--text) !important; stroke-width: 2 !important; }
-
-.dnode text {
-  font-family: 'Courier New', monospace;
-  fill: var(--node-text);
-  pointer-events: none; user-select: none;
-  text-anchor: middle;
-}
-.dnode text.nl-slug { font-size: 10px; font-weight: bold; fill: var(--node-text); }
-.dnode text.nl-root { font-size: 11px; font-weight: bold; fill: var(--active); }
-.dnode text.nl-sub  { font-size: 9px; fill: var(--node-text-dim); }
-
-/* Straight orthogonal connectors */
-.dedge { stroke: var(--edge-color); stroke-width: 1; fill: none; }
-.dedge.root-edge { stroke: var(--edge-root); stroke-width: 1.5; }
-
-.diagram-toolbar {
-  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
-  display: flex; align-items: center; gap: 1px;
-  background: var(--surface2); border: 1px solid var(--border2);
-  border-radius: 3px; padding: 3px; z-index: 10;
-  transition: background 0.2s;
-}
-.diagram-toolbar button { border: none; background: none; padding: 4px 10px; font-size: 13px; color: var(--text-dim); border-radius: 2px; }
-.diagram-toolbar button:hover { background: var(--surface3); color: var(--active); border-color: transparent; }
-.dt-div { width: 1px; background: var(--border2); height: 18px; margin: 0 2px; }
-
-.diagram-info-panel {
-  position: absolute; top: 14px; right: 14px; width: 210px;
-  background: var(--surface); border: 1px solid var(--border2);
-  border-radius: 2px; z-index: 10; font-size: 11px;
-  transition: background 0.2s;
-}
-.dip-header {
-  padding: 8px 12px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  transition: border-color 0.2s;
-}
-.dip-label { color: var(--text-dim); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
-.dip-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 5px; }
-.info-row { display: flex; justify-content: space-between; }
-.il { color: var(--text-dim); }
-.iv { color: var(--text); }
-.iv.good { color: var(--good); }
-
-.diagram-legend {
-  position: absolute; top: 14px; left: 14px;
-  background: var(--surface); border: 1px solid var(--border2);
-  border-radius: 2px; padding: 8px 12px;
-  font-size: 10px; z-index: 10;
-  display: flex; flex-direction: column; gap: 5px;
-  color: var(--text-dim); transition: background 0.2s;
-}
-.legend-item { display: flex; align-items: center; gap: 8px; }
-.legend-box {
-  width: 28px; height: 14px; border-radius: 1px; flex-shrink: 0;
-  border: 1px solid;
-}
-
-/* ══════════════════════════════════════════
-   EXPORT TAB
-══════════════════════════════════════════ */
-#tab-export { flex-direction: column; }
-.export-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; max-width: 580px; overflow-y: auto; }
-.export-section-title {
-  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--text-faint); border-bottom: 1px solid var(--border);
-  padding-bottom: 6px; margin-bottom: 10px;
-  transition: border-color 0.2s;
-}
-.export-option-grid { display: flex; gap: 8px; flex-wrap: wrap; }
-.export-card {
-  border: 1px solid var(--border2); border-radius: 2px;
-  padding: 10px 14px; cursor: pointer;
-  transition: border-color 0.1s, background 0.1s;
-  background: var(--surface); min-width: 130px;
-}
-.export-card:hover { border-color: var(--text-dim); background: var(--surface2); }
-.export-card.selected { border-color: var(--text-dim); background: var(--surface2); }
-.card-label { color: var(--text); font-size: 12px; margin-bottom: 3px; }
-.card-desc  { color: var(--text-faint); font-size: 10px; line-height: 1.4; }
-
-/* ══════════════════════════════════════════
-   HOME SCREEN
-══════════════════════════════════════════ */
-#home-screen {
-  position: fixed; inset: 0; background: var(--bg); z-index: 500;
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 28px; transition: opacity 0.2s, background 0.2s;
-}
-#home-screen.gone { opacity: 0; pointer-events: none; }
-.home-logo-name    { font-size: 26px; font-weight: bold; letter-spacing: 0.06em; color: var(--accent); }
-.home-logo-tagline { font-size: 12px; color: var(--text-faint); letter-spacing: 0.1em; margin-top: 6px; }
-.home-desc { font-size: 12px; color: var(--text-dim); text-align: center; max-width: 380px; line-height: 1.7; }
-
-/* ══════════════════════════════════════════
-   MODALS
-══════════════════════════════════════════ */
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.72);
-  z-index: 1000; display: flex; align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none; transition: opacity 0.15s;
-}
-.modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal {
-  background: var(--surface); border: 1px solid var(--border2);
-  border-radius: 3px; width: 460px; max-width: 94vw; max-height: 80vh;
-  display: flex; flex-direction: column;
-  transform: translateY(8px); transition: transform 0.15s, background 0.2s;
-}
-.modal-overlay.open .modal { transform: translateY(0); }
-.modal-header {
-  padding: 14px 18px; border-bottom: 1px solid var(--border);
-  display: flex; justify-content: space-between; align-items: center;
-  transition: border-color 0.2s;
-}
-.modal-title { color: var(--active); font-size: 13px; }
-.modal-close { background: none; border: none; color: var(--text-dim); font-size: 16px; padding: 0 4px; line-height: 1; }
-.modal-close:hover { color: var(--active); background: none; border-color: transparent; }
-.modal-body { padding: 16px 18px; overflow-y: auto; font-size: 12px; line-height: 1.7; color: var(--text); }
-.modal-body p { margin-bottom: 10px; }
-.modal-body p:last-child { margin-bottom: 0; }
-.modal-body strong { color: var(--active); }
-.modal-st { color: var(--text-dim); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin: 14px 0 6px; }
-.modal-st:first-child { margin-top: 0; }
-
-/* ── Footer ── */
-footer {
-  border-top: 1px solid var(--border); padding: 6px 16px;
-  display: flex; align-items: center; gap: 12px;
-  font-size: 11px; color: var(--text-faint);
-  flex-shrink: 0; background: var(--surface);
-  transition: background 0.2s, border-color 0.2s;
-}
-footer a { color: var(--text-faint); }
-footer a:hover { color: var(--text); }
-.fsep { color: var(--text-faint); }
-
-/* ── Misc ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-.hidden { display: none !important; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-</style>
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
 
 <!-- ── Home screen ── -->
 <div id="home-screen">
   <div style="text-align:center">
-    <div class="home-logo-name">🌿 Canopy</div>
-    <div class="home-logo-tagline">// sitemap toolkit</div>
+    <div class="home-title">🌿 Canopy</div>
+    <div class="home-sub">// sitemap toolkit</div>
   </div>
   <p class="home-desc">Crawl a live site, map its page structure, and export a visual sitemap — for internal planning or sharing with clients.</p>
-  <button class="primary" style="padding:8px 24px;font-size:13px" onclick="startSession()">+ new sitemap</button>
+  <button class="btn-check" onclick="startSession()">+ new sitemap</button>
 </div>
 
-<!-- ── App ── -->
-<div id="app">
+<button class="btn-theme" id="btn-theme" title="Toggle light/dark mode" onclick="toggleTheme()">🌙</button>
 
+<div id="app">
   <header>
-    <div class="logo-wrap" onclick="goHome()">
-      <span class="logo-name">🌿 Canopy</span>
-      <span class="logo-tagline">// sitemap toolkit</span>
+    <div class="header-left" onclick="goHome()">
+      <h1>🌿 Canopy</h1>
+      <span class="subtitle">// sitemap toolkit</span>
     </div>
-    <nav>
-      <button class="nav-tab active" data-tab="crawl"   onclick="switchTab('crawl')">🕷️ Crawler</button>
-      <button class="nav-tab"        data-tab="diagram" onclick="switchTab('diagram')">🌳 Diagram</button>
-      <button class="nav-tab"        data-tab="export"  onclick="switchTab('export')">🍂 Export</button>
+    <nav class="header-nav">
+      <button class="nav-tab active" data-page="crawler" onclick="switchPage('crawler')"><span class="nav-emoji">🕷️</span>Crawler</button>
+      <button class="nav-tab" data-page="diagram" onclick="switchPage('diagram')"><span class="nav-emoji">🌳</span>Diagram</button>
+      <button class="nav-tab" data-page="export" onclick="switchPage('export')"><span class="nav-emoji">🍂</span>Export</button>
     </nav>
-    <div class="header-right">
-      <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
-      <button onclick="showModal('m-about')" style="font-size:11px">?</button>
-    </div>
   </header>
 
-  <!-- ═══════════════ CRAWLER ═══════════════ -->
-  <div id="tab-crawl" class="tab-content active">
-
-    <!-- Settings block -->
-    <div class="crawl-settings">
-      <div class="crawl-settings-title">Crawl settings</div>
-      <div class="crawl-settings-sub">Enter a URL to crawl all reachable internal pages and map the site structure.</div>
-      <div class="crawl-input-row">
-        <span class="crawl-label">Start URL</span>
-        <input type="url" id="start-url" placeholder="https://example.com">
-        <button class="primary" id="btn-crawl" onclick="startCrawl()">Crawl site</button>
-        <button id="btn-stop" disabled onclick="stopCrawl()">Stop</button>
-        <div class="snail-wrap">
-          <span class="snail" id="snail">🐌</span>
-        </div>
-      </div>
+  <!-- ══════════════════════════════════════
+       PAGE: Crawler
+  ══════════════════════════════════════ -->
+  <div id="page-crawler">
+    <div class="page-heading">
+      <div class="page-heading-title">Crawler</div>
+      <div class="page-heading-sub">Crawl a site to discover all its internal URLs — then build a sitemap diagram.</div>
     </div>
 
-    <!-- Stats bar — mirrors Spider's stat cells -->
-    <div class="crawl-stats-bar">
-      <div class="stat-cell"><strong id="ct-d">0</strong> discovered</div>
-      <div class="stat-cell"><strong id="ct-ok" class="good">0</strong> ok</div>
-      <div class="stat-cell"><strong id="ct-e"  class="bad">0</strong> errors</div>
-      <div class="stat-cell"><strong id="ct-b"  class="warn">0</strong> blocked</div>
-      <div class="stat-cell" style="margin-left:auto;border-left:1px solid var(--border);border-right:none;display:flex;gap:8px">
-        <button id="btn-to-diagram" disabled onclick="sendToDiagram()">→ build diagram</button>
-        <button id="btn-csv"        disabled onclick="exportCrawlCSV()">↓ export CSV</button>
-      </div>
-    </div>
-
-    <!-- Workbench -->
-    <div class="workbench-row" id="wb-row">
-      <div class="workbench-header" onclick="toggleWb()">
-        <div class="workbench-header-left">
-          <span class="wb-arrow">▶</span>
-          <span>Workbench</span>
-          <span style="color:var(--text-faint);font-size:11px">Advanced crawl options — filter out URLs you don't need before the crawl starts.</span>
+    <!-- Crawl settings card -->
+    <div class="section-card">
+      <div class="card-header">
+        <div class="card-header-text">
+          <div class="card-title">Crawl settings</div>
+          <div class="card-help">A proxy is required to crawl most external sites — use automatic to get started immediately.</div>
         </div>
-        <span class="workbench-header-right" id="wb-excluded"></span>
       </div>
-      <div class="workbench-body">
+      <div class="card-body">
+        <!-- URL + buttons row -->
+        <div class="check-row" style="margin-bottom:0.85rem;">
+          <div class="base-url-wrap">
+            <label class="base-url-label" for="crawl-url">Start URL</label>
+            <input class="base-url-input" id="crawl-url" type="url" placeholder="https://example.com" />
+          </div>
+          <div class="check-divider"></div>
+          <button class="btn-check" id="btn-crawl-start" onclick="startCrawl()">Crawl site</button>
+          <button class="btn-check stop hidden" id="btn-crawl-stop" onclick="stopCrawl()">Stop</button>
+        </div>
 
-        <div class="wb-section">
-          <div class="wb-section-title">Concurrency</div>
-          <div class="wb-desc">How many pages to fetch simultaneously. Higher values crawl faster but may trigger rate limiting. 3 is a safe default.</div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <input type="number" id="concurrency" value="3" min="1" max="10" style="width:52px">
-            <span style="font-size:10px;color:var(--text-faint)">1 = careful &nbsp;·&nbsp; 5 = fast &nbsp;·&nbsp; 10 = aggressive</span>
+        <!-- Proxy row -->
+        <div class="check-row">
+          <div class="base-url-wrap">
+            <label class="base-url-label">Proxy</label>
+            <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+              <div class="pill-group">
+                <button class="pill active" id="proxy-auto" onclick="setProxy('auto')">automatic</button>
+                <button class="pill"        id="proxy-manual" onclick="setProxy('manual')">manual</button>
+              </div>
+              <input class="base-url-input hidden" id="proxy-manual-url" type="url" placeholder="https://your-worker.workers.dev" style="flex:1;min-width:240px;" />
+            </div>
+          </div>
+          <div style="align-self:flex-end;">
+            <a class="btn-session" href="#" onclick="document.getElementById('proxy-info').classList.toggle('hidden');return false;" style="text-decoration:none;display:inline-block;">?</a>
           </div>
         </div>
 
-        <div class="wb-section">
-          <div class="wb-section-title">Exclude from crawl</div>
-          <div class="wb-desc">Tick anything you don't want in your results.</div>
-          <label class="filter-item"><input type="checkbox" id="f-pagination" checked><span>Pagination <span class="filter-hint">?page=, /page/, /p/</span></span></label>
-          <label class="filter-item"><input type="checkbox" id="f-media"      checked><span>Media &amp; files <span class="filter-hint">.png, .jpg, .gif, .svg, .ico, .pdf, .zip, .mp4</span></span></label>
-          <label class="filter-item"><input type="checkbox" id="f-dev"        checked><span>Dev &amp; system URLs <span class="filter-hint">wp-admin, wp-json, .css, .js, .woff, /feed</span></span></label>
-          <label class="filter-item"><input type="checkbox" id="f-query"             ><span>All query strings <span class="filter-hint">any URL containing ?</span></span></label>
-          <label class="filter-item"><input type="checkbox" id="f-hash"              ><span>Hash / anchor links <span class="filter-hint">URLs containing #</span></span></label>
+        <!-- Proxy info box -->
+        <div class="proxy-info-box hidden" id="proxy-info">
+          <p style="margin-bottom:0.75rem;color:var(--text-muted);">Browsers block requests to other websites for security reasons (CORS). A proxy sits in between — Canopy asks the proxy to fetch the page, and the proxy returns it. This lets the Crawler crawl any site.</p>
+          <strong style="color:var(--text-title);">Automatic</strong> — uses the built-in Canopy proxy. Works immediately, no setup needed.<br/>
+          <strong style="color:var(--text-title);">Manual</strong> — use your own Cloudflare Worker proxy if you prefer to host it yourself.<br/><br/>
+          <div style="border-top:1px solid var(--border-soft);padding-top:0.65rem;">
+            <a href="#" onclick="const b=document.getElementById('cf-body');const a=document.getElementById('cf-arrow');b.classList.toggle('hidden');a.textContent=b.classList.contains('hidden')?'▶':'▼';return false;" style="color:var(--text-muted);text-decoration:none;display:flex;align-items:center;gap:0.5rem;">
+              <span id="cf-arrow" style="font-size:0.6rem;">▶</span>
+              <span>Setting up your own Cloudflare Worker</span>
+            </a>
+            <div id="cf-body" class="hidden" style="margin-top:0.65rem;line-height:2;">
+              1. Create a free account at <a href="https://cloudflare.com" target="_blank">cloudflare.com</a><br/>
+              2. Go to <strong style="color:var(--text-title);">Workers &amp; Pages</strong> → <strong style="color:var(--text-title);">Create</strong> → <strong style="color:var(--text-title);">Create Worker</strong><br/>
+              3. Replace the default code with the contents of <strong style="color:var(--text-title);">canopy-worker.js</strong><br/>
+              4. Edit <strong style="color:var(--text-title);">ALLOWED_ORIGIN</strong> to match your site's URL<br/>
+              5. Click <strong style="color:var(--text-title);">Deploy</strong> — copy the Worker URL into the manual proxy field<br/><br/>
+              <a href="#" onclick="downloadWorker();return false;">↓ Download canopy-worker.js</a>
+            </div>
+          </div>
         </div>
 
-        <div class="wb-section">
-          <div class="wb-section-title">Custom patterns</div>
-          <div class="wb-desc">One per line — any URL containing the pattern will be skipped.</div>
-          <textarea id="custom-patterns" placeholder="e.g. /archive/" rows="5" style="width:180px;resize:vertical;font-size:11px"></textarea>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Results -->
-    <div class="crawl-body">
-      <div class="results-toolbar">
-        <div class="pill-group">
-          <button class="pill active" onclick="setFilter('all',this)">all</button>
-          <button class="pill"        onclick="setFilter('ok',this)">ok</button>
-          <button class="pill"        onclick="setFilter('error',this)">errors</button>
-          <button class="pill"        onclick="setFilter('blocked',this)">blocked</button>
-        </div>
-        <span id="url-count" style="color:var(--text-faint);font-size:11px;margin-left:4px">0 URLs</span>
-        <span id="status-text" style="color:var(--text-dim);font-size:11px;margin-left:8px"></span>
-      </div>
-
-      <div class="results-list" id="rlist">
-        <div class="empty-state" id="empty-crawl">
-          <div class="empty-icon">🌱</div>
-          <div>No crawl yet — enter a URL above and click <strong>Crawl site</strong></div>
+        <!-- Progress bar -->
+        <div id="crawl-progress-wrap" class="hidden" style="margin-top:0.85rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
+            <span id="crawl-status-text" style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--text-muted);"></span>
+            <span id="snail-emoji" style="font-size:1rem;line-height:1;">🐌</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-fill" id="crawl-progress-fill"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:0.3rem;">
+            <span id="crawl-queue-info" style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--text-dimmer);"></span>
+          </div>
         </div>
       </div>
     </div>
 
-  </div><!-- /crawl -->
+    <!-- Workbench (accordion) -->
+    <div class="section-card">
+      <div class="card-header accordion" id="wb-header" onclick="toggleAccordion('wb-header','wb-body')">
+        <div class="card-header-text">
+          <div class="card-title">Workbench</div>
+          <div class="accordion-help">Advanced crawl options — filter out URLs you don't need before the crawl starts.</div>
+        </div>
+        <span class="accordion-toggle" id="wb-toggle">◀</span>
+      </div>
+      <div class="accordion-body" id="wb-body">
+        <div class="card-body" style="display:flex;gap:2rem;flex-wrap:wrap;">
 
-  <!-- ═══════════════ DIAGRAM ═══════════════ -->
-  <div id="tab-diagram" class="tab-content">
-    <div id="diagram-canvas-wrap">
-      <svg id="diagram">
-        <g id="dg" transform="translate(0,0) scale(1)">
-          <g id="edges-g"></g>
-          <g id="nodes-g"></g>
-        </g>
-      </svg>
-      <div class="empty-state" id="empty-diagram" style="position:absolute;inset:0">
-        <div class="empty-icon">🌿</div>
-        <div>No diagram yet — run a crawl then click <strong>→ build diagram</strong></div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem;min-width:180px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.3rem;">Concurrency</div>
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);margin-bottom:0.4rem;line-height:1.5;">How many pages to fetch simultaneously. Higher values crawl faster but may trigger rate limiting. 3 is a safe default.</div>
+            <div style="display:flex;align-items:center;gap:0.65rem;">
+              <input class="base-url-input" id="concurrency" type="number" min="1" max="10" value="3" style="width:65px;flex:0 0 auto;" />
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--text-muted);">1 = careful &nbsp;·&nbsp; 5 = fast &nbsp;·&nbsp; 10 = aggressive</span>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0.45rem;min-width:240px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.1rem;">Filters</div>
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);margin-bottom:0.3rem;">Tick anything you don't want in your results.</div>
+            <label class="spider-opt-row"><input type="checkbox" id="f-pagination" checked /> <span>Pagination <span class="rule-preview">?page=, /page/, /p/</span></span></label>
+            <label class="spider-opt-row"><input type="checkbox" id="f-media"      checked /> <span>Media &amp; files <span class="rule-preview">.png, .jpg, .gif, .svg, .ico, .pdf, .zip, .mp4</span></span></label>
+            <label class="spider-opt-row"><input type="checkbox" id="f-dev"        checked /> <span>Dev &amp; system URLs <span class="rule-preview">wp-admin, wp-json, .css, .js, .woff, /feed</span></span></label>
+            <label class="spider-opt-row"><input type="checkbox" id="f-query"              /> <span>All query strings <span class="rule-preview">any URL containing ?</span></span></label>
+            <label class="spider-opt-row"><input type="checkbox" id="f-hash"       checked /> <span>Hash/anchor links <span class="rule-preview">URLs containing #</span></span></label>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:0.45rem;min-width:180px;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.1rem;">Custom patterns</div>
+            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);margin-bottom:0.3rem;">One per line — any URL containing the pattern will be skipped.</div>
+            <textarea id="custom-patterns" class="base-url-input" style="height:110px;min-height:unset;resize:vertical;" placeholder="/members/&#10;/checkout/&#10;/cart/"></textarea>
+          </div>
+
+        </div>
       </div>
     </div>
 
-    <div class="diagram-legend" id="dlegend" style="display:none">
-      <div class="legend-item">
-        <div class="legend-box" style="background:var(--node-root-fill);border-color:var(--node-root-stroke)"></div>
-        root
+    <!-- Results card -->
+    <div id="crawler-results" class="hidden">
+      <div class="section-card" style="margin-top:0.75rem;">
+        <div class="card-body" style="padding:0.65rem 1rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+            <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
+              <div class="stat"><strong id="stat-total" style="color:#008080;">0</strong> discovered</div>
+              <div class="stat"><strong id="stat-ok"    style="color:#5aab72;">0</strong> ok</div>
+              <div class="stat"><strong id="stat-err"   style="color:#c86a5a;">0</strong> errors</div>
+              <div class="stat"><strong id="stat-blk"   style="color:var(--text-muted);">0</strong> blocked</div>
+            </div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <button class="btn-session" id="btn-to-diagram" disabled onclick="sendToDiagram()">→ build diagram</button>
+              <button class="btn-session save" id="btn-export-csv" disabled onclick="exportCrawlCSV()">↓ CSV</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="legend-item">
-        <div class="legend-box" style="background:var(--node-sec-fill);border-color:var(--node-sec-stroke)"></div>
-        section
+
+      <!-- Exclusion summary (shown after crawl) -->
+      <div id="excl-summary" class="hidden" style="margin-bottom:0.75rem;"></div>
+
+      <!-- Filter + search toolbar -->
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;flex-wrap:wrap;">
+        <div class="filter-pills">
+          <button class="fpill active" onclick="setResultFilter('all',this)">all</button>
+          <button class="fpill"        onclick="setResultFilter('ok',this)">ok</button>
+          <button class="fpill"        onclick="setResultFilter('errors',this)">errors</button>
+          <button class="fpill"        onclick="setResultFilter('blocked',this)">blocked</button>
+        </div>
+        <input class="search-input" id="result-search" type="text" placeholder="search URLs…" oninput="renderResults()" autocomplete="off" spellcheck="false" />
+        <button class="btn-session hidden" id="search-clear" onclick="clearSearch()">✕</button>
       </div>
-      <div class="legend-item">
-        <div class="legend-box" style="background:var(--node-leaf-fill);border-color:var(--node-leaf-stroke)"></div>
-        page
+
+      <div id="result-rows" style="display:flex;flex-direction:column;gap:0.35rem;max-height:500px;overflow-y:auto;"></div>
+    </div>
+  </div><!-- /page-crawler -->
+
+  <!-- ══════════════════════════════════════
+       PAGE: Diagram
+  ══════════════════════════════════════ -->
+  <div id="page-diagram" class="hidden">
+    <div class="page-heading">
+      <div class="page-heading-title">Diagram</div>
+      <div class="page-heading-sub">Interactive sitemap tree — pan, zoom, and explore the structure.</div>
+    </div>
+
+    <div id="diagram-empty" class="section-card">
+      <div class="card-body" style="text-align:center;padding:3rem 1rem;font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:var(--text-muted);">
+        🌿 &nbsp; No diagram yet — run a crawl and click <strong style="color:var(--text-title);">→ build diagram</strong>
       </div>
     </div>
 
-    <div class="diagram-info-panel" id="dinfo" style="display:none">
-      <div class="dip-header">
-        <span class="dip-label">Overview</span>
-        <span id="info-domain" style="color:var(--text);font-size:11px"></span>
+    <div id="diagram-wrap" class="hidden">
+      <div class="diagram-canvas-wrap" id="diagram-canvas">
+        <svg id="diagram">
+          <g id="dg" transform="translate(0,0) scale(1)">
+            <g id="edges-g"></g>
+            <g id="nodes-g"></g>
+          </g>
+        </svg>
+
+        <!-- Legend overlay -->
+        <div class="diagram-overlay d-legend" id="d-legend">
+          <div class="legend-item">
+            <div class="legend-box" style="background:var(--bg-card-hd);border-color:#444;"></div>
+            root
+          </div>
+          <div class="legend-item">
+            <div class="legend-box" style="background:var(--bg-card);border-color:var(--border-soft);"></div>
+            section
+          </div>
+          <div class="legend-item">
+            <div class="legend-box" style="background:var(--bg-input);border-color:var(--border-inner);"></div>
+            page
+          </div>
+        </div>
+
+        <!-- Info overlay -->
+        <div class="diagram-overlay d-info-panel" id="d-info">
+          <div class="d-info-header">
+            <span>Overview</span>
+            <span id="d-domain" style="color:var(--text-body);"></span>
+          </div>
+          <div class="d-info-body">
+            <div class="d-info-row"><span class="dk">total pages</span><span class="dv" id="d-total">—</span></div>
+            <div class="d-info-row"><span class="dk">sections</span>   <span class="dv" id="d-secs">—</span></div>
+            <div class="d-info-row"><span class="dk">max depth</span>  <span class="dv" id="d-depth">—</span></div>
+            <div class="d-info-row"><span class="dk">status</span>     <span class="dv good" id="d-status">—</span></div>
+          </div>
+        </div>
       </div>
-      <div class="dip-body">
-        <div class="info-row"><span class="il">total pages</span><span class="iv" id="info-total">—</span></div>
-        <div class="info-row"><span class="il">sections</span>   <span class="iv" id="info-sec">—</span></div>
-        <div class="info-row"><span class="il">max depth</span>  <span class="iv" id="info-depth">—</span></div>
-        <div class="info-row"><span class="il">status</span>     <span class="iv good" id="info-st">—</span></div>
+
+      <!-- Diagram toolbar below canvas -->
+      <div class="diagram-toolbar-row">
+        <button class="btn-session" onclick="dzoom(1.2)" title="Zoom in">+</button>
+        <button class="btn-session" onclick="dzoom(0.83)" title="Zoom out">−</button>
+        <button class="btn-session" onclick="dfit()" title="Fit to view">⊡ fit</button>
+        <button class="btn-session" onclick="buildDiagram()" title="Re-layout">↺ re-layout</button>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--text-muted);margin-left:0.5rem;">scroll to zoom &nbsp;·&nbsp; drag to pan</span>
+        <div style="margin-left:auto;">
+          <button class="btn-check" onclick="switchPage('export')">↓ export →</button>
+        </div>
       </div>
     </div>
+  </div><!-- /page-diagram -->
 
-    <div class="diagram-toolbar" id="dtoolbar" style="display:none">
-      <button onclick="dzoom(1.2)" title="Zoom in">+</button>
-      <button onclick="dzoom(0.83)" title="Zoom out">−</button>
-      <button onclick="dfit()" title="Fit to view">⊡</button>
-      <div class="dt-div"></div>
-      <button onclick="buildDiagram()" title="Re-layout">↺</button>
-      <div class="dt-div"></div>
-      <button onclick="switchTab('export')">↓ export →</button>
+  <!-- ══════════════════════════════════════
+       PAGE: Export
+  ══════════════════════════════════════ -->
+  <div id="page-export" class="hidden">
+    <div class="page-heading">
+      <div class="page-heading-title">Export</div>
+      <div class="page-heading-sub">Download your sitemap in your preferred format.</div>
     </div>
-  </div>
 
-  <!-- ═══════════════ EXPORT ═══════════════ -->
-  <div id="tab-export" class="tab-content">
-    <div class="export-body">
-      <div>
-        <div class="export-section-title">Format</div>
-        <div class="export-option-grid">
+    <div class="section-card">
+      <div class="card-header">
+        <div class="card-header-text">
+          <div class="card-title">Format</div>
+          <div class="card-help">Choose what you want to download.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="export-grid">
           <div class="export-card selected" onclick="pickFmt(this,'png')">
-            <div class="card-label">🖼️ PNG</div>
-            <div class="card-desc">Flat image — easy to share or drop into a doc</div>
+            <div class="ec-label">🖼️ PNG</div>
+            <div class="ec-desc">Flat image — easy to share or drop into a doc or presentation</div>
           </div>
           <div class="export-card" onclick="pickFmt(this,'svg')">
-            <div class="card-label">⬡ SVG</div>
-            <div class="card-desc">Vector — scalable, good for large diagrams</div>
+            <div class="ec-label">⬡ SVG</div>
+            <div class="ec-desc">Vector — scalable, good for large diagrams or print</div>
           </div>
           <div class="export-card" onclick="pickFmt(this,'csv')">
-            <div class="card-label">📋 CSV</div>
-            <div class="card-desc">URL list with depth and section — for spreadsheets</div>
+            <div class="ec-label">📋 CSV</div>
+            <div class="ec-desc">URL list with depth and section — for spreadsheets</div>
           </div>
           <div class="export-card" onclick="pickFmt(this,'json')">
-            <div class="card-label">{ } JSON</div>
-            <div class="card-desc">Full tree structure — for devs or re-importing</div>
+            <div class="ec-label">{ } JSON</div>
+            <div class="ec-desc">Full tree structure — for developers or re-importing</div>
           </div>
         </div>
-      </div>
-      <div>
-        <div class="export-section-title">Download</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button class="primary" onclick="doExport()">↓ download</button>
-          <button onclick="switchTab('diagram')">⧉ view diagram first</button>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <button class="btn-check" onclick="doExport()">↓ download</button>
+          <button class="btn-session" onclick="switchPage('diagram')">⧉ view diagram first</button>
         </div>
-        <div id="export-msg" style="margin-top:8px;font-size:11px;color:var(--text-dim)"></div>
+        <div id="export-msg" style="margin-top:0.65rem;font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--text-muted);"></div>
       </div>
     </div>
-  </div>
+  </div><!-- /page-export -->
 
   <footer>
     <span>🌿</span>
-    <span class="fsep">//</span>
-    <a href="#" onclick="showModal('m-about');return false">what is Canopy?</a>
-    <span class="fsep">//</span>
-    <a href="#" onclick="showModal('m-boring');return false">boring stuff</a>
+    <span>//</span>
+    <a href="#" onclick="showModal('m-about');return false;">what is Canopy?</a>
+    <span>//</span>
+    <a href="#" onclick="showModal('m-boring');return false;">boring stuff</a>
   </footer>
+</div><!-- /app -->
 
-</div>
-
-<!-- ── Modals ── -->
-<div class="modal-overlay" id="m-about" onclick="overlayClose(event,'m-about')">
+<!-- Modals -->
+<div class="modal-overlay" id="m-about" onclick="if(event.target===this)closeModal('m-about')">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title">What is Canopy?</span>
@@ -717,16 +606,16 @@ footer a:hover { color: var(--text); }
       <p><strong>Canopy is a sitemap toolkit.</strong></p>
       <p>It crawls a live website, maps the structure of every page it can reach, and generates a visual tree diagram — useful for understanding a site before a redesign, migration, or audit, and for sharing that structure with a client.</p>
       <div class="modal-st">The workflow</div>
-      <p><strong>🕷️ Crawler</strong> — point it at any URL and Canopy walks all reachable internal pages. Use the Workbench to filter out what you don't need before you start. When done, hit <strong>→ build diagram</strong>.</p>
-      <p><strong>🌳 Diagram</strong> — an interactive tree laid out by section and depth. Nodes are rectangular boxes showing the URL slug. Pan and zoom to explore.</p>
+      <p><strong>🕷️ Crawler</strong> — point it at any URL and Canopy walks all reachable internal pages. Use the Workbench to filter out what you don't need. When done, hit <strong>→ build diagram</strong>.</p>
+      <p><strong>🌳 Diagram</strong> — an interactive tree laid out by section and depth. Rectangular nodes show the URL slug. Pan and zoom to explore.</p>
       <p><strong>🍂 Export</strong> — download as PNG or SVG for presentations, CSV for spreadsheets, or JSON for developers.</p>
       <div class="modal-st">A note on crawling</div>
-      <p>Browsers block cross-origin requests (CORS), so some sites will show as blocked. Canopy marks these clearly and continues crawling what it can reach. Proxy support is planned for a future release.</p>
+      <p>A built-in Cloudflare Worker proxy handles CORS restrictions so Canopy can crawl any public site. Switch to manual proxy in the Crawler settings if you'd prefer to use your own.</p>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="m-boring" onclick="overlayClose(event,'m-boring')">
+<div class="modal-overlay" id="m-boring" onclick="if(event.target===this)closeModal('m-boring')">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title">The Boring Stuff</span>
@@ -736,68 +625,105 @@ footer a:hover { color: var(--text); }
       <div class="modal-st">Disclaimer</div>
       <p>Canopy is provided as-is, without warranty of any kind. You are solely responsible for ensuring you have permission to crawl any site you use Canopy on. The creator accepts no liability for any disruption or misuse.</p>
       <div class="modal-st">Privacy</div>
-      <p>Canopy runs entirely in your browser. No URLs, crawl data, or session information are transmitted to any server. Everything stays on your device.</p>
+      <p>Canopy runs entirely in your browser. The only exception is the proxy feature: when crawling a site, page requests are routed through a Cloudflare Worker so the browser can reach external sites. Only the URLs being fetched are passed through.</p>
       <div class="modal-st">Licence</div>
-      <p>All rights reserved. This tool and its source code may not be reproduced or redistributed without explicit written permission.</p>
+      <p>All rights reserved. This tool may not be reproduced or redistributed without permission.</p>
     </div>
   </div>
 </div>
 
 <script>
-/* ─────────────────────────────────────────
+/* ═══════════════════════════════════════════
    State
-───────────────────────────────────────── */
-let results  = [];
-let running  = false;
-let stopped  = false;
-let filter   = 'all';
-let fmt      = 'png';
-let tree     = null;
-let dt       = { x:0, y:0, s:1 };
-let dragging = false;
-let dragFrom = { x:0, y:0 };
-let isDark   = true;
+═══════════════════════════════════════════ */
+let crawlResults = [];
+let crawlState   = { running: false, queue: [], visited: new Set(), results: [], base: '' };
+let resultFilter = 'all';
+let resultSearch = '';
+let exportFmt    = 'png';
+let diagramTree  = null;
+let dt           = { x:0, y:0, s:1 };
+let dragging     = false;
+let dragFrom     = { x:0, y:0 };
+let isDark       = true;
 
-/* ─────────────────────────────────────────
+/* ═══════════════════════════════════════════
    Theme
-───────────────────────────────────────── */
+═══════════════════════════════════════════ */
 function toggleTheme() {
   isDark = !isDark;
-  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-  document.getElementById('theme-btn').textContent = isDark ? '🌙' : '☀️';
-  // Re-render diagram with new theme colours if it exists
-  if (tree) renderDiagram();
+  document.documentElement.classList.toggle('light', !isDark);
+  document.getElementById('btn-theme').textContent = isDark ? '🌙' : '☀️';
+  if (diagramTree) renderDiagram();
 }
 
-/* ─────────────────────────────────────────
-   Home / nav
-───────────────────────────────────────── */
+/* ═══════════════════════════════════════════
+   Navigation
+═══════════════════════════════════════════ */
 function startSession() { document.getElementById('home-screen').classList.add('gone'); }
 function goHome()       { document.getElementById('home-screen').classList.remove('gone'); }
 
-function switchTab(name) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  document.querySelector(`.nav-tab[data-tab="${name}"]`).classList.add('active');
+function switchPage(name) {
+  ['crawler','diagram','export'].forEach(p => {
+    document.getElementById('page-'+p).classList.toggle('hidden', p !== name);
+  });
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.page === name);
+  });
 }
 
-/* ─────────────────────────────────────────
-   Workbench
-───────────────────────────────────────── */
-function toggleWb() {
-  document.getElementById('wb-row').classList.toggle('open');
+/* ═══════════════════════════════════════════
+   Accordion
+═══════════════════════════════════════════ */
+function toggleAccordion(headerId, bodyId) {
+  const h = document.getElementById(headerId);
+  const b = document.getElementById(bodyId);
+  h.classList.toggle('open');
+  b.classList.toggle('open');
 }
 
-/* ─────────────────────────────────────────
-   Snail animation
-───────────────────────────────────────── */
-function snailStart() { document.getElementById('snail').classList.add('crawling'); }
-function snailStop()  { document.getElementById('snail').classList.remove('crawling'); }
+/* ═══════════════════════════════════════════
+   Proxy
+═══════════════════════════════════════════ */
+const CANOPY_PROXY = 'https://waypointspider.libertyhphillips.workers.dev';
 
-/* ─────────────────────────────────────────
-   Crawl engine
-───────────────────────────────────────── */
+function setProxy(mode) {
+  document.getElementById('proxy-auto').classList.toggle('active', mode === 'auto');
+  document.getElementById('proxy-manual').classList.toggle('active', mode === 'manual');
+  document.getElementById('proxy-manual-url').classList.toggle('hidden', mode !== 'manual');
+}
+
+function getProxyUrl() {
+  const isManual = document.getElementById('proxy-manual').classList.contains('active');
+  if (isManual) {
+    return document.getElementById('proxy-manual-url').value.trim().replace(/\/$/, '') || CANOPY_PROXY;
+  }
+  return CANOPY_PROXY;
+}
+
+async function fetchPage(url) {
+  const proxyBase = getProxyUrl();
+  try {
+    const proxyUrl = `${proxyBase}?url=${encodeURIComponent(url)}`;
+    const res = await fetch(proxyUrl);
+    if (!res.ok) return { ok: false, status: res.status, statusText: String(res.status), html: '' };
+    const data = await res.json();
+    return { ok: data.ok, status: data.status, statusText: String(data.status), html: data.html || '' };
+  } catch {
+    // Proxy failed — fall back to direct fetch
+    try {
+      const res = await fetch(url, { method: 'GET', credentials: 'omit', headers: { 'Accept': 'text/html,application/xhtml+xml' } });
+      const text = res.headers.get('content-type')?.includes('text/html') ? await res.text() : '';
+      return { ok: res.ok, status: res.status, statusText: String(res.status), html: text };
+    } catch {
+      return { ok: null, status: null, statusText: 'blocked', html: '' };
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════
+   Crawl filters
+═══════════════════════════════════════════ */
 function getFilters() {
   return {
     pagination: document.getElementById('f-pagination').checked,
@@ -812,28 +738,26 @@ function getFilters() {
 function shouldExclude(url, f) {
   if (f.pagination && /[?&]page=|\/page\/\d|\/p\/\d/.test(url)) return true;
   if (f.media && /\.(png|jpe?g|gif|svg|ico|webp|pdf|zip|mp4|woff2?|ttf|eot)(\?|$)/i.test(url)) return true;
-  if (f.dev   && /wp-admin|wp-json|\.css(\?|$)|\.js(\?|$)|\/feed\/?$/.test(url)) return true;
+  if (f.dev   && /wp-admin|wp-json|\.css(\?|$)|\.js(\?|$)|\.woff|\/feed\/?$/.test(url)) return true;
   if (f.query && url.includes('?')) return true;
   if (f.hash  && url.includes('#')) return true;
   for (const p of f.patterns) { if (p && url.includes(p)) return true; }
   return false;
 }
 
-async function fetchPage(url) {
+function normaliseUrl(url) {
+  try { return (new URL(url)).href; } catch { return url; }
+}
+
+function extractLinks(html, base) {
   try {
-    const resp = await fetch(url, { mode:'cors', signal: AbortSignal.timeout(8000) });
-    if (!resp.ok) return { status:'error', links:[] };
-    const html = await resp.text();
-    const doc  = new DOMParser().parseFromString(html, 'text/html');
+    const doc = new DOMParser().parseFromString(html, 'text/html');
     const links = [];
     doc.querySelectorAll('a[href]').forEach(a => {
-      try { links.push(new URL(a.getAttribute('href'), url).href); } catch {}
+      try { links.push(new URL(a.getAttribute('href'), base).href); } catch {}
     });
-    return { status:'ok', links };
-  } catch(e) {
-    const msg = (e.message||'').toLowerCase();
-    return { status: (msg.includes('cors')||e.name==='TypeError') ? 'blocked' : 'error', links:[] };
-  }
+    return links;
+  } catch { return []; }
 }
 
 function getSection(url) {
@@ -841,144 +765,213 @@ function getSection(url) {
   catch { return '/'; }
 }
 
+/* ═══════════════════════════════════════════
+   Crawl engine
+═══════════════════════════════════════════ */
 async function startCrawl() {
-  const raw = document.getElementById('start-url').value.trim();
-  if (!raw) { alert('Enter a start URL.'); return; }
+  const rawUrl = document.getElementById('crawl-url').value.trim();
+  if (!rawUrl) { alert('Enter a start URL.'); return; }
   let startUrl;
-  try { startUrl = new URL(raw).href; } catch { alert('Invalid URL.'); return; }
+  try { startUrl = new URL(rawUrl).href; } catch { alert('Invalid URL.'); return; }
 
-  results = []; running = true; stopped = false;
-  document.getElementById('btn-crawl').disabled    = true;
-  document.getElementById('btn-stop').disabled     = false;
+  const origin = new URL(startUrl).origin;
+  const f = getFilters();
+  const concurrency = parseInt(document.getElementById('concurrency').value) || 3;
+
+  crawlResults = [];
+  crawlState = { running: true, queue: [startUrl], visited: new Set(), results: [], base: origin };
+  crawlState.visited.add(startUrl);
+
+  // UI reset
+  document.getElementById('btn-crawl-start').disabled = true;
+  document.getElementById('btn-crawl-stop').classList.remove('hidden');
+  document.getElementById('crawler-results').classList.remove('hidden');
+  document.getElementById('result-rows').innerHTML = '';
+  document.getElementById('crawl-progress-wrap').classList.remove('hidden');
+  document.getElementById('crawl-progress-fill').classList.add('crawling');
+  document.getElementById('snail-emoji').classList.add('crawling');
   document.getElementById('btn-to-diagram').disabled = true;
-  document.getElementById('btn-csv').disabled      = true;
-  document.getElementById('empty-crawl').classList.remove('hidden');
-  document.querySelectorAll('#rlist .result-item').forEach(el=>el.remove());
-  document.getElementById('status-text').textContent = 'crawling…';
-  snailStart();
-  resetCtrs();
+  document.getElementById('btn-export-csv').disabled = true;
+  updateStats();
+  setStatusText('crawling…');
+  setQueueInfo('');
 
-  const f    = getFilters();
-  const con  = parseInt(document.getElementById('concurrency').value)||3;
-  const base = new URL(startUrl).origin;
-  const seen = new Set([startUrl]);
-  const queue = [{ url:startUrl, depth:0 }];
+  async function worker() {
+    while (crawlState.running && crawlState.queue.length > 0) {
+      const url = crawlState.queue.shift();
+      if (!url || crawlState.visited.has(url)) continue;
+      if (shouldExclude(url, f)) { crawlState.visited.add(url); continue; }
+      crawlState.visited.add(url);
 
-  const processOne = async ({ url, depth }) => {
-    if (stopped) return;
-    const { status, links } = await fetchPage(url);
-    const entry = { url, status, depth, section: getSection(url) };
-    results.push(entry);
-    updateCtrs();
-    appendItem(entry);
-    if (status==='ok' && depth<12) {
-      for (const lnk of links) {
-        try {
-          const u = new URL(lnk);
-          if (u.origin !== base) continue;
-          const clean = (u.origin + u.pathname).replace(/\/+$/,'') || u.origin+'/';
-          if (seen.has(clean)) continue;
-          if (shouldExclude(clean, f)) continue;
-          seen.add(clean);
-          queue.push({ url:clean, depth:depth+1 });
-        } catch {}
+      const item = { url, ok: null, status: null, statusText: '…', depth: getDepth(url, origin), section: getSection(url) };
+      crawlState.results.push(item);
+      crawlResults.push(item);
+      appendResultRow(item);
+      updateStats();
+      setQueueInfo(`${crawlState.queue.length} in queue`);
+
+      const result = await fetchPage(url);
+      item.ok = result.ok;
+      item.status = result.status;
+      item.statusText = result.statusText;
+      updateResultRow(item);
+      updateStats();
+
+      if (result.html && crawlState.running) {
+        const links = extractLinks(result.html, url);
+        for (const lnk of links) {
+          try {
+            const u = new URL(lnk);
+            if (u.origin !== origin) continue;
+            const clean = (u.origin + u.pathname).replace(/\/+$/, '') || u.origin + '/';
+            if (crawlState.visited.has(clean) || crawlState.queue.includes(clean)) continue;
+            if (shouldExclude(clean, f)) continue;
+            crawlState.queue.push(clean);
+          } catch {}
+        }
       }
     }
-  };
-
-  while (queue.length > 0 && !stopped) {
-    await Promise.all(queue.splice(0, con).map(processOne));
   }
 
-  running = false;
-  snailStop();
-  document.getElementById('btn-crawl').disabled = false;
-  document.getElementById('btn-stop').disabled  = true;
-  if (results.length > 0) {
+  const workers = Array.from({ length: concurrency }, () => worker());
+  await Promise.all(workers);
+
+  crawlState.running = false;
+  document.getElementById('btn-crawl-start').disabled = false;
+  document.getElementById('btn-crawl-stop').classList.add('hidden');
+  document.getElementById('crawl-progress-fill').classList.remove('crawling');
+  document.getElementById('snail-emoji').classList.remove('crawling');
+  setQueueInfo('');
+
+  const n = crawlState.results.length;
+  if (n > 0) {
     document.getElementById('btn-to-diagram').disabled = false;
-    document.getElementById('btn-csv').disabled        = false;
+    document.getElementById('btn-export-csv').disabled = false;
+    setStatusText(`done — ${n} URL${n!==1?'s':''} found`);
+  } else {
+    setStatusText('done — no URLs found');
   }
-  document.getElementById('status-text').textContent = stopped
-    ? `stopped — ${results.length} URL${results.length!==1?'s':''} found`
-    : `done — ${results.length} URL${results.length!==1?'s':''}`;
 }
 
 function stopCrawl() {
-  stopped = true; running = false;
-  document.getElementById('btn-stop').disabled = true;
+  crawlState.running = false;
+  document.getElementById('btn-crawl-stop').classList.add('hidden');
+  document.getElementById('btn-crawl-start').disabled = false;
+  document.getElementById('crawl-progress-fill').classList.remove('crawling');
+  document.getElementById('snail-emoji').classList.remove('crawling');
+  const n = crawlState.results.length;
+  setStatusText(`stopped — ${n} URL${n!==1?'s':''} found`);
 }
 
-function resetCtrs() {
-  ['d','ok','e','b'].forEach(k => document.getElementById('ct-'+k).textContent='0');
-  document.getElementById('url-count').textContent = '0 URLs';
+function getDepth(url, base) {
+  try { return new URL(url).pathname.split('/').filter(Boolean).length; } catch { return 0; }
 }
 
-function updateCtrs() {
-  const n   = results.length;
-  const ok  = results.filter(r=>r.status==='ok').length;
-  const err = results.filter(r=>r.status==='error').length;
-  const blk = results.filter(r=>r.status==='blocked').length;
-  document.getElementById('ct-d').textContent  = n;
-  document.getElementById('ct-ok').textContent = ok;
-  document.getElementById('ct-e').textContent  = err;
-  document.getElementById('ct-b').textContent  = blk;
-  document.getElementById('url-count').textContent = n + ' URL'+(n!==1?'s':'');
+function setStatusText(t) { document.getElementById('crawl-status-text').textContent = t; }
+function setQueueInfo(t)   { document.getElementById('crawl-queue-info').textContent = t; }
+
+function updateStats() {
+  const r = crawlState.results;
+  const ok  = r.filter(x => x.ok).length;
+  const err = r.filter(x => x.ok === false && x.statusText !== 'blocked').length;
+  const blk = r.filter(x => x.statusText === 'blocked').length;
+  document.getElementById('stat-total').textContent = r.length;
+  document.getElementById('stat-ok').textContent    = ok;
+  document.getElementById('stat-err').textContent   = err;
+  document.getElementById('stat-blk').textContent   = blk;
 }
 
-/* ─────────────────────────────────────────
-   Results list
-───────────────────────────────────────── */
-function setFilter(f, btn) {
-  filter = f;
-  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('#rlist .result-item').forEach(el=>el.remove());
-  const vis = filter==='all' ? results : results.filter(r=>r.status===filter);
-  const list = document.getElementById('rlist');
-  vis.forEach(r => list.appendChild(makeItem(r)));
-  document.getElementById('empty-crawl').classList.toggle('hidden', results.length>0 && vis.length>0);
+/* ═══════════════════════════════════════════
+   Result rows
+═══════════════════════════════════════════ */
+const rowMap = new WeakMap();
+
+function badgeInfo(item) {
+  if (item.statusText === '…')       return ['badge-pend', '…'];
+  if (item.statusText === 'blocked') return ['badge-blk', 'blocked'];
+  if (item.ok)                       return ['badge-ok', String(item.status)];
+  return ['badge-err', String(item.status || 'ERR')];
 }
 
-function appendItem(entry) {
-  document.getElementById('empty-crawl').classList.add('hidden');
-  if (filter !== 'all' && entry.status !== filter) return;
-  document.getElementById('rlist').appendChild(makeItem(entry));
-}
-
-function makeItem(r) {
+function makeRow(item) {
   const d = document.createElement('div');
-  d.className = 'result-item';
-  const bc = r.status==='ok' ? 'badge-ok' : r.status==='blocked' ? 'badge-block' : 'badge-err';
-  const bt = r.status==='ok' ? '200' : r.status==='blocked' ? 'CORS' : 'ERR';
-  d.innerHTML = `
-    <span class="status-badge ${bc}">${bt}</span>
-    <span class="url-text" title="${r.url}">${r.url}</span>
-    <span class="section-tag">${r.section}</span>
-    <span class="depth-tag">d${r.depth}</span>`;
+  d.className = 'spider-row';
+  const [bc, bt] = badgeInfo(item);
+  d.innerHTML = `<span class="spider-url" title="${item.url}">${item.url}</span><span class="spider-depth">d${item.depth}</span><span class="spider-badge ${bc}">${bt}</span>`;
+  rowMap.set(item, d);
   return d;
 }
 
-/* ─────────────────────────────────────────
-   Diagram — rectangular nodes, orthogonal lines
-───────────────────────────────────────── */
-function sendToDiagram() { buildDiagram(); switchTab('diagram'); }
+function appendResultRow(item) {
+  if (!matchesFilter(item)) return;
+  document.getElementById('result-rows').appendChild(makeRow(item));
+}
 
-// Node dimensions
-const NODE_W      = 130;
-const NODE_H      = 30;
-const NODE_ROOT_W = 150;
-const NODE_ROOT_H = 36;
-const H_GAP       = 40;   // horizontal gap between siblings
-const V_GAP       = 60;   // vertical gap between levels
+function updateResultRow(item) {
+  const el = rowMap.get(item);
+  if (!el) return;
+  const badge = el.querySelector('.spider-badge');
+  if (!badge) return;
+  const [bc, bt] = badgeInfo(item);
+  badge.className = 'spider-badge ' + bc;
+  badge.textContent = bt;
+  // If filter is now wrong for this item, remove it
+  if (!matchesFilter(item)) el.remove();
+}
+
+function matchesFilter(item) {
+  if (resultFilter === 'ok'      && !item.ok) return false;
+  if (resultFilter === 'errors'  && (item.ok || item.statusText === 'blocked')) return false;
+  if (resultFilter === 'blocked' && item.statusText !== 'blocked') return false;
+  if (resultSearch && !item.url.toLowerCase().includes(resultSearch.toLowerCase())) return false;
+  return true;
+}
+
+function setResultFilter(f, btn) {
+  resultFilter = f;
+  document.querySelectorAll('.fpill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  renderResults();
+}
+
+function renderResults() {
+  resultSearch = document.getElementById('result-search').value;
+  document.getElementById('search-clear').classList.toggle('hidden', !resultSearch);
+  const container = document.getElementById('result-rows');
+  container.innerHTML = '';
+  crawlState.results.filter(matchesFilter).forEach(item => {
+    container.appendChild(makeRow(item));
+  });
+}
+
+function clearSearch() {
+  document.getElementById('result-search').value = '';
+  resultSearch = '';
+  document.getElementById('search-clear').classList.add('hidden');
+  renderResults();
+}
+
+/* ═══════════════════════════════════════════
+   Diagram
+═══════════════════════════════════════════ */
+const NODE_W      = 128;
+const NODE_H      = 28;
+const NODE_ROOT_W = 148;
+const NODE_ROOT_H = 34;
+const H_GAP       = 36;
+const V_GAP       = 56;
+
+function sendToDiagram() {
+  buildDiagram();
+  switchPage('diagram');
+}
 
 function buildDiagram() {
-  const pages = results.filter(r => r.status==='ok' || r.status==='blocked');
+  const pages = crawlState.results.filter(r => r.ok || r.statusText === 'blocked');
   if (!pages.length) return;
 
-  document.getElementById('empty-diagram').style.display = 'none';
-  document.getElementById('dlegend').style.display  = '';
-  document.getElementById('dinfo').style.display    = '';
-  document.getElementById('dtoolbar').style.display = '';
+  document.getElementById('diagram-empty').classList.add('hidden');
+  document.getElementById('diagram-wrap').classList.remove('hidden');
 
   // Build tree from URL paths
   const root = { label:'/', slug:'/', url:'/', ch:{}, depth:0, isRoot:true };
@@ -997,129 +990,113 @@ function buildDiagram() {
   function toArr(obj) {
     return { ...obj, children: Object.values(obj.ch).map(toArr) };
   }
-  tree = toArr(root);
+  diagramTree = toArr(root);
 
-  // Stats
   let maxD=0, total=0, secs=0;
   function count(n) { total++; if(n.depth>maxD)maxD=n.depth; if(n.isSection)secs++; n.children.forEach(count); }
-  count(tree);
+  count(diagramTree);
 
-  let domain=''; try { domain = new URL(document.getElementById('start-url').value).hostname; } catch {}
-  document.getElementById('info-domain').textContent = domain;
-  document.getElementById('info-total').textContent  = total;
-  document.getElementById('info-sec').textContent    = secs;
-  document.getElementById('info-depth').textContent  = maxD;
-  document.getElementById('info-st').textContent     = '✅ complete';
+  let domain=''; try { domain = new URL(document.getElementById('crawl-url').value).hostname; } catch {}
+  document.getElementById('d-domain').textContent = domain;
+  document.getElementById('d-total').textContent  = total;
+  document.getElementById('d-secs').textContent   = secs;
+  document.getElementById('d-depth').textContent  = maxD;
+  document.getElementById('d-status').textContent = '✅ complete';
 
   renderDiagram();
 }
 
-function nodeW(n) { return n.isRoot ? NODE_ROOT_W : NODE_W; }
-function nodeH(n) { return n.isRoot ? NODE_ROOT_H : NODE_H; }
+function nW(n) { return n.isRoot ? NODE_ROOT_W : NODE_W; }
+function nH(n) { return n.isRoot ? NODE_ROOT_H : NODE_H; }
 
 function subtreeW(n) {
-  if (!n.children || !n.children.length) return nodeW(n);
-  const childrenTotal = n.children.reduce((s,c) => s + subtreeW(c), 0)
-                      + (n.children.length-1) * H_GAP;
-  return Math.max(nodeW(n), childrenTotal);
+  if (!n.children || !n.children.length) return nW(n);
+  const childSum = n.children.reduce((s,c) => s + subtreeW(c), 0) + (n.children.length-1)*H_GAP;
+  return Math.max(nW(n), childSum);
 }
 
 function assignXY(n, cx, y) {
-  n.x = cx;
-  n.y = y;
+  n.x = cx; n.y = y;
   if (!n.children || !n.children.length) return;
   const total = n.children.reduce((s,c)=>s+subtreeW(c),0) + (n.children.length-1)*H_GAP;
   let x = cx - total/2;
   for (const c of n.children) {
     const w = subtreeW(c);
-    assignXY(c, x + w/2, y + nodeH(n) + V_GAP);
+    assignXY(c, x + w/2, y + nH(n) + V_GAP);
     x += w + H_GAP;
   }
 }
 
 function renderDiagram() {
-  if (!tree) return;
+  if (!diagramTree) return;
   const svg = document.getElementById('diagram');
   document.getElementById('edges-g').innerHTML = '';
   document.getElementById('nodes-g').innerHTML = '';
 
-  const W = svg.clientWidth  || window.innerWidth;
-  const H = svg.clientHeight || (window.innerHeight - 90);
+  const W = svg.clientWidth  || 1200;
+  const H = svg.clientHeight || 600;
 
-  assignXY(tree, 0, 0);
+  assignXY(diagramTree, 0, 0);
 
-  // Bounding box
   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   function bb(n) {
-    const hw = nodeW(n)/2;
+    const hw=nW(n)/2;
     if(n.x-hw<minX)minX=n.x-hw; if(n.x+hw>maxX)maxX=n.x+hw;
-    if(n.y<minY)minY=n.y; if(n.y+nodeH(n)>maxY)maxY=n.y+nodeH(n);
+    if(n.y<minY)minY=n.y; if(n.y+nH(n)>maxY)maxY=n.y+nH(n);
     n.children.forEach(bb);
   }
-  bb(tree);
+  bb(diagramTree);
 
   const pad=60, tW=maxX-minX+pad*2, tH=maxY-minY+pad*2;
   const sc = Math.min((W-40)/tW, (H-40)/tH, 1.0);
-  dt = { x: W/2 - ((minX+maxX)/2)*sc, y: pad + (-minY)*sc, s: sc };
+  dt = { x: W/2-((minX+maxX)/2)*sc, y: pad+(-minY)*sc, s: sc };
   applyDt();
 
   const EG = document.getElementById('edges-g');
   const NG = document.getElementById('nodes-g');
 
-  // Orthogonal edges: elbow connectors
   function drawEdges(n) {
-    const pw = nodeW(n), ph = nodeH(n);
-    const px = n.x, py = n.y;
     for (const c of n.children) {
-      const cw = nodeW(c), ch = nodeH(c);
-      // parent bottom-centre → child top-centre, with a horizontal elbow midway
-      const x1 = px;
-      const y1 = py + ph;
-      const x2 = c.x;
+      const y1 = n.y + nH(n);
       const y2 = c.y;
-      const mid = y1 + (y2 - y1) / 2;
-
+      const mid = y1 + (y2-y1)/2;
       const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-      path.setAttribute('d', `M ${x1} ${y1} L ${x1} ${mid} L ${x2} ${mid} L ${x2} ${y2}`);
-      path.setAttribute('class', 'dedge' + (n.isRoot ? ' root-edge' : ''));
+      path.setAttribute('d',`M ${n.x} ${y1} L ${n.x} ${mid} L ${c.x} ${mid} L ${c.x} ${y2}`);
+      path.setAttribute('class','dedge'+(n.isRoot?' root-edge':''));
       EG.appendChild(path);
       drawEdges(c);
     }
   }
-  drawEdges(tree);
+  drawEdges(diagramTree);
 
-  // Node boxes
   function drawNodes(n) {
-    const w = nodeW(n), h = nodeH(n);
+    const w=nW(n), h=nH(n);
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-    g.setAttribute('class', 'dnode' + (n.isRoot?' root':n.isSection?' section':' leaf'));
-    g.setAttribute('transform', `translate(${n.x - w/2},${n.y})`);
+    g.setAttribute('class','dnode'+(n.isRoot?' root':n.isSection?' section':' leaf'));
+    g.setAttribute('transform',`translate(${n.x-w/2},${n.y})`);
     g.dataset.url = n.url;
 
     const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
     rect.setAttribute('width', w);
     rect.setAttribute('height', h);
-    rect.setAttribute('rx', 2);
-    rect.setAttribute('ry', 2);
+    rect.setAttribute('rx', 3); rect.setAttribute('ry', 3);
     g.appendChild(rect);
 
-    // Primary label: slug
-    const slug = n.isRoot ? '/' : (n.slug.length>14 ? n.slug.slice(0,13)+'…' : n.slug);
+    const slug = n.isRoot ? '/' : (n.slug.length>15 ? n.slug.slice(0,14)+'…' : n.slug);
     const t = document.createElementNS('http://www.w3.org/2000/svg','text');
     t.setAttribute('x', w/2);
-    t.setAttribute('y', n.isRoot ? h/2+4 : h/2+3);
+    t.setAttribute('y', h/2+4);
     t.setAttribute('class', n.isRoot ? 'nl-root' : 'nl-slug');
     t.textContent = slug;
     g.appendChild(t);
 
-    // Child count sub-label (sections only)
     if (n.isSection && n.children.length > 0) {
       const sub = document.createElementNS('http://www.w3.org/2000/svg','text');
       sub.setAttribute('x', w/2);
-      sub.setAttribute('y', h + 14);
+      sub.setAttribute('y', h+13);
       sub.setAttribute('class','nl-sub');
       sub.setAttribute('text-anchor','middle');
-      sub.textContent = n.children.length + (n.children.length===1?' page':' pages');
+      sub.textContent = n.children.length+(n.children.length===1?' page':' pages');
       g.appendChild(sub);
     }
 
@@ -1130,67 +1107,66 @@ function renderDiagram() {
     NG.appendChild(g);
     n.children.forEach(drawNodes);
   }
-  drawNodes(tree);
+  drawNodes(diagramTree);
 }
 
 function applyDt() {
   document.getElementById('dg').setAttribute('transform',`translate(${dt.x},${dt.y}) scale(${dt.s})`);
 }
-function dzoom(f) { dt.s = Math.min(Math.max(dt.s*f, 0.06), 6); applyDt(); }
-function dfit()   { if(tree) buildDiagram(); }
+function dzoom(f) { dt.s=Math.min(Math.max(dt.s*f,0.06),6); applyDt(); }
+function dfit()   { if(diagramTree) buildDiagram(); }
 
-// Pan + scroll zoom
-const dcw = document.getElementById('diagram-canvas-wrap');
-dcw.addEventListener('mousedown', e => {
+// Pan
+const dc = document.getElementById('diagram-canvas');
+dc.addEventListener('mousedown', e => {
   if (e.target.closest('.dnode')) return;
-  dragging=true; dragFrom={x:e.clientX-dt.x, y:e.clientY-dt.y};
+  dragging=true; dragFrom={x:e.clientX-dt.x,y:e.clientY-dt.y};
 });
 window.addEventListener('mousemove', e => {
   if (!dragging) return;
   dt.x=e.clientX-dragFrom.x; dt.y=e.clientY-dragFrom.y; applyDt();
 });
 window.addEventListener('mouseup', () => dragging=false);
-dcw.addEventListener('wheel', e => {
-  e.preventDefault(); dzoom(e.deltaY<0?1.1:0.9);
-}, {passive:false});
+dc.addEventListener('wheel', e => { e.preventDefault(); dzoom(e.deltaY<0?1.1:0.9); }, {passive:false});
 
-/* ─────────────────────────────────────────
+/* ═══════════════════════════════════════════
    Export
-───────────────────────────────────────── */
+═══════════════════════════════════════════ */
 function pickFmt(card, f) {
   document.querySelectorAll('.export-card').forEach(c=>c.classList.remove('selected'));
-  card.classList.add('selected'); fmt=f;
+  card.classList.add('selected'); exportFmt=f;
 }
 
 function doExport() {
   const msg = document.getElementById('export-msg');
   msg.textContent='';
-  if (!results.length && fmt!=='png' && fmt!=='svg') { msg.textContent='⚠ Run a crawl first.'; return; }
-  if (fmt==='csv')       exportCSV();
-  else if (fmt==='json') exportJSON();
-  else if (fmt==='svg')  exportSVG();
-  else                   exportPNG();
+  if (exportFmt==='csv')       exportCSV();
+  else if (exportFmt==='json') exportJSON();
+  else if (exportFmt==='svg')  exportSVGFile();
+  else exportPNG();
 }
 
 function exportCSV() {
+  if (!crawlState.results.length) { document.getElementById('export-msg').textContent='⚠ Run a crawl first.'; return; }
   const rows=['url,status,depth,section'];
-  results.forEach(r=>rows.push(`"${r.url}","${r.status}",${r.depth},"${r.section}"`));
+  crawlState.results.forEach(r=>rows.push(`"${r.url}","${r.statusText}",${r.depth},"${r.section}"`));
   dl('canopy-sitemap.csv', rows.join('\n'), 'text/csv');
 }
 function exportJSON() {
-  dl('canopy-sitemap.json', JSON.stringify({crawledAt:new Date().toISOString(),urls:results,tree},null,2), 'application/json');
+  dl('canopy-sitemap.json', JSON.stringify({crawledAt:new Date().toISOString(),urls:crawlState.results,tree:diagramTree},null,2), 'application/json');
 }
-function exportSVG() {
+function exportSVGFile() {
+  if (!diagramTree) { document.getElementById('export-msg').textContent='⚠ Build the diagram first.'; return; }
   dl('canopy-sitemap.svg', new XMLSerializer().serializeToString(document.getElementById('diagram')), 'image/svg+xml');
 }
 function exportPNG() {
+  if (!diagramTree) { document.getElementById('export-msg').textContent='⚠ Build the diagram first.'; return; }
   const svg=document.getElementById('diagram');
   const W=svg.clientWidth||1400, H=svg.clientHeight||900;
   const canvas=document.createElement('canvas');
   canvas.width=W*2; canvas.height=H*2;
   const ctx=canvas.getContext('2d'); ctx.scale(2,2);
-  ctx.fillStyle= isDark ? '#0e0e0e' : '#f5f5f5';
-  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=isDark?'#0a0a0d':'#e8e8e2'; ctx.fillRect(0,0,W,H);
   const blob=new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml'});
   const url=URL.createObjectURL(blob);
   const img=new Image();
@@ -1208,12 +1184,48 @@ function dl(name, content, type) {
   a.download=name; a.click();
 }
 
-/* ─────────────────────────────────────────
+/* ═══════════════════════════════════════════
+   Worker download
+═══════════════════════════════════════════ */
+const WORKER_CODE = `/**
+ * Canopy Crawler Proxy — Cloudflare Worker
+ * Deploy to Cloudflare Workers to enable crawling of external sites.
+ * Set ALLOWED_ORIGIN to your hosted URL before deploying.
+ */
+
+const ALLOWED_ORIGIN = '*';
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url).searchParams.get('url');
+    if (!url) return new Response(JSON.stringify({ error: 'No URL' }), { status: 400 });
+    try {
+      const res = await fetch(url, { headers: { 'User-Agent': 'CanopyBot/1.0' } });
+      const contentType = res.headers.get('content-type') || '';
+      const html = contentType.includes('text/html') ? await res.text() : '';
+      return new Response(JSON.stringify({ ok: res.ok, status: res.status, html }), {
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': ALLOWED_ORIGIN }
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: false, status: null, html: '' }), {
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': ALLOWED_ORIGIN }
+      });
+    }
+  }
+};
+`;
+
+function downloadWorker() {
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([WORKER_CODE],{type:'text/javascript'}));
+  a.download='canopy-worker.js'; a.click();
+}
+
+/* ═══════════════════════════════════════════
    Modals
-───────────────────────────────────────── */
+═══════════════════════════════════════════ */
 function showModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function overlayClose(e, id) { if(e.target===document.getElementById(id)) closeModal(id); }
 document.addEventListener('keydown', e => {
   if (e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
 });
