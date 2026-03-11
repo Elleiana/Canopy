@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Canopy</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3C!-- root node --%3E%3Crect x='9' y='2' width='14' height='8' rx='1.5' fill='%23008080' opacity='0.92'/%3E%3Crect x='11.5' y='4' width='9' height='1.5' rx='0.5' fill='%23e0ddd8' opacity='0.65'/%3E%3Crect x='12' y='6.5' width='5' height='1' rx='0.5' fill='%23e0ddd8' opacity='0.35'/%3E%3C!-- trunk --%3E%3Crect x='15.25' y='10' width='1.5' height='4' fill='%23008080' opacity='0.6'/%3E%3C!-- horizontal bar --%3E%3Crect x='7' y='14' width='18' height='1.5' fill='%23008080' opacity='0.45'/%3E%3C!-- left branch trunk --%3E%3Crect x='7' y='15.5' width='1.5' height='3.5' fill='%23008080' opacity='0.4'/%3E%3C!-- right branch trunk --%3E%3Crect x='23.5' y='15.5' width='1.5' height='3.5' fill='%23008080' opacity='0.4'/%3E%3C!-- left leaf 1 --%3E%3Crect x='3' y='19' width='9' height='5' rx='1' fill='%23008080' opacity='0.55'/%3E%3C!-- left leaf 2 --%3E%3Crect x='3' y='26' width='9' height='5' rx='1' fill='%23008080' opacity='0.4'/%3E%3C!-- left leaf connectors --%3E%3Crect x='3' y='24' width='1.5' height='7' fill='%23008080' opacity='0.3'/%3E%3C!-- right leaf 1 --%3E%3Crect x='20' y='19' width='9' height='5' rx='1' fill='%23008080' opacity='0.55'/%3E%3C!-- right leaf 2 --%3E%3Crect x='20' y='26' width='9' height='5' rx='1' fill='%23008080' opacity='0.4'/%3E%3C!-- right leaf connectors --%3E%3Crect x='27.5' y='24' width='1.5' height='7' fill='%23008080' opacity='0.3'/%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23008080' opacity='0.92'/%3E%3C!-- root node --%3E%3Ccircle cx='16' cy='6' r='3.2' fill='%23e0ddd8' opacity='0.9'/%3E%3C!-- trunk --%3E%3Crect x='15.2' y='9' width='1.6' height='4' fill='%23e0ddd8' opacity='0.7'/%3E%3C!-- horizontal bar --%3E%3Crect x='8' y='13' width='16' height='1.4' fill='%23e0ddd8' opacity='0.55'/%3E%3C!-- left drop --%3E%3Crect x='8' y='14.4' width='1.4' height='3' fill='%23e0ddd8' opacity='0.5'/%3E%3C!-- right drop --%3E%3Crect x='22.6' y='14.4' width='1.4' height='3' fill='%23e0ddd8' opacity='0.5'/%3E%3C!-- left section node --%3E%3Ccircle cx='8.7' cy='20' r='2.8' fill='%23e0ddd8' opacity='0.75'/%3E%3C!-- right section node --%3E%3Ccircle cx='23.3' cy='20' r='2.8' fill='%23e0ddd8' opacity='0.75'/%3E%3C!-- left leaf rail --%3E%3Crect x='8' y='22.8' width='1.4' height='5' fill='%23e0ddd8' opacity='0.4'/%3E%3C!-- right leaf rail --%3E%3Crect x='22.6' y='22.8' width='1.4' height='5' fill='%23e0ddd8' opacity='0.4'/%3E%3C!-- left leaves --%3E%3Ccircle cx='12' cy='24.5' r='1.8' fill='%23e0ddd8' opacity='0.55'/%3E%3Ccircle cx='12' cy='28.5' r='1.8' fill='%23e0ddd8' opacity='0.4'/%3E%3C!-- right leaves --%3E%3Ccircle cx='20' cy='24.5' r='1.8' fill='%23e0ddd8' opacity='0.55'/%3E%3Ccircle cx='20' cy='28.5' r='1.8' fill='%23e0ddd8' opacity='0.4'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -226,7 +226,8 @@
     .dnode.section rect { fill: var(--bg-card);    stroke: var(--border-soft); stroke-width: 1; }
     .dnode.leaf rect    { fill: var(--bg-input);   stroke: var(--border-inner); stroke-width: 1; }
     .dnode:hover rect   { filter: brightness(1.4); }
-    .dnode.selected rect { stroke: #008080 !important; stroke-width: 2 !important; }
+    .dnode.selected rect { stroke: #008080 !important; stroke-width: 2 !important; filter: brightness(1.3); }
+    .dnode.ancestor rect { stroke: #005f5f !important; stroke-width: 1.5 !important; filter: brightness(1.15); opacity: 0.9; }
     .dnode text { font-family: 'IBM Plex Mono', monospace; fill: var(--text-body); pointer-events: none; user-select: none; text-anchor: middle; }
     .dnode text.nl-slug { font-size: 10px; fill: var(--text-body); }
     .dnode text.nl-root { font-size: 11px; font-weight: 600; fill: var(--text-strong); }
@@ -291,7 +292,7 @@
 <!-- ── Home screen ── -->
 <div id="home-screen">
   <div style="text-align:center">
-    <div class="home-title"><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' style='width:1.1em;height:1.1em;vertical-align:-0.12em;display:inline-block;flex-shrink:0;'><rect x='9' y='2' width='14' height='8' rx='1.5' fill='#008080' opacity='0.92'/><rect x='11.5' y='4' width='9' height='1.5' rx='0.5' fill='#e0ddd8' opacity='0.65'/><rect x='12' y='6.5' width='5' height='1' rx='0.5' fill='#e0ddd8' opacity='0.35'/><rect x='15.25' y='10' width='1.5' height='4' fill='#008080' opacity='0.6'/><rect x='7' y='14' width='18' height='1.5' fill='#008080' opacity='0.45'/><rect x='7' y='15.5' width='1.5' height='3.5' fill='#008080' opacity='0.4'/><rect x='23.5' y='15.5' width='1.5' height='3.5' fill='#008080' opacity='0.4'/><rect x='3' y='19' width='9' height='5' rx='1' fill='#008080' opacity='0.55'/><rect x='3' y='26' width='9' height='5' rx='1' fill='#008080' opacity='0.4'/><rect x='3' y='24' width='1.5' height='7' fill='#008080' opacity='0.3'/><rect x='20' y='19' width='9' height='5' rx='1' fill='#008080' opacity='0.55'/><rect x='20' y='26' width='9' height='5' rx='1' fill='#008080' opacity='0.4'/><rect x='27.5' y='24' width='1.5' height='7' fill='#008080' opacity='0.3'/></svg> Canopy</div>
+    <div class="home-title"><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' style='width:1.1em;height:1.1em;vertical-align:-0.12em;display:inline-block;flex-shrink:0;'><circle cx='16' cy='16' r='15' fill='#008080' opacity='0.92'/><circle cx='16' cy='6' r='3.2' fill='#e0ddd8' opacity='0.9'/><rect x='15.2' y='9' width='1.6' height='4' fill='#e0ddd8' opacity='0.7'/><rect x='8' y='13' width='16' height='1.4' fill='#e0ddd8' opacity='0.55'/><rect x='8' y='14.4' width='1.4' height='3' fill='#e0ddd8' opacity='0.5'/><rect x='22.6' y='14.4' width='1.4' height='3' fill='#e0ddd8' opacity='0.5'/><circle cx='8.7' cy='20' r='2.8' fill='#e0ddd8' opacity='0.75'/><circle cx='23.3' cy='20' r='2.8' fill='#e0ddd8' opacity='0.75'/><rect x='8' y='22.8' width='1.4' height='5' fill='#e0ddd8' opacity='0.4'/><rect x='22.6' y='22.8' width='1.4' height='5' fill='#e0ddd8' opacity='0.4'/><circle cx='12' cy='24.5' r='1.8' fill='#e0ddd8' opacity='0.55'/><circle cx='12' cy='28.5' r='1.8' fill='#e0ddd8' opacity='0.4'/><circle cx='20' cy='24.5' r='1.8' fill='#e0ddd8' opacity='0.55'/><circle cx='20' cy='28.5' r='1.8' fill='#e0ddd8' opacity='0.4'/></svg> Canopy</div>
     <div class="home-sub">// sitemap toolkit</div>
   </div>
   <p class="home-desc">Crawl a live site, map its page structure, and export a visual sitemap — for internal planning or sharing with clients.</p>
@@ -303,7 +304,7 @@
 <div id="app">
   <header>
     <div class="header-left" onclick="goHome()">
-      <h1><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' style='width:1.1em;height:1.1em;vertical-align:-0.12em;display:inline-block;flex-shrink:0;'><rect x='9' y='2' width='14' height='8' rx='1.5' fill='#008080' opacity='0.92'/><rect x='11.5' y='4' width='9' height='1.5' rx='0.5' fill='#e0ddd8' opacity='0.65'/><rect x='12' y='6.5' width='5' height='1' rx='0.5' fill='#e0ddd8' opacity='0.35'/><rect x='15.25' y='10' width='1.5' height='4' fill='#008080' opacity='0.6'/><rect x='7' y='14' width='18' height='1.5' fill='#008080' opacity='0.45'/><rect x='7' y='15.5' width='1.5' height='3.5' fill='#008080' opacity='0.4'/><rect x='23.5' y='15.5' width='1.5' height='3.5' fill='#008080' opacity='0.4'/><rect x='3' y='19' width='9' height='5' rx='1' fill='#008080' opacity='0.55'/><rect x='3' y='26' width='9' height='5' rx='1' fill='#008080' opacity='0.4'/><rect x='3' y='24' width='1.5' height='7' fill='#008080' opacity='0.3'/><rect x='20' y='19' width='9' height='5' rx='1' fill='#008080' opacity='0.55'/><rect x='20' y='26' width='9' height='5' rx='1' fill='#008080' opacity='0.4'/><rect x='27.5' y='24' width='1.5' height='7' fill='#008080' opacity='0.3'/></svg> Canopy</h1>
+      <h1><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' style='width:1.1em;height:1.1em;vertical-align:-0.12em;display:inline-block;flex-shrink:0;'><circle cx='16' cy='16' r='15' fill='#008080' opacity='0.92'/><circle cx='16' cy='6' r='3.2' fill='#e0ddd8' opacity='0.9'/><rect x='15.2' y='9' width='1.6' height='4' fill='#e0ddd8' opacity='0.7'/><rect x='8' y='13' width='16' height='1.4' fill='#e0ddd8' opacity='0.55'/><rect x='8' y='14.4' width='1.4' height='3' fill='#e0ddd8' opacity='0.5'/><rect x='22.6' y='14.4' width='1.4' height='3' fill='#e0ddd8' opacity='0.5'/><circle cx='8.7' cy='20' r='2.8' fill='#e0ddd8' opacity='0.75'/><circle cx='23.3' cy='20' r='2.8' fill='#e0ddd8' opacity='0.75'/><rect x='8' y='22.8' width='1.4' height='5' fill='#e0ddd8' opacity='0.4'/><rect x='22.6' y='22.8' width='1.4' height='5' fill='#e0ddd8' opacity='0.4'/><circle cx='12' cy='24.5' r='1.8' fill='#e0ddd8' opacity='0.55'/><circle cx='12' cy='28.5' r='1.8' fill='#e0ddd8' opacity='0.4'/><circle cx='20' cy='24.5' r='1.8' fill='#e0ddd8' opacity='0.55'/><circle cx='20' cy='28.5' r='1.8' fill='#e0ddd8' opacity='0.4'/></svg> Canopy</h1>
       <span class="subtitle">// sitemap toolkit</span>
     </div>
     <nav class="header-nav">
@@ -495,11 +496,57 @@
 
     <div id="diagram-empty" class="section-card">
       <div class="card-body" style="text-align:center;padding:3rem 1rem;font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:var(--text-muted);">
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' style='width:1.1em;height:1.1em;vertical-align:-0.12em;display:inline-block;flex-shrink:0;'><rect x='9' y='2' width='14' height='8' rx='1.5' fill='#008080' opacity='0.92'/><rect x='11.5' y='4' width='9' height='1.5' rx='0.5' fill='#e0ddd8' opacity='0.65'/><rect x='12' y='6.5' width='5' height='1' rx='0.5' fill='#e0ddd8' opacity='0.35'/><rect x='15.25' y='10' width='1.5' height='4' fill='#008080' opacity='0.6'/><rect x='7' y='14' width='18' height='1.5' fill='#008080' opacity='0.45'/><rect x='7' y='15.5' width='1.5' height='3.5' fill='#008080' opacity='0.4'/><rect x='23.5' y='15.5' width='1.5' height='3.5' fill='#008080' opacity='0.4'/><rect x='3' y='19' width='9' height='5' rx='1' fill='#008080' opacity='0.55'/><rect x='3' y='26' width='9' height='5' rx='1' fill='#008080' opacity='0.4'/><rect x='3' y='24' width='1.5' height='7' fill='#008080' opacity='0.3'/><rect x='20' y='19' width='9' height='5' rx='1' fill='#008080' opacity='0.55'/><rect x='20' y='26' width='9' height='5' rx='1' fill='#008080' opacity='0.4'/><rect x='27.5' y='24' width='1.5' height='7' fill='#008080' opacity='0.3'/></svg> &nbsp; No diagram yet — run a crawl and click <strong style="color:var(--text-title);">→ build diagram</strong>
+        🌳 &nbsp; No diagram yet — run a crawl and click <strong style="color:var(--text-title);">→ build diagram</strong>
       </div>
     </div>
 
     <div id="diagram-wrap" class="hidden">
+
+      <!-- Diagram Workbench -->
+      <div class="section-card" style="margin-bottom:0.75rem;">
+        <div class="card-header accordion" id="dwb-header" onclick="toggleAccordion('dwb-header','dwb-body')">
+          <div class="card-header-text">
+            <div class="card-title">Workbench</div>
+            <div class="accordion-help">Control depth, grouping, and display options for the diagram.</div>
+          </div>
+          <span class="accordion-toggle" id="dwb-toggle">◀</span>
+        </div>
+        <div class="accordion-body" id="dwb-body">
+          <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;flex-wrap:wrap;">
+
+            <div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.4rem;">Max depth</div>
+              <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);margin-bottom:0.6rem;line-height:1.5;">Trim the tree to a maximum depth. Useful for high-level overviews — show sections only, or sections plus one level.</div>
+              <div style="display:flex;align-items:center;gap:0.65rem;">
+                <input class="base-url-input" id="d-max-depth" type="number" min="1" max="10" value="4" style="width:60px;flex:0 0 auto;" />
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--text-muted);">1 = root only &nbsp;·&nbsp; 2 = sections &nbsp;·&nbsp; 3+ = pages</span>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.4rem;">Collapse sections</div>
+              <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);margin-bottom:0.6rem;line-height:1.5;">Hide the children of any section with more than this many pages. Keeps the diagram readable for large sites.</div>
+              <div style="display:flex;align-items:center;gap:0.65rem;">
+                <input class="base-url-input" id="d-collapse-threshold" type="number" min="1" max="999" value="20" style="width:60px;flex:0 0 auto;" />
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--text-muted);">pages per section before collapsing</span>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.4rem;">Display</div>
+              <div style="display:flex;flex-direction:column;gap:0.45rem;margin-top:0.2rem;">
+                <label class="spider-opt-row"><input type="checkbox" id="d-show-counts" checked /> <span>Show child counts on sections</span></label>
+                <label class="spider-opt-row"><input type="checkbox" id="d-show-errors" checked /> <span>Include error / blocked pages</span></label>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-body" style="padding-top:0;border-top:1px solid var(--border-soft);margin-top:0.25rem;display:flex;align-items:center;gap:0.5rem;">
+            <button class="btn-check" onclick="buildDiagram()">↺ apply &amp; re-draw</button>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--text-muted);">Changes take effect when you re-draw.</span>
+          </div>
+        </div>
+      </div>
       <div class="diagram-canvas-wrap" id="diagram-canvas">
         <svg id="diagram">
           <g id="dg" transform="translate(0,0) scale(1)">
@@ -653,6 +700,8 @@ let resultFilter = 'all';
 let resultSearch = '';
 let exportFmt    = 'png';
 let diagramTree  = null;
+let parentMap    = new Map();   // node → parent node
+let nodeElemMap  = new Map();   // node → SVG <g> element
 let dt           = { x:0, y:0, s:1 };
 let dragging     = false;
 let dragFrom     = { x:0, y:0 };
@@ -995,19 +1044,30 @@ function sendToDiagram() {
 }
 
 function buildDiagram() {
-  const pages = crawlState.results.filter(r => r.ok || r.statusText === 'blocked');
+  const showErrors = document.getElementById('d-show-errors')?.checked ?? true;
+  const pages = crawlState.results.filter(r => {
+    if (r.ok) return true;
+    if (r.statusText === 'blocked' && showErrors) return true;
+    return false;
+  });
   if (!pages.length) return;
 
   document.getElementById('diagram-empty').classList.add('hidden');
   document.getElementById('diagram-wrap').classList.remove('hidden');
+
+  const maxDepth         = parseInt(document.getElementById('d-max-depth')?.value) || 4;
+  const collapseThresh   = parseInt(document.getElementById('d-collapse-threshold')?.value) || 20;
+  const showCounts       = document.getElementById('d-show-counts')?.checked ?? true;
 
   // Build tree from URL paths
   const root = { label:'/', slug:'/', url:'/', ch:{}, depth:0, isRoot:true };
   for (const r of pages) {
     let path; try { path = new URL(r.url).pathname; } catch { continue; }
     const parts = path.split('/').filter(Boolean);
+    if (parts.length >= maxDepth) continue; // trim to max depth
     let node = root;
     for (let i=0; i<parts.length; i++) {
+      if (i >= maxDepth - 1) break;
       const seg = parts[i];
       if (!node.ch[seg]) node.ch[seg] = { label:'/'+seg, slug:seg, url:r.url, ch:{}, depth:i+1, isSection:i===0 };
       if (i===parts.length-1) node.ch[seg].url = r.url;
@@ -1016,9 +1076,35 @@ function buildDiagram() {
   }
 
   function toArr(obj) {
-    return { ...obj, children: Object.values(obj.ch).map(toArr) };
+    const children = Object.values(obj.ch).map(toArr);
+    return { ...obj, children };
   }
-  diagramTree = toArr(root);
+  let tree = toArr(root);
+
+  // Apply collapse threshold — truncate sections with too many children
+  function applyCollapse(n) {
+    if (n.isSection && n.children.length > collapseThresh) {
+      n.collapsed = true;
+      n.collapsedCount = n.children.length;
+      n.children = [];
+    } else {
+      n.children.forEach(applyCollapse);
+    }
+  }
+  tree.children.forEach(applyCollapse);
+
+  diagramTree = tree;
+
+  // Build parent map for ancestor highlighting
+  parentMap = new Map();
+  function buildParentMap(n, parent) {
+    parentMap.set(n, parent);
+    n.children.forEach(c => buildParentMap(c, n));
+  }
+  buildParentMap(diagramTree, null);
+
+  // Build node→SVG element map (populated during drawNodes)
+  nodeElemMap = new Map();
 
   let maxD=0, total=0, secs=0;
   function count(n) { total++; if(n.depth>maxD)maxD=n.depth; if(n.isSection)secs++; n.children.forEach(count); }
@@ -1031,7 +1117,7 @@ function buildDiagram() {
   document.getElementById('d-depth').textContent  = maxD;
   document.getElementById('d-status').textContent = '✅ complete';
 
-  renderDiagram();
+  renderDiagram(showCounts);
 }
 
 /* ── Layout engine ──
@@ -1102,8 +1188,9 @@ function placeChildrenVertically(parent, colCx, startY, colW) {
   }
 }
 
-function renderDiagram() {
+function renderDiagram(showCounts) {
   if (!diagramTree) return;
+  nodeElemMap = new Map();
   const svg = document.getElementById('diagram');
   document.getElementById('edges-g').innerHTML = '';
   document.getElementById('nodes-g').innerHTML = '';
@@ -1226,10 +1313,41 @@ function renderDiagram() {
     t.textContent = slug;
     g.appendChild(t);
 
+    // Child count label (sections, or collapsed nodes)
+    if (n.collapsed && n.collapsedCount) {
+      const sub = document.createElementNS('http://www.w3.org/2000/svg','text');
+      sub.setAttribute('x', w/2); sub.setAttribute('y', h+13);
+      sub.setAttribute('class','nl-sub'); sub.setAttribute('text-anchor','middle');
+      sub.textContent = `${n.collapsedCount} pages (collapsed)`;
+      g.appendChild(sub);
+    } else if (showCounts && n.isSection && n.children.length > 0) {
+      const sub = document.createElementNS('http://www.w3.org/2000/svg','text');
+      sub.setAttribute('x', w/2); sub.setAttribute('y', h+13);
+      sub.setAttribute('class','nl-sub'); sub.setAttribute('text-anchor','middle');
+      sub.textContent = n.children.length+(n.children.length===1?' page':' pages');
+      g.appendChild(sub);
+    }
+
+    // Register in map
+    nodeElemMap.set(n, g);
+
+    // Click: select this node + highlight ancestor path to root
     g.addEventListener('click', () => {
-      document.querySelectorAll('.dnode.selected').forEach(el=>el.classList.remove('selected'));
+      // Clear all previous highlights
+      document.querySelectorAll('.dnode.selected,.dnode.ancestor').forEach(el => {
+        el.classList.remove('selected','ancestor');
+      });
+      // Mark this node as selected
       g.classList.add('selected');
+      // Walk up parent chain and mark each as ancestor
+      let p = parentMap.get(n);
+      while (p) {
+        const pEl = nodeElemMap.get(p);
+        if (pEl) pEl.classList.add('ancestor');
+        p = parentMap.get(p);
+      }
     });
+
     NG.appendChild(g);
     n.children.forEach(drawNodes);
   }
@@ -1246,6 +1364,10 @@ function dfit()   { if(diagramTree) buildDiagram(); }
 const dc = document.getElementById('diagram-canvas');
 dc.addEventListener('mousedown', e => {
   if (e.target.closest('.dnode')) return;
+  // Click on background — clear selection
+  document.querySelectorAll('.dnode.selected,.dnode.ancestor').forEach(el => {
+    el.classList.remove('selected','ancestor');
+  });
   dragging=true; dragFrom={x:e.clientX-dt.x,y:e.clientY-dt.y};
 });
 window.addEventListener('mousemove', e => {
