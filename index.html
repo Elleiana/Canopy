@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Canopy</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><line x1='16' y1='30' x2='16' y2='9' stroke='%23008080' stroke-width='2.8' stroke-linecap='round'/><line x1='16' y1='22' x2='7' y2='15' stroke='%23008080' stroke-width='2.5' stroke-linecap='round'/><line x1='16' y1='15' x2='25' y2='10' stroke='%23008080' stroke-width='2.5' stroke-linecap='round'/><circle cx='16' cy='5.5' r='3.8' fill='none' stroke='%23008080' stroke-width='2.4'/><circle cx='5.5' cy='13' r='3.2' fill='none' stroke='%23008080' stroke-width='2.2'/><circle cx='26.5' cy='8' r='3.2' fill='none' stroke='%23008080' stroke-width='2.2'/></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -149,14 +150,15 @@
     @keyframes barPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
     /* ── Snail animation ── */
-    #snail-emoji { display: inline-block; font-size: 1rem; line-height: 1; }
+    #snail-emoji { display: inline-block; font-size: 1rem; line-height: 1; transform: scaleX(-1); }
     #snail-emoji.crawling { animation: snailWalk 2.6s ease-in-out infinite; }
+    /* Resting at right (scaleX -1 = facing left), walks left then returns */
     @keyframes snailWalk {
-      0%   { transform: translateX(0px)   scaleX(1);  }
-      42%  { transform: translateX(16px)  scaleX(1);  }
-      50%  { transform: translateX(16px)  scaleX(-1); }
-      92%  { transform: translateX(0px)   scaleX(-1); }
-      100% { transform: translateX(0px)   scaleX(1);  }
+      0%   { transform: translateX(0px)    scaleX(-1); }
+      42%  { transform: translateX(-16px)  scaleX(-1); }
+      50%  { transform: translateX(-16px)  scaleX(1);  }
+      92%  { transform: translateX(0px)    scaleX(1);  }
+      100% { transform: translateX(0px)    scaleX(-1); }
     }
 
     /* ── Stats row ── */
@@ -277,7 +279,7 @@
     .home-desc  { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.82rem; color: var(--text-body); text-align: center; max-width: 400px; line-height: 1.7; }
 
     /* ── Footer ── */
-    footer { border-top: 1px solid var(--border); margin-top: 2.5rem; padding-top: 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--text-muted); display: flex; gap: 0.75rem; align-items: center; }
+    footer { border-top: 1px solid var(--border); margin-top: 2.5rem; padding-top: 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: var(--text-muted); display: flex; gap: 0.75rem; align-items: center; justify-content: center; }
     footer a { color: var(--text-muted); text-decoration: none; }
     footer a:hover { color: #008080; }
 
@@ -289,7 +291,7 @@
 <!-- ── Home screen ── -->
 <div id="home-screen">
   <div style="text-align:center">
-    <div class="home-title">🌿 Canopy</div>
+    <div class="home-title"><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' style='width:1.1em;height:1.1em;vertical-align:-0.12em;display:inline-block;flex-shrink:0;'><line x1='16' y1='30' x2='16' y2='9' stroke='#008080' stroke-width='2.8' stroke-linecap='round'/><line x1='16' y1='22' x2='7' y2='15' stroke='#008080' stroke-width='2.5' stroke-linecap='round'/><line x1='16' y1='15' x2='25' y2='10' stroke='#008080' stroke-width='2.5' stroke-linecap='round'/><circle cx='16' cy='5.5' r='3.8' fill='none' stroke='#008080' stroke-width='2.4'/><circle cx='5.5' cy='13' r='3.2' fill='none' stroke='#008080' stroke-width='2.2'/><circle cx='26.5' cy='8' r='3.2' fill='none' stroke='#008080' stroke-width='2.2'/></svg> Canopy</div>
     <div class="home-sub">// sitemap toolkit</div>
   </div>
   <p class="home-desc">Crawl a live site, map its page structure, and export a visual sitemap — for internal planning or sharing with clients.</p>
@@ -301,7 +303,7 @@
 <div id="app">
   <header>
     <div class="header-left" onclick="goHome()">
-      <h1>🌿 Canopy</h1>
+      <h1><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' style='width:1.1em;height:1.1em;vertical-align:-0.12em;display:inline-block;flex-shrink:0;'><line x1='16' y1='30' x2='16' y2='9' stroke='#008080' stroke-width='2.8' stroke-linecap='round'/><line x1='16' y1='22' x2='7' y2='15' stroke='#008080' stroke-width='2.5' stroke-linecap='round'/><line x1='16' y1='15' x2='25' y2='10' stroke='#008080' stroke-width='2.5' stroke-linecap='round'/><circle cx='16' cy='5.5' r='3.8' fill='none' stroke='#008080' stroke-width='2.4'/><circle cx='5.5' cy='13' r='3.2' fill='none' stroke='#008080' stroke-width='2.2'/><circle cx='26.5' cy='8' r='3.2' fill='none' stroke='#008080' stroke-width='2.2'/></svg> Canopy</h1>
       <span class="subtitle">// sitemap toolkit</span>
     </div>
     <nav class="header-nav">
@@ -404,31 +406,40 @@
         <span class="accordion-toggle" id="wb-toggle">◀</span>
       </div>
       <div class="accordion-body" id="wb-body">
-        <div class="card-body" style="display:flex;gap:2rem;flex-wrap:wrap;">
+        <div class="card-body">
 
-          <div style="display:flex;flex-direction:column;gap:0.5rem;min-width:180px;">
-            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.3rem;">Concurrency</div>
-            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);margin-bottom:0.4rem;line-height:1.5;">How many pages to fetch simultaneously. Higher values crawl faster but may trigger rate limiting. 3 is a safe default.</div>
-            <div style="display:flex;align-items:center;gap:0.65rem;">
+          <!-- Concurrency row -->
+          <div style="margin-bottom:0.85rem;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.4rem;">Concurrency</div>
+            <div style="display:flex;align-items:center;gap:0.65rem;flex-wrap:wrap;">
               <input class="base-url-input" id="concurrency" type="number" min="1" max="10" value="3" style="width:65px;flex:0 0 auto;" />
+              <span style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);">How many pages to fetch simultaneously. Higher values crawl faster but may trigger rate limiting. 3 is a safe default.</span>
               <span style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--text-muted);">1 = careful &nbsp;·&nbsp; 5 = fast &nbsp;·&nbsp; 10 = aggressive</span>
             </div>
           </div>
 
-          <div style="display:flex;flex-direction:column;gap:0.45rem;min-width:240px;">
-            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.1rem;">Filters</div>
-            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);margin-bottom:0.3rem;">Tick anything you don't want in your results.</div>
-            <label class="spider-opt-row"><input type="checkbox" id="f-pagination" checked /> <span>Pagination <span class="rule-preview">?page=, /page/, /p/</span></span></label>
-            <label class="spider-opt-row"><input type="checkbox" id="f-media"      checked /> <span>Media &amp; files <span class="rule-preview">.png, .jpg, .gif, .svg, .ico, .pdf, .zip, .mp4</span></span></label>
-            <label class="spider-opt-row"><input type="checkbox" id="f-dev"        checked /> <span>Dev &amp; system URLs <span class="rule-preview">wp-admin, wp-json, .css, .js, .woff, /feed</span></span></label>
-            <label class="spider-opt-row"><input type="checkbox" id="f-query"              /> <span>All query strings <span class="rule-preview">any URL containing ?</span></span></label>
-            <label class="spider-opt-row"><input type="checkbox" id="f-hash"       checked /> <span>Hash/anchor links <span class="rule-preview">URLs containing #</span></span></label>
-          </div>
+          <!-- Divider -->
+          <div style="border-top:1px solid var(--border-soft);margin-bottom:0.85rem;"></div>
 
-          <div style="display:flex;flex-direction:column;gap:0.45rem;min-width:180px;">
-            <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.1rem;">Custom patterns</div>
-            <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);margin-bottom:0.3rem;">One per line — any URL containing the pattern will be skipped.</div>
-            <textarea id="custom-patterns" class="base-url-input" style="height:110px;min-height:unset;resize:vertical;" placeholder="/members/&#10;/checkout/&#10;/cart/"></textarea>
+          <!-- Filters + Custom in two columns -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+
+            <div style="display:flex;flex-direction:column;gap:0.45rem;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.1rem;">Filters</div>
+              <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);margin-bottom:0.3rem;">Tick anything you don't want in your results.</div>
+              <label class="spider-opt-row"><input type="checkbox" id="f-pagination" checked /> <span>Pagination <span class="rule-preview">?page=, /page/, /p/</span></span></label>
+              <label class="spider-opt-row"><input type="checkbox" id="f-media"      checked /> <span>Media &amp; files <span class="rule-preview">.png, .jpg, .gif, .svg, .ico, .pdf, .zip, .mp4</span></span></label>
+              <label class="spider-opt-row"><input type="checkbox" id="f-dev"        checked /> <span>Dev &amp; system URLs <span class="rule-preview">wp-admin, wp-json, .css, .js, .woff, /feed</span></span></label>
+              <label class="spider-opt-row"><input type="checkbox" id="f-query"              /> <span>All query strings <span class="rule-preview">any URL containing ?</span></span></label>
+              <label class="spider-opt-row"><input type="checkbox" id="f-hash"       checked /> <span>Hash/anchor links <span class="rule-preview">URLs containing #</span></span></label>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:0.45rem;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.1rem;">Custom patterns</div>
+              <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.72rem;color:var(--text-help);margin-bottom:0.3rem;">One per line — any URL containing the pattern will be skipped.</div>
+              <textarea id="custom-patterns" class="base-url-input" style="height:120px;min-height:unset;resize:vertical;" placeholder="/members/&#10;/checkout/&#10;/cart/"></textarea>
+            </div>
+
           </div>
 
         </div>
@@ -484,7 +495,7 @@
 
     <div id="diagram-empty" class="section-card">
       <div class="card-body" style="text-align:center;padding:3rem 1rem;font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:var(--text-muted);">
-        🌿 &nbsp; No diagram yet — run a crawl and click <strong style="color:var(--text-title);">→ build diagram</strong>
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' style='width:1.1em;height:1.1em;vertical-align:-0.12em;display:inline-block;flex-shrink:0;'><line x1='16' y1='30' x2='16' y2='9' stroke='#008080' stroke-width='2.8' stroke-linecap='round'/><line x1='16' y1='22' x2='7' y2='15' stroke='#008080' stroke-width='2.5' stroke-linecap='round'/><line x1='16' y1='15' x2='25' y2='10' stroke='#008080' stroke-width='2.5' stroke-linecap='round'/><circle cx='16' cy='5.5' r='3.8' fill='none' stroke='#008080' stroke-width='2.4'/><circle cx='5.5' cy='13' r='3.2' fill='none' stroke='#008080' stroke-width='2.2'/><circle cx='26.5' cy='8' r='3.2' fill='none' stroke='#008080' stroke-width='2.2'/></svg> &nbsp; No diagram yet — run a crawl and click <strong style="color:var(--text-title);">→ build diagram</strong>
       </div>
     </div>
 
@@ -587,7 +598,7 @@
   </div><!-- /page-export -->
 
   <footer>
-    <span>🌿</span>
+    <span>🐯</span>
     <span>//</span>
     <a href="#" onclick="showModal('m-about');return false;">what is Canopy?</a>
     <span>//</span>
