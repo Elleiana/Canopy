@@ -49,6 +49,15 @@
       --dt-text-sub:     #555;
       --dt-sel-stroke:   #008080;
       --dt-anc-stroke:   #005f5f;
+      /* Per-depth fills: d0=root, d1–d4 ramp lighter, d5–d7 fold back (never as dark as d0) */
+      --dt-d0-fill: #1a1a24; --dt-d0-stroke: #555566;
+      --dt-d1-fill: #181828; --dt-d1-stroke: #323248;
+      --dt-d2-fill: #202030; --dt-d2-stroke: #3c3c58;
+      --dt-d3-fill: #2a2a3e; --dt-d3-stroke: #484868;
+      --dt-d4-fill: #32324a; --dt-d4-stroke: #545478;
+      --dt-d5-fill: #272738; --dt-d5-stroke: #42425e;
+      --dt-d6-fill: #202030; --dt-d6-stroke: #383854;
+      --dt-d7-fill: #1c1c2a; --dt-d7-stroke: #303048;
     }
     html.light {
       --bg:           #e8e8e2;
@@ -90,6 +99,15 @@
       --dt-text-sub:     #888;
       --dt-sel-stroke:   #008080;
       --dt-anc-stroke:   #50a0a0;
+      /* Per-depth fills: light mode — d0=darkest, d4=lightest, d5–d7 fold back */
+      --dt-d0-fill: #d8d8e4; --dt-d0-stroke: #888898;
+      --dt-d1-fill: #dcdce8; --dt-d1-stroke: #9090a4;
+      --dt-d2-fill: #e4e4ef; --dt-d2-stroke: #9898b0;
+      --dt-d3-fill: #ebebf5; --dt-d3-stroke: #a0a0bc;
+      --dt-d4-fill: #f2f2f9; --dt-d4-stroke: #a8a8c4;
+      --dt-d5-fill: #e8e8f2; --dt-d5-stroke: #9c9cb8;
+      --dt-d6-fill: #e2e2ec; --dt-d6-stroke: #9494ae;
+      --dt-d7-fill: #dcdce6; --dt-d7-stroke: #8c8ca6;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -247,15 +265,12 @@
     svg#diagram { width: 100%; height: 100%; overflow: visible; }
     .diagram-toolbar-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
 
-    /* SVG node styles — colours driven by --dt-* vars so themes work */
+    /* SVG node styles — fills/strokes set inline per depth via --dt-d*-fill vars */
     .dnode { cursor: pointer; }
     .dnode rect { transition: fill 0.2s, stroke 0.2s, filter 0.1s; }
-    .dnode.root rect    { fill: var(--dt-root-fill); stroke: var(--dt-root-stroke); stroke-width: 1.5; }
-    .dnode.section rect { fill: var(--dt-sec-fill);  stroke: var(--dt-sec-stroke);  stroke-width: 1; }
-    .dnode.leaf rect    { fill: var(--dt-leaf-fill); stroke: var(--dt-leaf-stroke); stroke-width: 1; }
-    .dnode:hover rect   { filter: brightness(1.35); }
-    .dnode.selected rect { stroke: var(--dt-sel-stroke) !important; stroke-width: 2 !important; filter: brightness(1.3); }
-    .dnode.ancestor rect { stroke: var(--dt-anc-stroke) !important; stroke-width: 1.5 !important; filter: brightness(1.15); }
+    .dnode:hover rect   { filter: brightness(1.4); }
+    .dnode.selected rect { stroke: var(--dt-sel-stroke) !important; stroke-width: 2 !important; filter: brightness(1.35); }
+    .dnode.ancestor rect { stroke: var(--dt-anc-stroke) !important; stroke-width: 1.5 !important; filter: brightness(1.2); }
     .dnode text { font-family: 'IBM Plex Mono', monospace; fill: var(--dt-text); pointer-events: none; user-select: none; text-anchor: middle; transition: fill 0.2s; }
     .dnode text.nl-slug { font-size: 10px; fill: var(--dt-text); }
     .dnode text.nl-root { font-size: 11px; font-weight: 600; fill: var(--dt-text-root); }
@@ -299,6 +314,14 @@
       --dt-rail: #004444; --dt-rail-root: #006060;
       --dt-text: #a0d0d0; --dt-text-root: #c0eaea; --dt-text-sub: #408080;
       --dt-sel-stroke: #00c0c0; --dt-anc-stroke: #008080;
+      --dt-d0-fill: #001f1f; --dt-d0-stroke: #008080;
+      --dt-d1-fill: #002828; --dt-d1-stroke: #009898;
+      --dt-d2-fill: #003333; --dt-d2-stroke: #00b0b0;
+      --dt-d3-fill: #003e3e; --dt-d3-stroke: #00c0c0;
+      --dt-d4-fill: #004848; --dt-d4-stroke: #00d0d0;
+      --dt-d5-fill: #003a3a; --dt-d5-stroke: #00b8b8;
+      --dt-d6-fill: #002d2d; --dt-d6-stroke: #00a0a0;
+      --dt-d7-fill: #002424; --dt-d7-stroke: #009090;
     }
     [data-diagram-theme="slate"] {
       --dt-root-fill: #1c1c2e; --dt-root-stroke: #6060a0;
@@ -307,6 +330,14 @@
       --dt-rail: #303050; --dt-rail-root: #505080;
       --dt-text: #b0b0d8; --dt-text-root: #d8d8f8; --dt-text-sub: #606090;
       --dt-sel-stroke: #9090e0; --dt-anc-stroke: #6060b0;
+      --dt-d0-fill: #1c1c2e; --dt-d0-stroke: #6060a0;
+      --dt-d1-fill: #222238; --dt-d1-stroke: #7070b0;
+      --dt-d2-fill: #2a2a44; --dt-d2-stroke: #8080c0;
+      --dt-d3-fill: #323252; --dt-d3-stroke: #9090d0;
+      --dt-d4-fill: #3a3a60; --dt-d4-stroke: #a0a0e0;
+      --dt-d5-fill: #2e2e4c; --dt-d5-stroke: #8888c8;
+      --dt-d6-fill: #26263e; --dt-d6-stroke: #7878b8;
+      --dt-d7-fill: #202034; --dt-d7-stroke: #6868a8;
     }
     [data-diagram-theme="forest"] {
       --dt-root-fill: #0e1e12; --dt-root-stroke: #3a7a4a;
@@ -315,6 +346,14 @@
       --dt-rail: #1e4828; --dt-rail-root: #2e6838;
       --dt-text: #90c8a0; --dt-text-root: #b8e8c8; --dt-text-sub: #3a6848;
       --dt-sel-stroke: #5aab72; --dt-anc-stroke: #3a7a4a;
+      --dt-d0-fill: #0e1e12; --dt-d0-stroke: #3a7a4a;
+      --dt-d1-fill: #122418; --dt-d1-stroke: #458a55;
+      --dt-d2-fill: #172d1e; --dt-d2-stroke: #509a60;
+      --dt-d3-fill: #1c3624; --dt-d3-stroke: #5baa6b;
+      --dt-d4-fill: #21402a; --dt-d4-stroke: #66ba76;
+      --dt-d5-fill: #1a3422; --dt-d5-stroke: #55a066;
+      --dt-d6-fill: #16291b; --dt-d6-stroke: #488c58;
+      --dt-d7-fill: #122016; --dt-d7-stroke: #3c784c;
     }
     [data-diagram-theme="ember"] {
       --dt-root-fill: #1e1008; --dt-root-stroke: #a05030;
@@ -323,6 +362,14 @@
       --dt-rail: #583020; --dt-rail-root: #804838;
       --dt-text: #d0a080; --dt-text-root: #f0c8a0; --dt-text-sub: #805040;
       --dt-sel-stroke: #e07840; --dt-anc-stroke: #a05030;
+      --dt-d0-fill: #1e1008; --dt-d0-stroke: #a05030;
+      --dt-d1-fill: #271508; --dt-d1-stroke: #b86038;
+      --dt-d2-fill: #311b0a; --dt-d2-stroke: #cc7040;
+      --dt-d3-fill: #3b210c; --dt-d3-stroke: #e08048;
+      --dt-d4-fill: #45280e; --dt-d4-stroke: #f09050;
+      --dt-d5-fill: #382008; --dt-d5-stroke: #d07840;
+      --dt-d6-fill: #2c1806; --dt-d6-stroke: #b86538;
+      --dt-d7-fill: #231305; --dt-d7-stroke: #a05530;
     }
     /* Light mode adjustments for named themes */
     html.light[data-diagram-theme="teal"] {
@@ -331,6 +378,14 @@
       --dt-leaf-fill: #eef8f8; --dt-leaf-stroke: #a0d8d8;
       --dt-rail: #80c0c0; --dt-rail-root: #008080;
       --dt-text: #004848; --dt-text-root: #002828; --dt-text-sub: #608888;
+      --dt-d0-fill: #c0eaea; --dt-d0-stroke: #008080;
+      --dt-d1-fill: #caeef0; --dt-d1-stroke: #20a0a0;
+      --dt-d2-fill: #d5f2f2; --dt-d2-stroke: #40b0b0;
+      --dt-d3-fill: #dff5f5; --dt-d3-stroke: #60c0c0;
+      --dt-d4-fill: #eaf8f8; --dt-d4-stroke: #80d0d0;
+      --dt-d5-fill: #daf4f4; --dt-d5-stroke: #50b8b8;
+      --dt-d6-fill: #d2f0f0; --dt-d6-stroke: #30a8a8;
+      --dt-d7-fill: #c8ecec; --dt-d7-stroke: #109898;
     }
     html.light[data-diagram-theme="slate"] {
       --dt-root-fill: #d8d8f0; --dt-root-stroke: #6060a0;
@@ -338,6 +393,14 @@
       --dt-leaf-fill: #f4f4fc; --dt-leaf-stroke: #c0c0e0;
       --dt-rail: #a0a0d0; --dt-rail-root: #6060a0;
       --dt-text: #303060; --dt-text-root: #101040; --dt-text-sub: #7070a0;
+      --dt-d0-fill: #d8d8f0; --dt-d0-stroke: #6060a0;
+      --dt-d1-fill: #ddddf3; --dt-d1-stroke: #7070b0;
+      --dt-d2-fill: #e3e3f6; --dt-d2-stroke: #8080c0;
+      --dt-d3-fill: #e9e9f8; --dt-d3-stroke: #9090d0;
+      --dt-d4-fill: #eeeefb; --dt-d4-stroke: #a0a0e0;
+      --dt-d5-fill: #e7e7f8; --dt-d5-stroke: #8888c8;
+      --dt-d6-fill: #e2e2f5; --dt-d6-stroke: #7878b8;
+      --dt-d7-fill: #dcdcf2; --dt-d7-stroke: #6868a8;
     }
     html.light[data-diagram-theme="forest"] {
       --dt-root-fill: #c8e8d0; --dt-root-stroke: #3a7a4a;
@@ -345,6 +408,14 @@
       --dt-leaf-fill: #eef8f0; --dt-leaf-stroke: #a8d8b4;
       --dt-rail: #80b890; --dt-rail-root: #3a7a4a;
       --dt-text: #1a4828; --dt-text-root: #0a2814; --dt-text-sub: #5a8868;
+      --dt-d0-fill: #c8e8d0; --dt-d0-stroke: #3a7a4a;
+      --dt-d1-fill: #d0ecd8; --dt-d1-stroke: #50905e;
+      --dt-d2-fill: #d8f0e0; --dt-d2-stroke: #60a070;
+      --dt-d3-fill: #e0f3e8; --dt-d3-stroke: #70b080;
+      --dt-d4-fill: #e8f6ef; --dt-d4-stroke: #80c090;
+      --dt-d5-fill: #ddf2e5; --dt-d5-stroke: #68aa78;
+      --dt-d6-fill: #d6eedd; --dt-d6-stroke: #58986a;
+      --dt-d7-fill: #ceead5; --dt-d7-stroke: #488658;
     }
     html.light[data-diagram-theme="ember"] {
       --dt-root-fill: #f0d8c0; --dt-root-stroke: #a05030;
@@ -352,6 +423,14 @@
       --dt-leaf-fill: #fdf4ec; --dt-leaf-stroke: #d8b090;
       --dt-rail: #c09070; --dt-rail-root: #a05030;
       --dt-text: #502010; --dt-text-root: #300800; --dt-text-sub: #906050;
+      --dt-d0-fill: #f0d8c0; --dt-d0-stroke: #a05030;
+      --dt-d1-fill: #f3ddc8; --dt-d1-stroke: #b86040;
+      --dt-d2-fill: #f6e3d0; --dt-d2-stroke: #cc7050;
+      --dt-d3-fill: #f8e8d8; --dt-d3-stroke: #e08060;
+      --dt-d4-fill: #fbede0; --dt-d4-stroke: #f09070;
+      --dt-d5-fill: #f7e4d4; --dt-d5-stroke: #d07858;
+      --dt-d6-fill: #f4dfce; --dt-d6-stroke: #bc6848;
+      --dt-d7-fill: #f1dac8; --dt-d7-stroke: #a85838;
     }
 
     /* Theme picker swatch buttons */
@@ -472,7 +551,7 @@
       <!-- Mode toggle: Crawl ↔ Import -->
       <div class="pill-group" style="margin-bottom:1.25rem;">
         <button class="pill active" id="mode-crawl-btn"  onclick="setCrawlerMode('crawl')">🕷️ Crawl</button>
-        <button class="pill"        id="mode-import-btn" onclick="setCrawlerMode('import')">↑ Import URLs</button>
+        <button class="pill"        id="mode-import-btn" onclick="setCrawlerMode('import')">→ Import URLs</button>
       </div>
     </div>
 
@@ -1887,11 +1966,17 @@ function renderDiagram(showCounts) {
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
     g.setAttribute('class','dnode'+(n.isRoot?' root':n.isSection?' section':' leaf'));
     g.setAttribute('transform',`translate(${n.x-w/2},${n.y})`);
-    g.dataset.url = n.url || '';
+    g.dataset.url   = n.url || '';
+    g.dataset.depth = String(n.depth ?? 0);
 
+    // Depth-keyed fill/stroke (capped at d7, folded back after d4)
+    const di = Math.min(n.depth ?? 0, 7);
     const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
     rect.setAttribute('width', w); rect.setAttribute('height', h);
     rect.setAttribute('rx', 3);    rect.setAttribute('ry', 3);
+    rect.style.fill   = `var(--dt-d${di}-fill)`;
+    rect.style.stroke = `var(--dt-d${di}-stroke)`;
+    rect.style.strokeWidth = n.isRoot ? '1.5' : '1';
     g.appendChild(rect);
 
     const slug = n.isRoot ? '/'
@@ -1904,19 +1989,84 @@ function renderDiagram(showCounts) {
     t.textContent = slug;
     g.appendChild(t);
 
-    // Child count label (sections, or collapsed nodes)
-    if (n.collapsed && n.collapsedCount) {
-      const sub = document.createElementNS('http://www.w3.org/2000/svg','text');
-      sub.setAttribute('x', w/2); sub.setAttribute('y', h+13);
-      sub.setAttribute('class','nl-sub'); sub.setAttribute('text-anchor','middle');
-      sub.textContent = `${n.collapsedCount} pages (collapsed)`;
-      g.appendChild(sub);
-    } else if (showCounts && n.isSection && n.children.length > 0) {
+    // Child count sub-label (visible, expanded sections only)
+    if (!n.collapsed && showCounts && n.isSection && n.children.length > 0) {
       const sub = document.createElementNS('http://www.w3.org/2000/svg','text');
       sub.setAttribute('x', w/2); sub.setAttribute('y', h+13);
       sub.setAttribute('class','nl-sub'); sub.setAttribute('text-anchor','middle');
       sub.textContent = n.children.length+(n.children.length===1?' page':' pages');
       g.appendChild(sub);
+    }
+
+    // ── Collapsed badge: teal pill in top-right corner ──
+    if (n.collapsed && n.collapsedCount) {
+      const BADGE_R = 8;
+      const bx = w - 2;            // right edge
+      const by = -BADGE_R + 4;     // sits half above the node top
+
+      const badgeCircle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      badgeCircle.setAttribute('cx', bx);
+      badgeCircle.setAttribute('cy', by);
+      badgeCircle.setAttribute('r',  BADGE_R);
+      badgeCircle.style.fill   = '#008080';
+      badgeCircle.style.stroke = 'var(--dt-d0-fill)';
+      badgeCircle.style.strokeWidth = '1.5';
+      g.appendChild(badgeCircle);
+
+      const badgeText = document.createElementNS('http://www.w3.org/2000/svg','text');
+      badgeText.setAttribute('x', bx);
+      badgeText.setAttribute('y', by + 3.5);
+      badgeText.setAttribute('text-anchor', 'middle');
+      badgeText.style.fontSize   = '8px';
+      badgeText.style.fontFamily = 'IBM Plex Mono, monospace';
+      badgeText.style.fontWeight = '600';
+      badgeText.style.fill       = '#fff';
+      badgeText.style.pointerEvents = 'none';
+      badgeText.style.userSelect    = 'none';
+      badgeText.textContent = n.collapsedCount > 99 ? '99+' : String(n.collapsedCount);
+      g.appendChild(badgeText);
+    }
+
+    // ── Inline collapse/expand button for section nodes ──
+    if (n.isSection) {
+      const BTN_SIZE = 12;
+      const bx = w - BTN_SIZE - 3;
+      const by = h - BTN_SIZE - 3;
+
+      const btnRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      btnRect.setAttribute('x', bx); btnRect.setAttribute('y', by);
+      btnRect.setAttribute('width', BTN_SIZE); btnRect.setAttribute('height', BTN_SIZE);
+      btnRect.setAttribute('rx', 2);
+      btnRect.style.fill   = 'transparent';
+      btnRect.style.stroke = `var(--dt-d${di}-stroke)`;
+      btnRect.style.strokeWidth = '1';
+      btnRect.style.cursor = 'pointer';
+      btnRect.style.transition = 'fill 0.15s';
+      g.appendChild(btnRect);
+
+      const btnIcon = document.createElementNS('http://www.w3.org/2000/svg','text');
+      btnIcon.setAttribute('x', bx + BTN_SIZE/2);
+      btnIcon.setAttribute('y', by + BTN_SIZE/2 + 3.5);
+      btnIcon.setAttribute('text-anchor', 'middle');
+      btnIcon.style.fontSize      = '8px';
+      btnIcon.style.fontFamily    = 'IBM Plex Mono, monospace';
+      btnIcon.style.fill          = `var(--dt-d${di}-stroke)`;
+      btnIcon.style.pointerEvents = 'none';
+      btnIcon.style.userSelect    = 'none';
+      btnIcon.textContent = n.collapsed ? '+' : '−';
+      g.appendChild(btnIcon);
+
+      // Hover highlight on the button rect
+      btnRect.addEventListener('mouseenter', () => { btnRect.style.fill = `var(--dt-d${di}-stroke)`; btnIcon.style.fill = 'var(--dt-d0-fill)'; });
+      btnRect.addEventListener('mouseleave', () => { btnRect.style.fill = 'transparent'; btnIcon.style.fill = `var(--dt-d${di}-stroke)`; });
+
+      // Click the button: toggle collapse directly, without selecting the node
+      btnRect.addEventListener('click', e => {
+        e.stopPropagation();
+        const path = getNodePath(n);
+        manualCollapseState[path] = !n.collapsed;
+        buildDiagram();
+      });
     }
 
     // Register in map
@@ -2203,26 +2353,53 @@ function exportPNG() {
   // ── 3. Resolve CSS custom properties → concrete hex values ──
   const cs   = getComputedStyle(document.documentElement);
   const vars = {};
-  ['--dt-root-fill','--dt-root-stroke','--dt-sec-fill','--dt-sec-stroke',
-   '--dt-leaf-fill','--dt-leaf-stroke','--dt-rail','--dt-rail-root',
-   '--dt-text','--dt-text-root','--dt-text-sub',
+  // Collect all --dt-d*-fill/stroke and general vars
+  for (let d = 0; d <= 7; d++) {
+    vars[`--dt-d${d}-fill`]   = cs.getPropertyValue(`--dt-d${d}-fill`).trim();
+    vars[`--dt-d${d}-stroke`] = cs.getPropertyValue(`--dt-d${d}-stroke`).trim();
+  }
+  ['--dt-rail','--dt-rail-root','--dt-text','--dt-text-root','--dt-text-sub',
    '--dt-sel-stroke','--dt-anc-stroke'].forEach(v => {
     vars[v] = cs.getPropertyValue(v).trim();
   });
 
   // ── 4. Inline all styles (SVG as <img> gets no CSS) ──
+
+  // Node rects — depth-keyed fill/stroke
   clone.querySelectorAll('.dnode rect').forEach(el => {
-    const g = el.closest('.dnode');
-    let fill, stroke, sw;
-    if      (g.classList.contains('root'))    { fill=vars['--dt-root-fill']; stroke=vars['--dt-root-stroke']; sw='1.5'; }
-    else if (g.classList.contains('section')) { fill=vars['--dt-sec-fill'];  stroke=vars['--dt-sec-stroke'];  sw='1'; }
-    else                                      { fill=vars['--dt-leaf-fill']; stroke=vars['--dt-leaf-stroke']; sw='1'; }
-    if (g.classList.contains('selected')) { stroke=vars['--dt-sel-stroke']; sw='2'; }
-    if (g.classList.contains('ancestor')) { stroke=vars['--dt-anc-stroke']; sw='1.5'; }
-    el.setAttribute('fill', fill);
-    el.setAttribute('stroke', stroke);
+    const g  = el.closest('.dnode');
+    const di = Math.min(parseInt(g.dataset.depth ?? '0') || 0, 7);
+    let fill   = vars[`--dt-d${di}-fill`]   || vars['--dt-d0-fill'];
+    let stroke = vars[`--dt-d${di}-stroke`] || vars['--dt-d0-stroke'];
+    let sw = g.classList.contains('root') ? '1.5' : '1';
+    if (g.classList.contains('selected')) { stroke = vars['--dt-sel-stroke']; sw = '2'; }
+    if (g.classList.contains('ancestor')) { stroke = vars['--dt-anc-stroke']; sw = '1.5'; }
+    el.setAttribute('fill',         fill);
+    el.setAttribute('stroke',       stroke);
     el.setAttribute('stroke-width', sw);
+    el.removeAttribute('style');
     el.removeAttribute('class');
+  });
+
+  // Resolve inline var() references on badge circles and button rects
+  const resolveStyle = (s) => s
+    .replace(/var\(--dt-d(\d+)-fill\)/g,   (_, d) => vars[`--dt-d${d}-fill`]   || '')
+    .replace(/var\(--dt-d(\d+)-stroke\)/g, (_, d) => vars[`--dt-d${d}-stroke`] || '')
+    .replace(/var\(--dt-d0-fill\)/g,   vars['--dt-d0-fill']   || '')
+    .replace(/var\(--dt-d0-stroke\)/g, vars['--dt-d0-stroke'] || '');
+
+  clone.querySelectorAll('circle').forEach(el => {
+    const s = el.getAttribute('style') || '';
+    el.setAttribute('style', resolveStyle(s));
+  });
+
+  // Remove the interactive collapse button rects/icons (not useful in static PNG)
+  // They're small rects at the bottom-right of section nodes with cursor:pointer style
+  clone.querySelectorAll('.dnode rect[style*="cursor"]').forEach(el => el.remove());
+  // Also remove sibling text immediately after (the +/− icon)
+  clone.querySelectorAll('.dnode text[style*="pointer-events"]').forEach(el => {
+    // Keep badge text (white fill on teal circle), remove button icon text
+    if (!el.parentElement?.querySelector('circle')) el.remove();
   });
 
   clone.querySelectorAll('.dnode text').forEach(el => {
@@ -2231,7 +2408,12 @@ function exportPNG() {
     if      (el.classList.contains('nl-root')) fill = vars['--dt-text-root'];
     else if (el.classList.contains('nl-sub'))  fill = vars['--dt-text-sub'];
     else fill = g?.classList.contains('root') ? vars['--dt-text-root'] : vars['--dt-text'];
-    el.setAttribute('fill', fill);
+    // Badge text has explicit fill in style — leave it
+    if (el.style.fill && el.style.fill !== 'var(--dt-text)') {
+      /* already has resolved fill from badge */
+    } else {
+      el.setAttribute('fill', fill || vars['--dt-text']);
+    }
     el.setAttribute('font-family', 'monospace');
     el.setAttribute('font-size',   el.classList.contains('nl-root') ? '11' : el.classList.contains('nl-sub') ? '9' : '10');
     if (el.classList.contains('nl-root')) el.setAttribute('font-weight', '600');
