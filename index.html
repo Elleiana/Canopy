@@ -192,6 +192,20 @@
     .pill:hover { color: var(--text-title); }
     .pill.active { background: #008080; border-color: #008080; color: #e0ddd8; }
 
+    /* ── Session bar ── */
+    .session-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .session-name-wrap { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+    .session-name-input { background: none; border: none; border-bottom: 1px solid transparent; outline: none; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; font-weight: 600; color: var(--text-title); padding: 0.1rem 0.2rem; width: 220px; transition: border-color 0.15s; }
+    .session-name-input:hover { border-bottom-color: var(--border); }
+    .session-name-input:focus { border-bottom-color: #008080; }
+    .session-name-input::placeholder { color: var(--text-dimmer); font-weight: 400; }
+    .session-timestamp { font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; color: var(--text-muted); white-space: nowrap; }
+    .session-btns { display: flex; gap: 0.4rem; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
+    .btn-session.save { border-color: #243d28; color: #5aab72; }
+    .btn-session.save:hover { border-color: #5aab72; background: #0c160e; }
+    html.light .btn-session.save { border-color: #7ab888; color: #145828; }
+    html.light .btn-session.save:hover { background: #c8e8d2; }
+
     /* ── Progress bar ── */
     .progress-bar-track { height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
     .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #008080, #00a0a0); transition: width 0.3s ease; width: 0%; }
@@ -552,6 +566,21 @@
        PAGE: Crawler
   ══════════════════════════════════════ -->
   <div id="page-crawler" class="hidden">
+
+    <!-- Session bar -->
+    <div class="session-bar">
+      <div class="session-name-wrap">
+        <input class="session-name-input" id="session-name" type="text" placeholder="Untitled sitemap" maxlength="60" spellcheck="false" />
+        <span class="session-timestamp" id="session-timestamp"></span>
+      </div>
+      <div class="session-btns">
+        <button class="btn-session save" onclick="saveSessionFile()">↓ Save</button>
+        <label class="btn-session" title="Load a saved session">↑ Load<input type="file" id="load-session-file" accept=".json" hidden onchange="loadSessionFile(this)" /></label>
+        <button class="btn-session" id="btn-share" onclick="shareSession()" title="Copy a shareable link">🔗 Share</button>
+        <button class="btn-session" onclick="clearCrawl()" title="Clear and start fresh">✕ Clear</button>
+      </div>
+    </div>
+
     <div class="page-heading" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
       <div>
         <div class="page-heading-title">Crawler</div>
@@ -582,6 +611,7 @@
           <div class="check-divider"></div>
           <button class="btn-check" id="btn-crawl-start" onclick="startCrawl()">Crawl site</button>
           <button class="btn-check stop hidden" id="btn-crawl-stop" onclick="stopCrawl()">Stop</button>
+          <button class="btn-check hidden" id="btn-crawl-pause" onclick="togglePause()">⏸ Pause</button>
         </div>
 
         <!-- Proxy row -->
@@ -753,6 +783,7 @@
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
               <button class="btn-session" id="btn-to-diagram" disabled onclick="sendToDiagram()">→ build diagram</button>
               <button class="btn-session save" id="btn-export-csv" disabled onclick="exportCSV()">↓ CSV</button>
+              <button class="btn-session" id="btn-copy-urls" disabled onclick="copyURLs()" title="Copy all URLs to clipboard">⧉ copy URLs</button>
             </div>
           </div>
         </div>
@@ -828,24 +859,27 @@
                 <label class="spider-opt-row"><input type="checkbox" id="d-show-counts" checked /> <span>Show child counts on sections</span></label>
                 <label class="spider-opt-row"><input type="checkbox" id="d-show-errors" checked /> <span>Include error / blocked pages</span></label>
               </div>
-            </div>
-
-            <div>
-              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.5rem;">Colour theme</div>
-              <div class="theme-swatch-row" id="theme-swatch-row">
-                <button class="theme-swatch active" id="swatch-default" title="Default" style="background:linear-gradient(135deg,#1a1a24 50%,#2a2a38 50%);" onclick="setDiagramTheme('default',this)"></button>
-                <button class="theme-swatch" id="swatch-teal"    title="Teal"    style="background:linear-gradient(135deg,#001f1f 50%,#008080 50%);"  onclick="setDiagramTheme('teal',this)"></button>
-                <button class="theme-swatch" id="swatch-slate"   title="Slate"   style="background:linear-gradient(135deg,#1c1c2e 50%,#6060a0 50%);"  onclick="setDiagramTheme('slate',this)"></button>
-                <button class="theme-swatch" id="swatch-forest"  title="Forest"  style="background:linear-gradient(135deg,#0e1e12 50%,#3a7a4a 50%);"  onclick="setDiagramTheme('forest',this)"></button>
-                <button class="theme-swatch" id="swatch-ember"   title="Ember"   style="background:linear-gradient(135deg,#1e1008 50%,#a05030 50%);"   onclick="setDiagramTheme('ember',this)"></button>
+              <div style="margin-top:0.75rem;">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.35rem;">Node labels</div>
+                <div class="pill-group" id="label-mode-pills">
+                  <button class="pill active" id="lm-slug"   onclick="setLabelMode('slug',this)"  title="URL slug">slug</button>
+                  <button class="pill"        id="lm-title"  onclick="setLabelMode('title',this)" title="Page title from crawl">title</button>
+                  <button class="pill"        id="lm-custom" onclick="setLabelMode('custom',this)" title="Custom labels (edit in node panel)">custom</button>
+                </div>
               </div>
-              <div style="font-family:'IBM Plex Sans',sans-serif;font-size:0.68rem;color:var(--text-help);margin-top:0.4rem;" id="theme-label">Default</div>
             </div>
 
           </div>
-          <div class="card-body" style="padding-top:0.75rem;border-top:1px solid var(--border-soft);margin-top:0.25rem;display:flex;align-items:center;gap:0.5rem;">
+          <div class="card-body" style="padding-top:0.75rem;border-top:1px solid var(--border-soft);margin-top:0.25rem;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
             <button class="btn-check" onclick="buildDiagram()">↺ apply &amp; re-draw</button>
-            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--text-muted);">Changes take effect when you re-draw.</span>
+            <div class="theme-swatch-row" id="theme-swatch-row" style="margin-left:0.5rem;">
+              <button class="theme-swatch active" id="swatch-default" title="Default" style="background:linear-gradient(135deg,#1a1a24 50%,#2a2a38 50%);" onclick="setDiagramTheme('default',this)"></button>
+              <button class="theme-swatch" id="swatch-teal"    title="Teal"    style="background:linear-gradient(135deg,#001f1f 50%,#008080 50%);"  onclick="setDiagramTheme('teal',this)"></button>
+              <button class="theme-swatch" id="swatch-slate"   title="Slate"   style="background:linear-gradient(135deg,#1c1c2e 50%,#6060a0 50%);"  onclick="setDiagramTheme('slate',this)"></button>
+              <button class="theme-swatch" id="swatch-forest"  title="Forest"  style="background:linear-gradient(135deg,#0e1e12 50%,#3a7a4a 50%);"  onclick="setDiagramTheme('forest',this)"></button>
+              <button class="theme-swatch" id="swatch-ember"   title="Ember"   style="background:linear-gradient(135deg,#1e1008 50%,#a05030 50%);"  onclick="setDiagramTheme('ember',this)"></button>
+            </div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--text-muted);" id="theme-label">Default</span>
           </div>
         </div>
       </div>
@@ -904,6 +938,13 @@
             <div style="border-top:1px solid var(--border-soft);padding-top:0.5rem;display:flex;gap:0.4rem;flex-wrap:wrap;">
               <a id="d-node-link" href="#" target="_blank" rel="noopener" class="btn-session" style="font-size:0.62rem;padding:0.2rem 0.5rem;text-decoration:none;">↗ open URL</a>
               <button id="d-node-toggle-btn" class="btn-session" style="font-size:0.62rem;padding:0.2rem 0.5rem;display:none;" onclick="toggleNodeCollapse()">▸ expand</button>
+            </div>
+            <div id="d-node-label-row" style="border-top:1px solid var(--border-soft);padding-top:0.5rem;display:none;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.3rem;">Custom label</div>
+              <div style="display:flex;gap:0.4rem;align-items:center;">
+                <input id="d-node-custom-label" class="base-url-input" type="text" placeholder="e.g. Services" maxlength="32" style="flex:1;font-size:0.7rem;padding:0.25rem 0.5rem;" oninput="previewCustomLabel(this.value)" />
+                <button class="btn-session" style="font-size:0.62rem;padding:0.2rem 0.5rem;" onclick="applyCustomLabel()">✓ apply</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1034,7 +1075,7 @@
 /* ═══════════════════════════════════════════
    State
 ═══════════════════════════════════════════ */
-let crawlState   = { running: false, queue: [], visited: new Set(), results: [], base: '' };
+let crawlState   = { running: false, paused: false, queue: [], visited: new Set(), results: [], base: '' };
 let resultFilter = 'all';
 let resultSearch = '';
 let exportFmt    = 'png';
@@ -1047,47 +1088,71 @@ let dragFrom     = { x:0, y:0 };
 let isDark       = true;
 let excludedCount = 0;
 let selectedDNode = null;  // currently selected diagram node data object
+let customLabels  = {};    // url → custom label string
+let currentLabelMode = 'slug'; // 'slug' | 'title' | 'custom'
 
-/* ── Session persistence — multi-session history ── */
-const SESSION_KEY     = 'canopy_session_v1';    // current active session
-const HISTORY_KEY     = 'canopy_history_v1';    // array of saved sessions (max 8)
-const MAX_HISTORY     = 8;
+/* ═══════════════════════════════════════════
+   Session — save / load / share / history
+═══════════════════════════════════════════ */
+const SESSION_KEY = 'canopy_session_v2';
+const HISTORY_KEY = 'canopy_history_v2';
+const MAX_HISTORY = 5;
+
+/* Minimal LZString — compress to base64 URL-safe, decompress back */
+const LZString = {
+  compressToEncodedURIComponent(str) {
+    try {
+      return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+        (_, p1) => String.fromCharCode('0x' + p1)))
+        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    } catch { return ''; }
+  },
+  decompressFromEncodedURIComponent(b64) {
+    try {
+      const s = b64.replace(/-/g,'+').replace(/_/g,'/');
+      const pad = s.length % 4 ? '='.repeat(4 - s.length % 4) : '';
+      return decodeURIComponent(atob(s + pad).split('').map(
+        c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    } catch { return null; }
+  }
+};
 
 function getSessionName() {
+  const input = document.getElementById('session-name');
+  if (input && input.value.trim()) return input.value.trim();
   const url = document.getElementById('crawl-url').value.trim();
   if (!url) return 'Untitled sitemap';
   try { return new URL(url).hostname; } catch { return url; }
 }
 
-function saveSession() {
-  if (!crawlState.results.length) return;
-  try {
-    const name = getSessionName();
-    const data = {
-      id:       Date.now(),
-      name,
-      savedAt:  new Date().toISOString(),
-      startUrl: document.getElementById('crawl-url').value,
-      totalUrls: crawlState.results.length,
-      okUrls:    crawlState.results.filter(r => r.ok).length,
-      results:  crawlState.results.map(r => ({
-        url: r.url, ok: r.ok, status: r.status,
-        statusText: r.statusText, depth: r.depth, section: r.section
-      })),
-    };
-    // Save as current session
-    localStorage.setItem(SESSION_KEY, JSON.stringify(data));
-    // Also push to history
-    let history = getHistory();
-    // Remove any existing entry for the same domain
-    history = history.filter(h => h.name !== name);
-    history.unshift({ id: data.id, name, savedAt: data.savedAt,
-      startUrl: data.startUrl, totalUrls: data.totalUrls, okUrls: data.okUrls });
-    history = history.slice(0, MAX_HISTORY);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-    // Store full session data keyed by id
-    localStorage.setItem(`canopy_sess_${data.id}`, JSON.stringify(data));
-  } catch(e) { /* storage full */ }
+function formatDate(iso) {
+  const d = new Date(iso);
+  const pad = n => String(n).padStart(2,'0');
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function updateTimestamp(iso) {
+  const el = document.getElementById('session-timestamp');
+  if (!el) return;
+  el.textContent = iso ? `saved ${formatDate(iso)}` : '';
+}
+
+function buildSessionPayload() {
+  const iso = new Date().toISOString();
+  return {
+    version: 2, savedAt: iso,
+    name: getSessionName(),
+    startUrl: document.getElementById('crawl-url').value,
+    totalUrls: crawlState.results.length,
+    okUrls: crawlState.results.filter(r => r.ok).length,
+    results: crawlState.results.map(r => ({
+      url: r.url, ok: r.ok, status: r.status,
+      statusText: r.statusText, depth: r.depth, section: r.section,
+      title: r.title || ''
+    })),
+    customLabels: { ...customLabels },
+    labelMode: currentLabelMode,
+  };
 }
 
 function getHistory() {
@@ -1095,52 +1160,150 @@ function getHistory() {
   catch { return []; }
 }
 
+function saveSession() {
+  if (!crawlState.results.length) return;
+  try {
+    const data = buildSessionPayload();
+    localStorage.setItem(SESSION_KEY, JSON.stringify(data));
+    let hist = getHistory().filter(h => h.name !== data.name);
+    hist.unshift({ id: data.savedAt, name: data.name, savedAt: data.savedAt,
+      startUrl: data.startUrl, totalUrls: data.totalUrls, okUrls: data.okUrls });
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(hist.slice(0, MAX_HISTORY)));
+    localStorage.setItem(`canopy_sess_${data.savedAt}`, JSON.stringify(data));
+    updateTimestamp(data.savedAt);
+  } catch(e) { /* storage full */ }
+}
+
 function loadSessionById(id) {
   try {
     const raw = localStorage.getItem(`canopy_sess_${id}`);
     if (raw) return JSON.parse(raw);
-    // Fallback: try current session
     return JSON.parse(localStorage.getItem(SESSION_KEY));
   } catch { return null; }
 }
 
-function loadSession() {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    if (!data.results || !data.results.length) return;
-    crawlState.results = data.results;
-      if (data.startUrl) document.getElementById('crawl-url').value = data.startUrl;
-    document.getElementById('crawler-results').classList.remove('hidden');
-    document.getElementById('crawl-progress-wrap').classList.remove('hidden');
-    updateStats();
-    renderResults();
-    document.getElementById('btn-to-diagram').disabled = false;
-    document.getElementById('btn-export-csv').disabled = false;
-  } catch(e) { /* corrupt */ }
-}
-
-function loadSessionData(data) {
-  if (!data) return;
+function _applySession(data, announce) {
+  if (!data?.results) return;
   crawlState.results = data.results;
   if (data.startUrl) document.getElementById('crawl-url').value = data.startUrl;
+  const nameEl = document.getElementById('session-name');
+  if (nameEl && data.name) nameEl.value = data.name;
+  if (data.customLabels) customLabels = { ...data.customLabels };
+  if (data.labelMode) setLabelMode(data.labelMode, null, false);
   document.getElementById('crawler-results').classList.remove('hidden');
   document.getElementById('crawl-progress-wrap').classList.remove('hidden');
   updateStats();
   renderResults();
   document.getElementById('btn-to-diagram').disabled = false;
   document.getElementById('btn-export-csv').disabled = false;
-  setStatusText(`loaded — ${data.totalUrls} URLs`);
+  document.getElementById('btn-copy-urls').disabled = false;
+  updateTimestamp(data.savedAt || null);
+  if (announce) setStatusText(`loaded — ${data.results.length} URLs`);
 }
 
+function loadSession()            { _applySession(JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'), false); }
+function loadSessionData(data)    { _applySession(data, true); }
 
-
-function formatDate(iso) {
-  const d = new Date(iso);
-  const pad = n => String(n).padStart(2,'0');
-  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+/* ── Save to .json file ── */
+function saveSessionFile() {
+  if (!crawlState.results.length) { alert('Nothing to save — run a crawl first.'); return; }
+  const data = buildSessionPayload();
+  const safe = (data.name || 'canopy').replace(/[^a-z0-9-_]/gi,'_').toLowerCase();
+  dl(`${safe}.json`, JSON.stringify(data, null, 2), 'application/json');
+  saveSession();
 }
+
+/* ── Load from .json file ── */
+function loadSessionFile(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.results) throw new Error('Not a Canopy session');
+      loadSessionData(data);
+      saveSession();
+      switchPage('crawler');
+    } catch { alert('Could not load — file may be invalid or from a different tool.'); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+/* ── Share via URL hash ── */
+function shareSession() {
+  if (!crawlState.results.length) { alert('Run a crawl first before sharing.'); return; }
+  const btn = document.getElementById('btn-share');
+  btn.textContent = '… generating'; btn.disabled = true;
+  try {
+    const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(buildSessionPayload()));
+    const link = `${location.origin}${location.pathname}#s=${compressed}`;
+    navigator.clipboard.writeText(link)
+      .then(() => { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = '🔗 Share'; btn.disabled = false; }, 2200); })
+      .catch(() => { prompt('Copy this link:', link); btn.textContent = '🔗 Share'; btn.disabled = false; });
+  } catch { btn.textContent = '🔗 Share'; btn.disabled = false; alert('Could not generate share link.'); }
+}
+
+/* ── Clear ── */
+function clearCrawl() {
+  if (crawlState.running) stopCrawl();
+  crawlState = { running: false, paused: false, queue: [], visited: new Set(), results: [], base: '' };
+  excludedCount = 0; diagramTree = null; manualCollapseState = {}; customLabels = {};
+  currentLabelMode = 'slug';
+  document.getElementById('crawl-url').value = '';
+  const nameEl = document.getElementById('session-name');
+  if (nameEl) nameEl.value = '';
+  updateTimestamp(null);
+  document.getElementById('crawler-results').classList.add('hidden');
+  document.getElementById('crawl-progress-wrap').classList.add('hidden');
+  document.getElementById('crawl-progress-fill').classList.remove('crawling');
+  document.getElementById('snail-emoji').classList.remove('crawling');
+  document.getElementById('result-rows').innerHTML = '';
+  document.getElementById('btn-to-diagram').disabled = true;
+  document.getElementById('btn-export-csv').disabled = true;
+  document.getElementById('btn-copy-urls').disabled = true;
+  document.getElementById('btn-crawl-start').disabled = false;
+  document.getElementById('btn-crawl-stop').classList.add('hidden');
+  document.getElementById('btn-crawl-pause').classList.add('hidden');
+  setStatusText(''); setQueueInfo('');
+  // Reset diagram to empty state
+  const de = document.getElementById('diagram-empty');
+  const dw = document.getElementById('diagram-wrap');
+  if (de) de.classList.remove('hidden');
+  if (dw) dw.classList.add('hidden');
+  const eg = document.getElementById('edges-g'); if (eg) eg.innerHTML = '';
+  const ng = document.getElementById('nodes-g'); if (ng) ng.innerHTML = '';
+  // Reset label mode pills
+  setLabelMode('slug', null, false);
+}
+
+/* ── Copy URLs ── */
+function copyURLs() {
+  const urls = crawlState.results.map(r => r.url).join('\n');
+  navigator.clipboard.writeText(urls).then(() => {
+    const btn = document.getElementById('btn-copy-urls');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = '⧉ copy URLs'; }, 1800);
+  });
+}
+
+/* ── On page load: check for shared link in hash ── */
+(function checkShareLink() {
+  const hash = location.hash;
+  if (!hash.startsWith('#s=')) return;
+  try {
+    const json = LZString.decompressFromEncodedURIComponent(hash.slice(3));
+    if (!json) throw new Error('empty');
+    const data = JSON.parse(json);
+    if (!data.results) throw new Error('invalid');
+    history.replaceState(null, '', location.pathname);
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSessionData(data);
+      saveSession();
+      switchPage('crawler');
+    }, { once: true });
+  } catch(e) { /* bad link — ignore */ }
+})();
 
 /* ═══════════════════════════════════════════
    Theme
@@ -1249,12 +1412,13 @@ function renderHomePage() {
 
   history.forEach(entry => {
     const pct = entry.totalUrls > 0 ? Math.round((entry.okUrls / entry.totalUrls) * 100) : 0;
+    const domain = (() => { try { return new URL(entry.startUrl || '').hostname; } catch { return entry.startUrl || ''; } })();
     const card = document.createElement('div');
     card.className = 'home-session-card';
     card.innerHTML = `
       <div class="home-session-info">
         <div class="home-session-name">${esc(entry.name)}</div>
-        <div class="home-session-meta">${formatDate(entry.savedAt)}</div>
+        <div class="home-session-meta">${domain ? domain + ' · ' : ''}${formatDate(entry.savedAt)}</div>
         <div class="home-mini-bar-wrap">
           <div class="home-mini-bar-fill" style="width:${pct}%"></div>
         </div>
@@ -1399,6 +1563,14 @@ function runImport() {
   renderResults();
   document.getElementById('btn-to-diagram').disabled = false;
   document.getElementById('btn-export-csv').disabled = false;
+  document.getElementById('btn-copy-urls').disabled = false;
+
+  // Auto-fill session name from URL if blank
+  const nameEl = document.getElementById('session-name');
+  if (nameEl && !nameEl.value.trim()) {
+    const crawlUrl = document.getElementById('crawl-url').value.trim();
+    try { nameEl.value = new URL(crawlUrl).hostname; } catch {}
+  }
 
   status.textContent = `✓ ${urls.length} URL${urls.length !== 1 ? 's' : ''} imported`;
   saveSession();
@@ -1501,11 +1673,12 @@ async function startCrawl() {
   excludedCount = 0;
   // visited tracks URLs already queued or processed — add startUrl so it isn't queued twice
   // but do NOT skip it when dequeued; the worker checks visited before adding to queue, not before fetching
-  crawlState = { running: true, queue: [startUrl], visited: new Set([startUrl]), results: [], base: origin };
+  crawlState = { running: true, paused: false, queue: [startUrl], visited: new Set([startUrl]), results: [], base: origin };
 
   // UI reset
   document.getElementById('btn-crawl-start').disabled = true;
   document.getElementById('btn-crawl-stop').classList.remove('hidden');
+  document.getElementById('btn-crawl-pause').classList.remove('hidden');
   document.getElementById('crawler-results').classList.remove('hidden');
   document.getElementById('result-rows').innerHTML = '';
   document.getElementById('crawl-progress-wrap').classList.remove('hidden');
@@ -1521,6 +1694,12 @@ async function startCrawl() {
   // visited is used only to prevent duplicate queuing, not to skip fetching
   async function worker() {
     while (crawlState.running) {
+      // Pause: workers sleep while paused flag is set
+      while (crawlState.paused && crawlState.running) {
+        await new Promise(r => setTimeout(r, 120));
+      }
+      if (!crawlState.running) break;
+
       const url = crawlState.queue.shift();
       if (!url) {
         // Queue is empty right now — but another worker may push new URLs
@@ -1540,6 +1719,11 @@ async function startCrawl() {
       item.ok = result.ok;
       item.status = result.status;
       item.statusText = result.statusText;
+      // Extract and store page title for 'title' label mode
+      if (result.html) {
+        const m = result.html.match(/<title[^>]*>([^<]{1,80})<\/title>/i);
+        if (m) item.title = m[1].trim();
+      }
       updateResultRow(item);
       updateStats();
 
@@ -1571,6 +1755,7 @@ async function startCrawl() {
   crawlState.running = false;
   document.getElementById('btn-crawl-start').disabled = false;
   document.getElementById('btn-crawl-stop').classList.add('hidden');
+  document.getElementById('btn-crawl-pause').classList.add('hidden');
   document.getElementById('crawl-progress-fill').classList.remove('crawling');
   document.getElementById('snail-emoji').classList.remove('crawling');
   setQueueInfo('');
@@ -1579,6 +1764,7 @@ async function startCrawl() {
   if (n > 0) {
     document.getElementById('btn-to-diagram').disabled = false;
     document.getElementById('btn-export-csv').disabled = false;
+    document.getElementById('btn-copy-urls').disabled = false;
     setStatusText(`done — ${n} URL${n!==1?'s':''} found`);
     saveSession();
   } else {
@@ -1588,12 +1774,31 @@ async function startCrawl() {
 
 function stopCrawl() {
   crawlState.running = false;
+  crawlState.paused = false;
   document.getElementById('btn-crawl-stop').classList.add('hidden');
+  document.getElementById('btn-crawl-pause').classList.add('hidden');
   document.getElementById('btn-crawl-start').disabled = false;
   document.getElementById('crawl-progress-fill').classList.remove('crawling');
   document.getElementById('snail-emoji').classList.remove('crawling');
   const n = crawlState.results.length;
   setStatusText(`stopped — ${n} URL${n!==1?'s':''} found`);
+}
+
+function togglePause() {
+  if (!crawlState.running) return;
+  crawlState.paused = !crawlState.paused;
+  const btn = document.getElementById('btn-crawl-pause');
+  if (crawlState.paused) {
+    btn.textContent = '▶ Resume';
+    btn.classList.add('stop');
+    document.getElementById('snail-emoji').classList.remove('crawling');
+    setStatusText('paused — click Resume to continue');
+  } else {
+    btn.textContent = '⏸ Pause';
+    btn.classList.remove('stop');
+    document.getElementById('snail-emoji').classList.add('crawling');
+    setStatusText('crawling…');
+  }
 }
 
 function getDepth(url, base) {
@@ -1988,14 +2193,12 @@ function renderDiagram(showCounts) {
     rect.style.strokeWidth = n.isRoot ? '1.5' : '1';
     g.appendChild(rect);
 
-    const slug = n.isRoot ? '/'
-      : n.slug.length > 17 ? n.slug.slice(0,16)+'…'
-      : n.slug;
+    const labelText = getNodeLabel(n);
     const t = document.createElementNS('http://www.w3.org/2000/svg','text');
     t.setAttribute('x', w/2);
     t.setAttribute('y', h/2+4);
     t.setAttribute('class', n.isRoot ? 'nl-root' : 'nl-slug');
-    t.textContent = slug;
+    t.textContent = labelText;
     g.appendChild(t);
 
     // Child count sub-label (visible, expanded sections only)
@@ -2188,6 +2391,15 @@ function showNodePanel(n) {
     toggleBtn.style.display = 'none';
   }
 
+  // Custom label field — only shown in custom mode
+  const labelRow = document.getElementById('d-node-label-row');
+  const labelInput = document.getElementById('d-node-custom-label');
+  if (labelRow && labelInput) {
+    labelRow.style.display = currentLabelMode === 'custom' ? '' : 'none';
+    labelInput.value = customLabels[n.url || ''] || '';
+    labelInput.placeholder = n.slug || 'Custom label';
+  }
+
   panel.classList.remove('hidden');
 }
 
@@ -2228,6 +2440,63 @@ function toggleNodeCollapse() {
 
   // Rebuild diagram — applyManualCollapse will pick up the new state
   buildDiagram();
+}
+
+/* ── Label mode ── */
+function setLabelMode(mode, btn, redraw = true) {
+  currentLabelMode = mode;
+  // Update pills
+  ['slug','title','custom'].forEach(m => {
+    const el = document.getElementById(`lm-${m}`);
+    if (el) el.classList.toggle('active', m === mode);
+  });
+  // Show/hide custom label field in node panel
+  const labelRow = document.getElementById('d-node-label-row');
+  if (labelRow) labelRow.style.display = mode === 'custom' ? '' : 'none';
+  if (redraw && diagramTree) buildDiagram();
+}
+
+function getNodeLabel(n) {
+  if (n.isRoot) return '/';
+  const url = n.url || '';
+  if (currentLabelMode === 'custom' && customLabels[url]) {
+    return truncateLabel(customLabels[url], 18);
+  }
+  if (currentLabelMode === 'title') {
+    const result = crawlState.results.find(r => r.url === url);
+    if (result?.title) return truncateLabel(result.title, 18);
+  }
+  // Slug mode (default) or fallback
+  return truncateSlug(n.slug, 17);
+}
+
+// Middle-truncate a slug: keep first 8 + … + last 6 chars
+function truncateSlug(slug, max) {
+  if (!slug || slug.length <= max) return slug || '';
+  return slug.slice(0, 9) + '…' + slug.slice(-6);
+}
+
+// Truncate a label string to max chars, end-truncate with ellipsis
+function truncateLabel(str, max) {
+  if (!str) return '';
+  return str.length <= max ? str : str.slice(0, max - 1) + '…';
+}
+
+function applyCustomLabel() {
+  if (!selectedDNode) return;
+  const input = document.getElementById('d-node-custom-label');
+  const val = input.value.trim();
+  if (val) {
+    customLabels[selectedDNode.url] = val;
+  } else {
+    delete customLabels[selectedDNode.url];
+  }
+  if (diagramTree) buildDiagram();
+  saveSession();
+}
+
+function previewCustomLabel(val) {
+  // live preview: nothing needed — applied on button click
 }
 
 /* ── Tooltip ── */
@@ -2568,6 +2837,18 @@ document.addEventListener('keydown', e => {
 document.addEventListener('DOMContentLoaded', () => {
   renderHomePage();
   loadSession();  // pre-populates crawler state silently in background
+
+  // Auto-fill session name from URL when name is blank
+  const urlInput = document.getElementById('crawl-url');
+  const nameInput = document.getElementById('session-name');
+  if (urlInput && nameInput) {
+    urlInput.addEventListener('blur', () => {
+      if (nameInput.value.trim()) return; // don't overwrite user-set name
+      const v = urlInput.value.trim();
+      if (!v) return;
+      try { nameInput.value = new URL(v).hostname; } catch {}
+    });
+  }
 });
 </script>
 </body>
