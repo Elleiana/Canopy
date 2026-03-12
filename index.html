@@ -325,28 +325,28 @@
       --dt-sel-stroke: #e07840; --dt-anc-stroke: #a05030;
     }
     /* Light mode adjustments for named themes */
-    html.light [data-diagram-theme="teal"] {
+    html.light[data-diagram-theme="teal"] {
       --dt-root-fill: #c0eaea; --dt-root-stroke: #008080;
       --dt-sec-fill:  #d8f4f4; --dt-sec-stroke:  #60b0b0;
       --dt-leaf-fill: #eef8f8; --dt-leaf-stroke: #a0d8d8;
       --dt-rail: #80c0c0; --dt-rail-root: #008080;
       --dt-text: #004848; --dt-text-root: #002828; --dt-text-sub: #608888;
     }
-    html.light [data-diagram-theme="slate"] {
+    html.light[data-diagram-theme="slate"] {
       --dt-root-fill: #d8d8f0; --dt-root-stroke: #6060a0;
       --dt-sec-fill:  #e8e8f8; --dt-sec-stroke:  #9090c0;
       --dt-leaf-fill: #f4f4fc; --dt-leaf-stroke: #c0c0e0;
       --dt-rail: #a0a0d0; --dt-rail-root: #6060a0;
       --dt-text: #303060; --dt-text-root: #101040; --dt-text-sub: #7070a0;
     }
-    html.light [data-diagram-theme="forest"] {
+    html.light[data-diagram-theme="forest"] {
       --dt-root-fill: #c8e8d0; --dt-root-stroke: #3a7a4a;
       --dt-sec-fill:  #daf0e0; --dt-sec-stroke:  #70aa80;
       --dt-leaf-fill: #eef8f0; --dt-leaf-stroke: #a8d8b4;
       --dt-rail: #80b890; --dt-rail-root: #3a7a4a;
       --dt-text: #1a4828; --dt-text-root: #0a2814; --dt-text-sub: #5a8868;
     }
-    html.light [data-diagram-theme="ember"] {
+    html.light[data-diagram-theme="ember"] {
       --dt-root-fill: #f0d8c0; --dt-root-stroke: #a05030;
       --dt-sec-fill:  #f8e8d4; --dt-sec-stroke:  #c08060;
       --dt-leaf-fill: #fdf4ec; --dt-leaf-stroke: #d8b090;
@@ -664,14 +664,12 @@
             </div>
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
               <button class="btn-session" id="btn-to-diagram" disabled onclick="sendToDiagram()">→ build diagram</button>
-              <button class="btn-session save" id="btn-export-csv" disabled onclick="exportCrawlCSV()">↓ CSV</button>
+              <button class="btn-session save" id="btn-export-csv" disabled onclick="exportCSV()">↓ CSV</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Exclusion summary (shown after crawl) -->
-      <div id="excl-summary" class="hidden" style="margin-bottom:0.75rem;"></div>
 
       <!-- Filter + search toolbar -->
       <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;flex-wrap:wrap;">
@@ -774,15 +772,15 @@
         <!-- Legend overlay -->
         <div class="diagram-overlay d-legend" id="d-legend">
           <div class="legend-item">
-            <div class="legend-box" style="background:var(--bg-card-hd);border-color:#444;"></div>
+            <div class="legend-box" style="background:var(--dt-root-fill);border-color:var(--dt-root-stroke);"></div>
             root
           </div>
           <div class="legend-item">
-            <div class="legend-box" style="background:var(--bg-card);border-color:var(--border-soft);"></div>
+            <div class="legend-box" style="background:var(--dt-sec-fill);border-color:var(--dt-sec-stroke);"></div>
             section
           </div>
           <div class="legend-item">
-            <div class="legend-box" style="background:var(--bg-input);border-color:var(--border-inner);"></div>
+            <div class="legend-box" style="background:var(--dt-leaf-fill);border-color:var(--dt-leaf-stroke);"></div>
             page
           </div>
         </div>
@@ -885,7 +883,7 @@
             <div class="ec-label">🗺️ Sitemap XML</div>
             <div class="ec-desc">Standard sitemap.xml — submit to search engines</div>
           </div>
-          <div class="export-card" onclick="sendToWaypoint()" id="export-waypoint-card" style="border-color:var(--border-soft);">
+          <div class="export-card" onclick="pickFmt(this,'waypoint')" id="export-waypoint-card">
             <div class="ec-label">📍 Send to Waypoint</div>
             <div class="ec-desc">Open Waypoint with these URLs pre-loaded into the Mapper</div>
           </div>
@@ -949,7 +947,6 @@
 /* ═══════════════════════════════════════════
    State
 ═══════════════════════════════════════════ */
-let crawlResults = [];
 let crawlState   = { running: false, queue: [], visited: new Set(), results: [], base: '' };
 let resultFilter = 'all';
 let resultSearch = '';
@@ -1027,8 +1024,7 @@ function loadSession() {
     const data = JSON.parse(raw);
     if (!data.results || !data.results.length) return;
     crawlState.results = data.results;
-    crawlResults = data.results;
-    if (data.startUrl) document.getElementById('crawl-url').value = data.startUrl;
+      if (data.startUrl) document.getElementById('crawl-url').value = data.startUrl;
     document.getElementById('crawler-results').classList.remove('hidden');
     document.getElementById('crawl-progress-wrap').classList.remove('hidden');
     updateStats();
@@ -1041,7 +1037,6 @@ function loadSession() {
 function loadSessionData(data) {
   if (!data) return;
   crawlState.results = data.results;
-  crawlResults = data.results;
   if (data.startUrl) document.getElementById('crawl-url').value = data.startUrl;
   document.getElementById('crawler-results').classList.remove('hidden');
   document.getElementById('crawl-progress-wrap').classList.remove('hidden');
@@ -1052,17 +1047,7 @@ function loadSessionData(data) {
   setStatusText(`loaded — ${data.totalUrls} URLs`);
 }
 
-function clearSession() {
-  try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
-}
 
-function timeSince(date) {
-  const s = Math.floor((Date.now() - date) / 1000);
-  if (s < 60)    return s + 's ago';
-  if (s < 3600)  return Math.floor(s/60) + 'm ago';
-  if (s < 86400) return Math.floor(s/3600) + 'h ago';
-  return Math.floor(s/86400) + 'd ago';
-}
 
 function formatDate(iso) {
   const d = new Date(iso);
@@ -1229,10 +1214,6 @@ function setCrawlerMode(mode) {
   const isCrawl = mode === 'crawl';
   document.getElementById('crawl-mode-card').classList.toggle('hidden', !isCrawl);
   document.getElementById('import-mode-card').classList.toggle('hidden', isCrawl);
-  // Workbench only relevant to crawl mode
-  document.querySelectorAll('.section-card').forEach(c => {
-    if (c.id === 'wb-row-card') c.classList.toggle('hidden', !isCrawl);
-  });
   document.getElementById('mode-crawl-btn').classList.toggle('active', isCrawl);
   document.getElementById('mode-import-btn').classList.toggle('active', !isCrawl);
   const sub = document.getElementById('crawler-mode-sub');
@@ -1317,7 +1298,6 @@ function runImport() {
     } catch {}
     return { url, ok: true, status: 200, statusText: 'imported', depth, section };
   });
-  crawlResults = crawlState.results;
 
   // Set base URL field for diagram domain label
   if (baseUrl) document.getElementById('crawl-url').value = baseUrl;
@@ -1400,9 +1380,6 @@ function shouldExclude(url, f) {
   return false;
 }
 
-function normaliseUrl(url) {
-  try { return (new URL(url)).href; } catch { return url; }
-}
 
 function extractLinks(html, base) {
   try {
@@ -1434,7 +1411,6 @@ async function startCrawl() {
   const concurrency = parseInt(document.getElementById('concurrency').value) || 3;
   const maxDepth    = parseInt(document.getElementById('crawl-max-depth').value) || 6;
 
-  crawlResults = [];
   excludedCount = 0;
   // visited tracks URLs already queued or processed — add startUrl so it isn't queued twice
   // but do NOT skip it when dequeued; the worker checks visited before adding to queue, not before fetching
@@ -1469,7 +1445,6 @@ async function startCrawl() {
 
       const item = { url, ok: null, status: null, statusText: '…', depth: getDepth(url, origin), section: getSection(url) };
       crawlState.results.push(item);
-      crawlResults.push(item);
       appendResultRow(item);
       updateStats();
       setQueueInfo(`${crawlState.queue.length} in queue`);
@@ -1562,7 +1537,6 @@ function updateExcluded() {
   }
 }
 
-
 const rowMap = new WeakMap();
 
 function badgeInfo(item) {
@@ -1641,9 +1615,8 @@ const NODE_H       = 30;    // section + leaf node height
 const ROOT_W       = 160;
 const ROOT_H       = 36;
 const SEC_H_GAP    = 44;    // horizontal gap between section columns
-const LEAF_V_GAP   = 10;    // vertical gap between stacked leaves
+const V_GAP        = 16;    // consistent vertical gap used everywhere (sibling AND parent→child)
 const ROOT_TO_SEC  = 52;    // vertical distance root → sections
-const SEC_TO_LEAF  = 40;    // vertical distance section → first leaf
 const RAIL_OFFSET  = 16;    // left-rail x offset from section left edge
 
 function sendToDiagram() {
@@ -1689,17 +1662,26 @@ function buildDiagram() {
   }
   let tree = toArr(root);
 
-  // Apply collapse threshold — truncate sections with too many children
-  function applyCollapse(n) {
-    if (n.isSection && n.children.length > collapseThresh) {
+  // Apply collapse threshold — auto-collapse sections exceeding threshold
+  function applyCollapse(n, pathSoFar) {
+    const path = pathSoFar + '/' + (n.isRoot ? '' : n.slug);
+    // Manual state overrides threshold
+    if (n.isSection && manualCollapseState.hasOwnProperty(path)) {
+      if (manualCollapseState[path] === true && n.children.length > 0) {
+        n.collapsed = true;
+        n.collapsedCount = n.children.length;
+        n.children = [];
+      }
+      // false = force expanded, leave children as-is
+    } else if (n.isSection && n.children.length > collapseThresh) {
       n.collapsed = true;
       n.collapsedCount = n.children.length;
       n.children = [];
     } else {
-      n.children.forEach(applyCollapse);
+      n.children.forEach(c => applyCollapse(c, path));
     }
   }
-  tree.children.forEach(applyCollapse);
+  tree.children.forEach(c => applyCollapse(c, ''));
 
   diagramTree = tree;
 
@@ -1740,11 +1722,12 @@ const CHILD_INDENT = 24;  // how far right children shift from their parent's le
 // Returns the total HEIGHT of a subtree when laid out vertically
 function subtreeHeight(n) {
   if (!n.children || !n.children.length) return NODE_H;
-  let h = NODE_H + SEC_TO_LEAF;
+  // Node itself + gap + all children stacked with gaps between them
+  let h = NODE_H + V_GAP;
   for (const c of n.children) {
-    h += subtreeHeight(c) + LEAF_V_GAP;
+    h += subtreeHeight(c) + V_GAP;
   }
-  h -= LEAF_V_GAP;
+  h -= V_GAP; // no trailing gap after last child
   return h;
 }
 
@@ -1776,7 +1759,7 @@ function assignPositions(tree) {
     sec.y = ROOT_H + ROOT_TO_SEC;
 
     // Children stacked vertically, indented from the section's left edge
-    placeChildrenVertically(sec, colLeft, sec.y + NODE_H + SEC_TO_LEAF);
+    placeChildrenVertically(sec, colLeft, sec.y + NODE_H + V_GAP);
 
     cx += colWidths[i] + SEC_H_GAP;
   });
@@ -1784,16 +1767,15 @@ function assignPositions(tree) {
 
 function placeChildrenVertically(parent, parentLeft, startY) {
   if (!parent.children || !parent.children.length) return;
-  // Children are indented relative to their parent's left edge
   const childLeft = parentLeft + CHILD_INDENT;
   let y = startY;
   for (const child of parent.children) {
-    child.x = childLeft + NODE_W / 2;  // centre of child node
+    child.x = childLeft + NODE_W / 2;
     child.y = y;
     if (child.children && child.children.length) {
-      placeChildrenVertically(child, childLeft, child.y + NODE_H + SEC_TO_LEAF);
+      placeChildrenVertically(child, childLeft, child.y + NODE_H + V_GAP);
     }
-    y += subtreeHeight(child) + LEAF_V_GAP;
+    y += subtreeHeight(child) + V_GAP;
   }
 }
 
@@ -1975,6 +1957,25 @@ function renderDiagram(showCounts) {
     n.children.forEach(drawNodes);
   }
   drawNodes(diagramTree);
+
+  // After rebuild, re-select the previously selected node if it still exists
+  if (selectedDNode) {
+    const prevSlug = selectedDNode.slug;
+    nodeElemMap.forEach((el, node) => {
+      if (node.slug === prevSlug && node !== diagramTree) {
+        selectedDNode = node;
+        el.classList.add('selected');
+        showNodePanel(node);
+        // Restore ancestor highlights
+        let p = parentMap.get(node);
+        while (p) {
+          const pEl = nodeElemMap.get(p);
+          if (pEl) pEl.classList.add('ancestor');
+          p = parentMap.get(p);
+        }
+      }
+    });
+  }
 }
 
 function applyDt() {
@@ -2040,21 +2041,35 @@ function clearNodePanel() {
   selectedDNode = null;
 }
 
+// Stores manually set collapse states by node slug-path, survives rebuilds
+let manualCollapseState = {};  // key: slug path string → true (collapsed) / false (expanded)
+
+function getNodePath(n) {
+  // Walk parentMap to build a path string like "/services/brand"
+  const parts = [];
+  let cur = n;
+  while (cur) {
+    if (!cur.isRoot) parts.unshift(cur.slug);
+    cur = parentMap.get(cur);
+  }
+  return '/' + parts.join('/');
+}
+
 function toggleNodeCollapse() {
   if (!selectedDNode) return;
   const n = selectedDNode;
   if (!n.isSection) return;
+
+  const path = getNodePath(n);
+  // Toggle: if currently collapsed, mark as force-expanded; if expanded, mark as collapsed
   if (n.collapsed) {
-    // Restore children from full tree
-    n.collapsed = false;
-    // Re-build diagram to restore children (full rebuild is simplest)
-    buildDiagram();
+    manualCollapseState[path] = false;  // force expand
   } else {
-    n.collapsed = true;
-    n.collapsedCount = n.children.length;
-    n.children = [];
-    buildDiagram();
+    manualCollapseState[path] = true;   // force collapse
   }
+
+  // Rebuild diagram — applyManualCollapse will pick up the new state
+  buildDiagram();
 }
 
 /* ── Tooltip ── */
@@ -2124,6 +2139,7 @@ function doExport() {
   else if (exportFmt==='json') exportJSON();
   else if (exportFmt==='svg')  exportSVGFile();
   else if (exportFmt==='xml')  exportXML();
+  else if (exportFmt==='waypoint') sendToWaypoint();
   else exportPNG();
 }
 
