@@ -644,7 +644,7 @@
         </div>
 
         <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
-          <button class="btn-check" id="btn-import-run" onclick="runImport()">↑ Build sitemap</button>
+          <button class="btn-check" id="btn-import-run" onclick="runImport()">→ Build sitemap</button>
           <span id="import-status" style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--text-muted);"></span>
         </div>
       </div>
@@ -698,7 +698,7 @@
 
     <div id="diagram-empty" class="section-card">
       <div class="card-body" style="text-align:center;padding:3rem 1rem;font-family:'IBM Plex Mono',monospace;font-size:0.78rem;color:var(--text-muted);">
-        🌳 &nbsp; No diagram yet — run a crawl and click <strong style="color:var(--text-title);">→ build diagram</strong>
+        🌿 &nbsp; No diagram yet — <a href="#" onclick="switchPage('crawler');return false;" style="color:#008080;text-decoration:none;">run a crawl</a> or <a href="#" onclick="switchPage('crawler');setCrawlerMode('import');return false;" style="color:#008080;text-decoration:none;">import URLs</a> first.
       </div>
     </div>
 
@@ -915,13 +915,12 @@
     </div>
     <div class="modal-body">
       <p><strong>Canopy is a sitemap toolkit.</strong></p>
-      <p>It crawls a live website, maps the structure of every page it can reach, and generates a visual tree diagram — useful for understanding a site before a redesign, migration, or audit, and for sharing that structure with a client.</p>
+      <p>It crawls a live website, maps the structure of every page it can reach, and generates a visual tree diagram — useful for understanding a site before a redesign, migration, or audit, and for sharing that structure.</p>
       <div class="modal-st">The workflow</div>
       <p><strong>🕷️ Crawler</strong> — point it at any URL and Canopy walks all reachable internal pages. Use the Workbench to filter out what you don't need. When done, hit <strong>→ build diagram</strong>.</p>
       <p><strong>🌳 Diagram</strong> — an interactive tree laid out by section and depth. Rectangular nodes show the URL slug. Pan and zoom to explore.</p>
       <p><strong>🍂 Export</strong> — download as PNG or SVG for presentations, CSV for spreadsheets, or JSON for developers.</p>
-      <div class="modal-st">A note on crawling</div>
-      <p>A built-in Cloudflare Worker proxy handles CORS restrictions so Canopy can crawl any public site. Switch to manual proxy in the Crawler settings if you'd prefer to use your own.</p>
+      <p style="margin-top:0.75rem;"><a href="https://github.com/Elleiana/Canopy" target="_blank" rel="noopener" style="color:#008080;text-decoration:none;">→ Full guide on GitHub</a></p>
     </div>
   </div>
 </div>
@@ -2170,20 +2169,124 @@ function exportSVGFile() {
 }
 function exportPNG() {
   if (!diagramTree) { document.getElementById('export-msg').textContent='⚠ Build the diagram first.'; return; }
-  const svg=document.getElementById('diagram');
-  const W=svg.clientWidth||1400, H=svg.clientHeight||900;
-  const canvas=document.createElement('canvas');
-  canvas.width=W*2; canvas.height=H*2;
-  const ctx=canvas.getContext('2d'); ctx.scale(2,2);
-  ctx.fillStyle=isDark?'#0a0a0d':'#e8e8e2'; ctx.fillRect(0,0,W,H);
-  const blob=new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml'});
-  const url=URL.createObjectURL(blob);
-  const img=new Image();
-  img.onload=()=>{
-    ctx.drawImage(img,0,0); URL.revokeObjectURL(url);
-    canvas.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='canopy-sitemap.png'; a.click(); });
+
+  const PAD   = 60;
+  const SCALE = 2; // retina
+
+  // ── 1. Compute full content bounding box (same walk as renderDiagram) ──
+  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+  function bbWalk(n) {
+    const hw = (n.isRoot ? ROOT_W : NODE_W) / 2;
+    minX = Math.min(minX, n.x - hw);
+    maxX = Math.max(maxX, n.x + hw);
+    minY = Math.min(minY, n.y);
+    maxY = Math.max(maxY, n.y + (n.isRoot ? ROOT_H : NODE_H));
+    n.children.forEach(bbWalk);
+  }
+  bbWalk(diagramTree);
+
+  const contentW = maxX - minX + PAD * 2;
+  const contentH = maxY - minY + PAD * 2;
+
+  // ── 2. Clone SVG, strip pan/zoom transform, set viewBox to content bounds ──
+  const svg   = document.getElementById('diagram');
+  const clone = svg.cloneNode(true);
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('width',   contentW);
+  clone.setAttribute('height',  contentH);
+  clone.setAttribute('viewBox', `${minX - PAD} ${minY - PAD} ${contentW} ${contentH}`);
+
+  // Reset the pan/zoom <g> to identity
+  const dgClone = clone.querySelector('#dg');
+  if (dgClone) dgClone.setAttribute('transform', 'translate(0,0) scale(1)');
+
+  // ── 3. Resolve CSS custom properties → concrete hex values ──
+  const cs   = getComputedStyle(document.documentElement);
+  const vars = {};
+  ['--dt-root-fill','--dt-root-stroke','--dt-sec-fill','--dt-sec-stroke',
+   '--dt-leaf-fill','--dt-leaf-stroke','--dt-rail','--dt-rail-root',
+   '--dt-text','--dt-text-root','--dt-text-sub',
+   '--dt-sel-stroke','--dt-anc-stroke'].forEach(v => {
+    vars[v] = cs.getPropertyValue(v).trim();
+  });
+
+  // ── 4. Inline all styles (SVG as <img> gets no CSS) ──
+  clone.querySelectorAll('.dnode rect').forEach(el => {
+    const g = el.closest('.dnode');
+    let fill, stroke, sw;
+    if      (g.classList.contains('root'))    { fill=vars['--dt-root-fill']; stroke=vars['--dt-root-stroke']; sw='1.5'; }
+    else if (g.classList.contains('section')) { fill=vars['--dt-sec-fill'];  stroke=vars['--dt-sec-stroke'];  sw='1'; }
+    else                                      { fill=vars['--dt-leaf-fill']; stroke=vars['--dt-leaf-stroke']; sw='1'; }
+    if (g.classList.contains('selected')) { stroke=vars['--dt-sel-stroke']; sw='2'; }
+    if (g.classList.contains('ancestor')) { stroke=vars['--dt-anc-stroke']; sw='1.5'; }
+    el.setAttribute('fill', fill);
+    el.setAttribute('stroke', stroke);
+    el.setAttribute('stroke-width', sw);
+    el.removeAttribute('class');
+  });
+
+  clone.querySelectorAll('.dnode text').forEach(el => {
+    const g = el.closest('.dnode');
+    let fill;
+    if      (el.classList.contains('nl-root')) fill = vars['--dt-text-root'];
+    else if (el.classList.contains('nl-sub'))  fill = vars['--dt-text-sub'];
+    else fill = g?.classList.contains('root') ? vars['--dt-text-root'] : vars['--dt-text'];
+    el.setAttribute('fill', fill);
+    el.setAttribute('font-family', 'monospace');
+    el.setAttribute('font-size',   el.classList.contains('nl-root') ? '11' : el.classList.contains('nl-sub') ? '9' : '10');
+    if (el.classList.contains('nl-root')) el.setAttribute('font-weight', '600');
+    el.removeAttribute('class');
+  });
+
+  clone.querySelectorAll('.dedge').forEach(el => {
+    el.setAttribute('stroke',       el.classList.contains('root-edge') ? vars['--dt-rail-root'] : vars['--dt-rail']);
+    el.setAttribute('stroke-width', el.classList.contains('root-edge') ? '1.5' : '1');
+    el.setAttribute('fill', 'none');
+    el.removeAttribute('class');
+  });
+
+  clone.querySelectorAll('.dnode').forEach(el => el.removeAttribute('class'));
+
+  // ── 5. Add background rect ──
+  const bgFill = isDark ? '#0a0a0d' : '#e8e8e2';
+  const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  bg.setAttribute('x',      minX - PAD);
+  bg.setAttribute('y',      minY - PAD);
+  bg.setAttribute('width',  contentW);
+  bg.setAttribute('height', contentH);
+  bg.setAttribute('fill',   bgFill);
+  const dgEl = clone.querySelector('#dg');
+  clone.insertBefore(bg, dgEl || clone.firstChild);
+
+  // ── 6. Serialise → blob → canvas → PNG download ──
+  const svgStr = new XMLSerializer().serializeToString(clone);
+  const blob   = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+  const url    = URL.createObjectURL(blob);
+  const img    = new Image();
+
+  const canvas = document.createElement('canvas');
+  canvas.width  = contentW * SCALE;
+  canvas.height = contentH * SCALE;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(SCALE, SCALE);
+
+  img.onload = () => {
+    ctx.fillStyle = bgFill;
+    ctx.fillRect(0, 0, contentW, contentH);
+    ctx.drawImage(img, 0, 0, contentW, contentH);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(b => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(b);
+      a.download = 'canopy-sitemap.png';
+      a.click();
+    }, 'image/png');
   };
-  img.src=url;
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    document.getElementById('export-msg').textContent = '⚠ PNG export failed — try SVG instead.';
+  };
+  img.src = url;
 }
 function sendToWaypoint() {
   if (!crawlState.results.length) {
