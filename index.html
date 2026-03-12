@@ -1942,7 +1942,7 @@ function buildDiagram() {
     for (let i=0; i<parts.length; i++) {
       if (i >= maxDepth - 1) break;
       const seg = parts[i];
-      if (!node.ch[seg]) node.ch[seg] = { label:'/'+seg, slug:seg, url:r.url, ch:{}, depth:i+1, isSection:i===0 };
+      if (!node.ch[seg]) node.ch[seg] = { label:'/'+seg, slug:seg, url:r.url, ch:{}, depth:i+1 };
       if (i===parts.length-1) node.ch[seg].url = r.url;
       node = node.ch[seg];
     }
@@ -1953,6 +1953,13 @@ function buildDiagram() {
     return { ...obj, children };
   }
   let tree = toArr(root);
+
+  // Mark any node with children as a section (collapsible at any depth)
+  function markSections(n) {
+    n.isSection = n.children.length > 0 && !n.isRoot;
+    n.children.forEach(markSections);
+  }
+  markSections(tree);
 
   // Apply collapse threshold — auto-collapse sections exceeding threshold
   function applyCollapse(n, pathSoFar) {
@@ -2239,8 +2246,8 @@ function renderDiagram(showCounts) {
       g.appendChild(badgeText);
     }
 
-    // ── Inline collapse/expand button for section nodes ──
-    if (n.isSection) {
+    // ── Inline collapse/expand button for any node with children ──
+    if (n.isSection || n.children.length > 0) {
       const BTN_SIZE = 12;
       const bx = w - BTN_SIZE - 3;
       const by = h - BTN_SIZE - 3;
@@ -2370,21 +2377,22 @@ function showNodePanel(n) {
 
   const childRow = document.getElementById('d-node-children-row');
   const childVal = document.getElementById('d-node-children');
-  if (!n.isRoot && !n.isSection) {
+  const childCount = n.collapsed ? n.collapsedCount : (n.children?.length ?? 0);
+  const hasChildren = childCount > 0 || n.isRoot;
+  if (!hasChildren && !n.collapsed) {
     childRow.style.display = 'none';
   } else {
     childRow.style.display = '';
-    const cnt = n.collapsed ? n.collapsedCount : (n.children?.length ?? 0);
-    childVal.textContent = n.collapsed ? `${cnt} (collapsed)` : String(cnt);
+    childVal.textContent = n.collapsed ? `${childCount} (collapsed)` : String(childCount);
   }
 
   // Open URL link
   const link = document.getElementById('d-node-link');
   link.href = n.url || '#';
 
-  // Collapse/expand toggle for section nodes
+  // Collapse/expand toggle — show for any node that has (or had) children
   const toggleBtn = document.getElementById('d-node-toggle-btn');
-  if (n.isSection) {
+  if (n.isSection || (n.children?.length > 0)) {
     toggleBtn.style.display = '';
     toggleBtn.textContent = n.collapsed ? '▸ expand' : '▾ collapse';
   } else {
@@ -2428,7 +2436,7 @@ function getNodePath(n) {
 function toggleNodeCollapse() {
   if (!selectedDNode) return;
   const n = selectedDNode;
-  if (!n.isSection) return;
+  if (!n.isSection && n.children?.length === 0) return; // no children = nothing to collapse
 
   const path = getNodePath(n);
   // Toggle: if currently collapsed, mark as force-expanded; if expanded, mark as collapsed
@@ -2539,7 +2547,9 @@ function dfit()   { if(diagramTree) buildDiagram(); }
 // Pan
 const dc = document.getElementById('diagram-canvas');
 dc.addEventListener('mousedown', e => {
+  // Don't clear panel if clicking on a node or on the panel itself or its children
   if (e.target.closest('.dnode')) return;
+  if (e.target.closest('#d-node-panel')) return;
   // Click on background — clear selection and panel
   clearNodePanel();
   dragging=true; dragFrom={x:e.clientX-dt.x,y:e.clientY-dt.y};
