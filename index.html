@@ -1231,17 +1231,49 @@ function loadSessionFile(input) {
 }
 
 /* ── Share via URL hash ── */
-function shareSession() {
+/* ── Share via Worker store (short link) with LZString fallback ── */
+const CANOPY_STORE = 'https://canopystore.libertyhphillips.workers.dev';
+
+async function shareViaStore() {
+  const res = await fetch(`${CANOPY_STORE}/store`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session: buildSessionPayload() }),
+  });
+  if (!res.ok) throw new Error(`Store ${res.status}`);
+  const { id } = await res.json();
+  return `${location.origin}${location.pathname}#s=${id}`;
+}
+
+async function loadFromStore(id) {
+  const res = await fetch(`${CANOPY_STORE}/get?id=${encodeURIComponent(id)}`);
+  if (!res.ok) throw new Error(`Store ${res.status}`);
+  const { session } = await res.json();
+  return session;
+}
+
+async function shareSession() {
   if (!crawlState.results.length) { alert('Run a crawl first before sharing.'); return; }
   const btn = document.getElementById('btn-share');
   btn.textContent = '… generating'; btn.disabled = true;
   try {
-    const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(buildSessionPayload()));
-    const link = `${location.origin}${location.pathname}#s=${compressed}`;
-    navigator.clipboard.writeText(link)
-      .then(() => { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = '🔗 Share'; btn.disabled = false; }, 2200); })
-      .catch(() => { prompt('Copy this link:', link); btn.textContent = '🔗 Share'; btn.disabled = false; });
-  } catch { btn.textContent = '🔗 Share'; btn.disabled = false; alert('Could not generate share link.'); }
+    const link = await shareViaStore();
+    await navigator.clipboard.writeText(link);
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = '🔗 Share'; btn.disabled = false; }, 2200);
+  } catch(err) {
+    // Worker unavailable — fall back to LZString long link
+    console.warn('Store share failed, falling back to base64:', err);
+    try {
+      const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(buildSessionPayload()));
+      const link = `${location.origin}${location.pathname}#sl=${compressed}`;
+      await navigator.clipboard.writeText(link);
+      btn.textContent = '✓ Copied (long link)';
+    } catch {
+      btn.textContent = '🔗 Share';
+    }
+    setTimeout(() => { btn.textContent = '🔗 Share'; btn.disabled = false; }, 2500);
+  }
 }
 
 /* ── Clear ── */
@@ -1288,21 +1320,40 @@ function copyURLs() {
 }
 
 /* ── On page load: check for shared link in hash ── */
-(function checkShareLink() {
+(async function checkShareLink() {
   const hash = location.hash;
-  if (!hash.startsWith('#s=')) return;
-  try {
-    const json = LZString.decompressFromEncodedURIComponent(hash.slice(3));
-    if (!json) throw new Error('empty');
-    const data = JSON.parse(json);
-    if (!data.results) throw new Error('invalid');
-    history.replaceState(null, '', location.pathname);
-    document.addEventListener('DOMContentLoaded', () => {
-      loadSessionData(data);
-      saveSession();
-      switchPage('crawler');
-    }, { once: true });
-  } catch(e) { /* bad link — ignore */ }
+
+  // Short link via store Worker: #s=<id>
+  if (hash.startsWith('#s=')) {
+    const id = hash.slice(3);
+    // Only try the store if the value looks like a short ID (no base64 padding chars)
+    // Long base64 strings contain '-' and '_' and are typically 100+ chars
+    if (id.length < 40) {
+      try {
+        const session = await loadFromStore(id);
+        if (!session?.results) throw new Error('invalid');
+        history.replaceState(null, '', location.pathname);
+        document.addEventListener('DOMContentLoaded', () => {
+          loadSessionData(session); saveSession(); switchPage('crawler');
+        }, { once: true });
+        return;
+      } catch(e) { console.warn('Could not load from store:', e); }
+    }
+  }
+
+  // Long fallback link: #sl=<lzstring>
+  if (hash.startsWith('#sl=')) {
+    try {
+      const json = LZString.decompressFromEncodedURIComponent(hash.slice(4));
+      if (!json) throw new Error('empty');
+      const data = JSON.parse(json);
+      if (!data.results) throw new Error('invalid');
+      history.replaceState(null, '', location.pathname);
+      document.addEventListener('DOMContentLoaded', () => {
+        loadSessionData(data); saveSession(); switchPage('crawler');
+      }, { once: true });
+    } catch(e) { /* bad link */ }
+  }
 })();
 
 /* ═══════════════════════════════════════════
