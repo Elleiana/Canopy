@@ -870,29 +870,16 @@
             </div>
 
           </div>
-          <div class="card-body" style="padding-top:0.75rem;border-top:1px solid var(--border-soft);margin-top:0.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+          <div class="card-body" style="padding-top:0.75rem;border-top:1px solid var(--border-soft);margin-top:0.25rem;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
             <button class="btn-check" onclick="buildDiagram()">↺ apply &amp; re-draw</button>
-            <!-- Colour theme swatches -->
-            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-              <span style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">theme</span>
-              <div class="theme-swatch-row" id="theme-swatch-row">
-                <button class="theme-swatch active" id="swatch-default" title="Default" style="background:linear-gradient(135deg,#1a1a24 50%,#2a2a38 50%);" onclick="setDiagramTheme('default',this)"></button>
-                <button class="theme-swatch" id="swatch-teal"    title="Teal"    style="background:linear-gradient(135deg,#001f1f 50%,#008080 50%);"  onclick="setDiagramTheme('teal',this)"></button>
-                <button class="theme-swatch" id="swatch-slate"   title="Slate"   style="background:linear-gradient(135deg,#1c1c2e 50%,#6060a0 50%);"  onclick="setDiagramTheme('slate',this)"></button>
-                <button class="theme-swatch" id="swatch-forest"  title="Forest"  style="background:linear-gradient(135deg,#0e1e12 50%,#3a7a4a 50%);"  onclick="setDiagramTheme('forest',this)"></button>
-                <button class="theme-swatch" id="swatch-ember"   title="Ember"   style="background:linear-gradient(135deg,#1e1008 50%,#a05030 50%);"  onclick="setDiagramTheme('ember',this)"></button>
-              </div>
-              <span style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--text-muted);" id="theme-label">Default</span>
+            <div class="theme-swatch-row" id="theme-swatch-row" style="margin-left:0.5rem;">
+              <button class="theme-swatch active" id="swatch-default" title="Default" style="background:linear-gradient(135deg,#1a1a24 50%,#2a2a38 50%);" onclick="setDiagramTheme('default',this)"></button>
+              <button class="theme-swatch" id="swatch-teal"    title="Teal"    style="background:linear-gradient(135deg,#001f1f 50%,#008080 50%);"  onclick="setDiagramTheme('teal',this)"></button>
+              <button class="theme-swatch" id="swatch-slate"   title="Slate"   style="background:linear-gradient(135deg,#1c1c2e 50%,#6060a0 50%);"  onclick="setDiagramTheme('slate',this)"></button>
+              <button class="theme-swatch" id="swatch-forest"  title="Forest"  style="background:linear-gradient(135deg,#0e1e12 50%,#3a7a4a 50%);"  onclick="setDiagramTheme('forest',this)"></button>
+              <button class="theme-swatch" id="swatch-ember"   title="Ember"   style="background:linear-gradient(135deg,#1e1008 50%,#a05030 50%);"  onclick="setDiagramTheme('ember',this)"></button>
             </div>
-            <!-- Colour coding mode -->
-            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;border-left:1px solid var(--border);padding-left:1rem;">
-              <span style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">colour by</span>
-              <div class="pill-group" id="colour-mode-pills">
-                <button class="pill active" id="cm-none"    onclick="setColourMode('none',this)"   title="Depth-based shading (default)">depth</button>
-                <button class="pill"        id="cm-section" onclick="setColourMode('section',this)" title="Each top-level section gets a distinct hue">section</button>
-                <button class="pill"        id="cm-status"  onclick="setColourMode('status',this)"  title="Colour nodes by HTTP status">status</button>
-              </div>
-            </div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--text-muted);" id="theme-label">Default</span>
           </div>
         </div>
       </div>
@@ -1045,10 +1032,6 @@
     <a href="#" onclick="showModal('m-about');return false;">what is Canopy?</a>
     <span>//</span>
     <a href="#" onclick="showModal('m-boring');return false;">boring stuff</a>
-    <span>//</span>
-    <a href="https://elleiana.github.io/Waypoint/" target="_blank" rel="noopener">🧭 Waypoint</a>
-    <span>//</span>
-    <span style="color:var(--text-dimmer);">v0.3.0</span>
   </footer>
 </div><!-- /app -->
 
@@ -1107,7 +1090,6 @@ let excludedCount = 0;
 let selectedDNode = null;  // currently selected diagram node data object
 let customLabels  = {};    // url → custom label string
 let currentLabelMode = 'slug'; // 'slug' | 'title' | 'custom'
-let currentColourMode = 'none'; // 'none' | 'section' | 'status'
 
 /* ═══════════════════════════════════════════
    Session — save / load / share / history
@@ -1325,10 +1307,6 @@ function clearCrawl() {
   const ng = document.getElementById('nodes-g'); if (ng) ng.innerHTML = '';
   // Reset label mode pills
   setLabelMode('slug', null, false);
-  // Reset colour mode
-  currentColourMode = 'none';
-  sectionPaletteMap = {};
-  document.querySelectorAll('#colour-mode-pills .pill').forEach((p,i) => p.classList.toggle('active', i===0));
 }
 
 /* ── Copy URLs ── */
@@ -1340,6 +1318,27 @@ function copyURLs() {
     setTimeout(() => { btn.textContent = '⧉ copy URLs'; }, 1800);
   });
 }
+
+
+/* ── On page load: check for ?url= deep-link from Scout ── */
+(function checkDeepLink() {
+  const params = new URLSearchParams(location.search);
+  const deepUrl = params.get("url");
+  if (!deepUrl) return;
+  history.replaceState(null, "", location.pathname + location.hash);
+  function initDeepLink() {
+    const input = document.getElementById("crawl-url");
+    if (!input) return;
+    input.value = deepUrl;
+    switchPage("crawler");
+    setTimeout(startCrawl, 80);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initDeepLink, { once: true });
+  } else {
+    initDeepLink();
+  }
+})();
 
 /* ── On page load: check for shared link in hash ── */
 (async function checkShareLink() {
@@ -1407,100 +1406,6 @@ function setDiagramTheme(theme, btn) {
   if (btn) btn.classList.add('active');
   const lbl = document.getElementById('theme-label');
   if (lbl) lbl.textContent = THEME_NAMES[theme] || theme;
-}
-
-/* ── Colour coding by section or status ── */
-
-// Palette for section colouring — 12 distinct hues, works in dark + light mode
-const SECTION_PALETTES_DARK = [
-  { fill: '#0f1f2a', stroke: '#2a6080' }, // blue
-  { fill: '#1a0f2a', stroke: '#6040a0' }, // purple
-  { fill: '#0f2a18', stroke: '#308050' }, // green
-  { fill: '#2a1a0a', stroke: '#a06020' }, // amber
-  { fill: '#2a0f14', stroke: '#a03040' }, // red
-  { fill: '#0a2020', stroke: '#208888' }, // teal
-  { fill: '#1a200a', stroke: '#607020' }, // olive
-  { fill: '#200f2a', stroke: '#804090' }, // violet
-  { fill: '#2a1a10', stroke: '#906040' }, // brown
-  { fill: '#0f1a2a', stroke: '#304888' }, // navy
-  { fill: '#2a1010', stroke: '#905030' }, // brick
-  { fill: '#102a1a', stroke: '#308858' }, // mint
-];
-const SECTION_PALETTES_LIGHT = [
-  { fill: '#d0e8f8', stroke: '#2a6080' },
-  { fill: '#e0d0f8', stroke: '#6040a0' },
-  { fill: '#d0f0e0', stroke: '#308050' },
-  { fill: '#f8ead0', stroke: '#a06020' },
-  { fill: '#f8d0d8', stroke: '#a03040' },
-  { fill: '#c8f0f0', stroke: '#208888' },
-  { fill: '#ecf8d0', stroke: '#607020' },
-  { fill: '#e8d0f8', stroke: '#804090' },
-  { fill: '#f5e0d0', stroke: '#906040' },
-  { fill: '#d0daf8', stroke: '#304888' },
-  { fill: '#f8d8d0', stroke: '#905030' },
-  { fill: '#d0f4e4', stroke: '#308858' },
-];
-
-const STATUS_COLOURS_DARK = {
-  ok:       { fill: '#0e2218', stroke: '#3a9060' },  // 2xx — green
-  redirect: { fill: '#221808', stroke: '#a07020' },  // 3xx — amber
-  error:    { fill: '#220a0a', stroke: '#983030' },  // 4xx/5xx — red
-  unknown:  { fill: '#141418', stroke: '#404050' },  // other
-};
-const STATUS_COLOURS_LIGHT = {
-  ok:       { fill: '#c8f0d8', stroke: '#3a9060' },
-  redirect: { fill: '#f8e8c0', stroke: '#a07020' },
-  error:    { fill: '#f8d0d0', stroke: '#983030' },
-  unknown:  { fill: '#e4e4ea', stroke: '#808090' },
-};
-
-// Map section slug → palette index (built during diagram render)
-let sectionPaletteMap = {};
-
-function setColourMode(mode, btn) {
-  currentColourMode = mode;
-  document.querySelectorAll('#colour-mode-pills .pill').forEach(p => p.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  if (diagramTree) buildDiagram();
-}
-
-// Returns { fill, stroke } override for a node in colour mode, or null for depth-default
-function getColourOverride(n) {
-  if (currentColourMode === 'none' || n.isRoot) return null;
-
-  if (currentColourMode === 'section') {
-    const pal = isDark ? SECTION_PALETTES_DARK : SECTION_PALETTES_LIGHT;
-    // Find top-level section slug for this node
-    let topSlug = n.isSection && n.depth === 1 ? n.slug : null;
-    if (!topSlug) {
-      // Walk parent chain to find depth-1 ancestor
-      let p = parentMap.get(n);
-      while (p && !p.isRoot) {
-        if (p.depth === 1) { topSlug = p.slug; break; }
-        p = parentMap.get(p);
-      }
-      if (!topSlug && n.depth === 1) topSlug = n.slug;
-    }
-    if (!topSlug) return null;
-    if (!sectionPaletteMap.hasOwnProperty(topSlug)) {
-      const idx = Object.keys(sectionPaletteMap).length % pal.length;
-      sectionPaletteMap[topSlug] = idx;
-    }
-    return pal[sectionPaletteMap[topSlug]];
-  }
-
-  if (currentColourMode === 'status') {
-    const pal = isDark ? STATUS_COLOURS_DARK : STATUS_COLOURS_LIGHT;
-    const result = crawlState.results.find(r => r.url === n.url);
-    if (!result) return pal.unknown;
-    if (result.statusText === 'imported') return pal.ok;
-    if (result.ok && result.status >= 200 && result.status < 300) return pal.ok;
-    if (result.status >= 300 && result.status < 400) return pal.redirect;
-    if (result.status >= 400) return pal.error;
-    return pal.unknown;
-  }
-
-  return null;
 }
 
 /* ═══════════════════════════════════════════
@@ -2161,7 +2066,6 @@ function buildDiagram() {
 
   // Build node→SVG element map (populated during drawNodes)
   nodeElemMap = new Map();
-  sectionPaletteMap = {}; // reset section colour assignments each render
 
   let maxD=0, total=0, secs=0;
   function count(n) { total++; if(n.depth>maxD)maxD=n.depth; if(n.isSection)secs++; n.children.forEach(count); }
@@ -2363,10 +2267,8 @@ function renderDiagram(showCounts) {
     const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
     rect.setAttribute('width', w); rect.setAttribute('height', h);
     rect.setAttribute('rx', 3);    rect.setAttribute('ry', 3);
-    // Apply colour mode override if active
-    const colOverride = getColourOverride(n);
-    rect.style.fill   = colOverride ? colOverride.fill   : `var(--dt-d${di}-fill)`;
-    rect.style.stroke = colOverride ? colOverride.stroke : `var(--dt-d${di}-stroke)`;
+    rect.style.fill   = `var(--dt-d${di}-fill)`;
+    rect.style.stroke = `var(--dt-d${di}-stroke)`;
     rect.style.strokeWidth = n.isRoot ? '1.5' : '1';
     g.appendChild(rect);
 
@@ -2928,7 +2830,7 @@ function exportPNG() {
   };
   img.src = url;
 }
-async function sendToWaypoint() {
+function sendToWaypoint() {
   if (!crawlState.results.length) {
     document.getElementById('export-msg').textContent = '⚠ Run a crawl first.';
     return;
@@ -2938,48 +2840,24 @@ async function sendToWaypoint() {
     document.getElementById('export-msg').textContent = '⚠ No successful URLs to send.';
     return;
   }
-
-  const msgEl = document.getElementById('export-msg');
-  const btn   = document.querySelector('[onclick="doExport()"]');
-  if (btn) { btn.disabled = true; btn.textContent = '… sending'; }
-  msgEl.textContent = '';
-
+  // Encode URL list as a data: URI and open Waypoint with it as a query param
+  // Waypoint accepts a ?urls= param with newline-separated URLs
   const urlList = ok.map(r => r.url).join('\n');
-  const WAYPOINT = 'https://elleiana.github.io/Waypoint/';
-
-  // Strategy 1: short URL via canopystore Worker (handles any size)
-  try {
-    const res = await fetch(`${CANOPY_STORE}/store`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ canopy_urls: urlList, source: 'canopy' }),
-    });
-    if (res.ok) {
-      const { id } = await res.json();
-      if (btn) { btn.disabled = false; btn.textContent = '↓ download'; }
-      window.open(`${WAYPOINT}?canopy=${encodeURIComponent(id)}`, '_blank', 'noopener');
-      msgEl.textContent = `✓ Opened Waypoint with ${ok.length} URLs.`;
-      return;
-    }
-  } catch(e) { /* fall through */ }
-
-  // Strategy 2: direct query string (works for small lists, <8000 chars)
   const encoded = encodeURIComponent(urlList);
-  const directUrl = `${WAYPOINT}?oldurls=${encoded}`;
-  if (directUrl.length < 8000) {
-    if (btn) { btn.disabled = false; btn.textContent = '↓ download'; }
-    window.open(directUrl, '_blank', 'noopener');
-    msgEl.textContent = `✓ Opened Waypoint with ${ok.length} URLs.`;
-    return;
-  }
-
-  // Strategy 3: clipboard fallback for large lists
-  if (btn) { btn.disabled = false; btn.textContent = '↓ download'; }
-  try {
-    await navigator.clipboard.writeText(urlList);
-    msgEl.textContent = `✓ ${ok.length} URLs copied to clipboard — paste into Waypoint's Mapper (existing site URLs).`;
-  } catch {
-    msgEl.textContent = `⚠ URL list too large to send directly. Export as CSV and import into Waypoint instead.`;
+  // Open Waypoint — it will pick up ?oldurls= on load if supported,
+  // otherwise fall back to copying to clipboard with instructions
+  const waypointUrl = `https://elleiana.github.io/Waypoint/?oldurls=${encoded}`;
+  if (waypointUrl.length < 8000) {
+    window.open(waypointUrl, '_blank', 'noopener');
+  } else {
+    // URL list too large for query string — copy to clipboard instead
+    navigator.clipboard.writeText(urlList).then(() => {
+      document.getElementById('export-msg').textContent =
+        `✓ ${ok.length} URLs copied to clipboard — paste into Waypoint's Mapper (existing site URLs).`;
+    }).catch(() => {
+      document.getElementById('export-msg').textContent =
+        `⚠ URL list too large to open directly. Export as CSV and import into Waypoint instead.`;
+    });
   }
 }
 
